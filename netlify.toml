@@ -1,5 +1,5 @@
 [build]
-  command = "cd frontend && yarn build"
+  command = "cd frontend && npm install && npm run build"
   publish = "frontend/build"
 
 [[redirects]]
@@ -8,13 +8,13 @@
   status = 200
 
 [context.production]
-  command = "cd frontend && yarn build"
+  command = "cd frontend && npm install && npm run build"
   publish = "frontend/build"
 
 [context.deploy-preview]
-  command = "cd frontend && yarn build"
+  command = "cd frontend && npm install && npm run build"
   publish = "frontend/build"
 
 [context.branch-deploy]
-  command = "cd frontend && yarn build"
+  command = "cd frontend && npm install && npm run build"
   publish = "frontend/build"
