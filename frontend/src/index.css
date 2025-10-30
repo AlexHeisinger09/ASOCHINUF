@@ -12,6 +12,44 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Performance optimizations for animations */
+@media (max-width: 768px) {
+    /* Reduce motion on mobile for better performance */
+    * {
+        animation-duration: 0.3s !important;
+        transition-duration: 0.2s !important;
+    }
+
+    /* Disable expensive effects on mobile */
+    .blur-3xl {
+        filter: none !important;
+    }
+
+    /* Hardware acceleration for transforms */
+    [class*="motion"],
+    [class*="animate"],
+    [class*="transition"] {
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        perspective: 1000px;
+        -webkit-perspective: 1000px;
+    }
+}
+
+/* Optimize all animated elements */
+[class*="motion"],
+[class*="animate"] {
+    will-change: transform, opacity;
+}
+
+/* Sponsor carousel optimization */
+.sponsors-carousel {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
 code {
     font-family:
         source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;

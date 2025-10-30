@@ -9,7 +9,12 @@
       "Bash(git commit -m \"$(cat <<''EOF''\nFix Netlify build configuration - use npm instead of yarn\n\n- Change build command to use npm install and npm run build\n- Yarn is not available by default in Netlify build environment\n- npm is the standard package manager in Netlify\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(npm run build:*)",
       "Bash(git commit:*)",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npm start)",
+      "Bash(rm:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

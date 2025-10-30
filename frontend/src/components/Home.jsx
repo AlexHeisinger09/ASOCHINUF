@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { 
-  Menu, X, Activity, Utensils, HeartPulse, 
-  Droplet, Facebook, Instagram, Twitter, Linkedin, 
-  GraduationCap, Clock, Award, Sparkles, ArrowRight, Users, BookOpen, Star
+import {
+  Menu, X, Utensils, HeartPulse,
+  Droplet, Facebook, Instagram, Twitter, Linkedin,
+  GraduationCap, Clock, Sparkles, ArrowRight, Star
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -15,9 +15,20 @@ const Home = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const headerOpacity = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+
+  // Detect mobile devices
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Rotating texts animation
   useEffect(() => {
@@ -38,7 +49,6 @@ const Home = () => {
 
   // Icon mapping
   const iconMap = {
-    activity: Activity,
     utensils: Utensils,
     'heart-pulse': HeartPulse,
     droplet: Droplet,
@@ -62,33 +72,28 @@ const Home = () => {
             className="flex items-center gap-2 cursor-pointer group"
             onClick={() => scrollToSection('#hero')}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-[#8c5cff] to-[#6a3dcf] rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-[#8c5cff]/30 group-hover:shadow-xl group-hover:shadow-[#8c5cff]/40 transition-all duration-300 group-hover:scale-110">
-              A
-            </div>
-            <span
-              className="text-2xl font-bold bg-gradient-to-r from-[#8c5cff] to-[#a371ff] bg-clip-text text-transparent group-hover:from-[#a371ff] group-hover:to-[#8c5cff] transition-all duration-300"
-              style={{ fontWeight: 800, letterSpacing: '0.05em' }}
-            >
-              ASOCHINUF
-            </span>
+            <img
+              src="/logos/logo-letras.png"
+              alt="ASOCHINUF Logo"
+              className="h-12 w-auto object-contain group-hover:scale-110 transition-all duration-300 filter brightness-100 group-hover:brightness-110"
+            />
           </motion.div>
 
           {/* Desktop Navigation - Enhanced typography */}
           <nav className="hidden md:flex items-center space-x-2">
             {[
-              { name: 'cursos', icon: BookOpen },
-              { name: 'capacitaciones', icon: Award },
-              { name: 'profesionales', icon: Users },
-              { name: 'organigrama', icon: Activity }
-            ].map(({ name, icon: IconComponent }) => (
+              { name: 'cursos' },
+              { name: 'capacitaciones' },
+              { name: 'profesionales' },
+              { name: 'organigrama' }
+            ].map(({ name }) => (
               <button
                 key={name}
                 onClick={() => scrollToSection(`#${name}`)}
                 className="px-5 py-3 text-gray-200 hover:text-white group font-bold text-base rounded-lg transition-all duration-300 relative overflow-hidden bg-gradient-to-r from-transparent to-transparent hover:from-[#8c5cff]/20 hover:to-[#6a3dcf]/20 border border-transparent hover:border-[#8c5cff]/40"
                 style={{ fontWeight: 700, letterSpacing: '0.03em' }}
               >
-                <span className="relative z-10 flex items-center gap-3">
-                  <IconComponent size={20} className="text-[#8c5cff] group-hover:text-[#a371ff] transition-colors duration-300 transform group-hover:scale-110" />
+                <span className="relative z-10">
                   <span className="capitalize">{name}</span>
                 </span>
                 <span className="absolute inset-0 bg-gradient-to-r from-[#8c5cff]/0 via-[#8c5cff]/10 to-[#8c5cff]/0 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-105 origin-center"></span>
@@ -117,18 +122,17 @@ const Home = () => {
             >
               <nav className="flex flex-col space-y-3 p-6">
                 {[
-                  { name: 'Cursos', icon: BookOpen },
-                  { name: 'Capacitaciones', icon: Award },
-                  { name: 'Profesionales', icon: Users },
-                  { name: 'Organigrama', icon: Activity }
-                ].map(({ name, icon: IconComponent }) => (
+                  { name: 'Cursos' },
+                  { name: 'Capacitaciones' },
+                  { name: 'Profesionales' },
+                  { name: 'Organigrama' }
+                ].map(({ name }) => (
                   <button
                     key={name}
                     onClick={() => scrollToSection(`#${name.toLowerCase()}`)}
                     className="px-5 py-4 text-left text-gray-200 hover:text-white font-bold text-base transition-all duration-300 rounded-lg group hover:bg-gradient-to-r hover:from-[#8c5cff]/20 hover:to-[#6a3dcf]/20 border border-[#8c5cff]/0 hover:border-[#8c5cff]/40 flex items-center gap-3"
                     style={{ letterSpacing: '0.03em', fontWeight: 700 }}
                   >
-                    <IconComponent size={22} className="text-[#8c5cff] group-hover:text-[#a371ff] transition-colors duration-300 flex-shrink-0" />
                     <span>{name}</span>
                     <ArrowRight size={18} className="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
                   </button>
@@ -143,34 +147,42 @@ const Home = () => {
       <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-[#1a0a2e] to-black opacity-90"></div>
         
-        {/* Animated background elements */}
+        {/* Animated background elements - Optimized for mobile */}
         <div className="absolute inset-0 overflow-hidden">
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 180, 360],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#8c5cff]/10 rounded-full blur-3xl"
-          />
-          <motion.div
-            animate={{
-              scale: [1.2, 1, 1.2],
-              rotate: [360, 180, 0],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#8c5cff]/10 rounded-full blur-3xl"
-          />
-          {/* Sparkle effects */}
-          {[...Array(5)].map((_, i) => (
+          {!isMobile && (
+            <>
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 180, 360],
+                }}
+                transition={{
+                  duration: 20,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#8c5cff]/10 rounded-full blur-3xl"
+              />
+              <motion.div
+                animate={{
+                  scale: [1.2, 1, 1.2],
+                  rotate: [360, 180, 0],
+                }}
+                transition={{
+                  duration: 25,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#8c5cff]/10 rounded-full blur-3xl"
+              />
+            </>
+          )}
+          {/* Simplified background for mobile */}
+          {isMobile && (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#8c5cff]/5 via-transparent to-[#8c5cff]/5" />
+          )}
+          {/* Sparkle effects - Reduced on mobile */}
+          {[...Array(isMobile ? 2 : 5)].map((_, i) => (
             <motion.div
               key={i}
               animate={{
@@ -188,7 +200,7 @@ const Home = () => {
                 left: `${10 + i * 20}%`,
               }}
             >
-              <Sparkles className="text-[#8c5cff]/30" size={20} />
+              <Sparkles className="text-[#8c5cff]/30" size={isMobile ? 16 : 20} />
             </motion.div>
           ))}
         </div>
@@ -251,7 +263,7 @@ const Home = () => {
           </motion.div>
         </motion.div>
 
-        {/* Sponsors Carousel */}
+        {/* Sponsors Carousel - Optimized for mobile */}
         <div className="relative z-10 w-full py-12 overflow-hidden">
           <div className="sponsors-carousel-wrapper">
             <motion.div
@@ -263,7 +275,7 @@ const Home = () => {
                 x: {
                   repeat: Infinity,
                   repeatType: "loop",
-                  duration: 40,
+                  duration: isMobile ? 60 : 40,
                   ease: "linear"
                 }
               }}
@@ -272,12 +284,12 @@ const Home = () => {
               {[...mockData.sponsors, ...mockData.sponsors].map((sponsor, index) => (
                 <div
                   key={`${sponsor.id}-${index}`}
-                  className="sponsor-logo flex-shrink-0 flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer"
+                  className={`sponsor-logo flex-shrink-0 flex items-center justify-center ${!isMobile ? 'hover:scale-110' : ''} transition-transform duration-300 cursor-pointer`}
                 >
-                  <img 
-                    src={sponsor.logo} 
+                  <img
+                    src={sponsor.logo}
                     alt={sponsor.name}
-                    className="h-12 w-auto object-contain filter brightness-90 hover:brightness-110 transition-all duration-300"
+                    className={`${isMobile ? 'h-10' : 'h-12'} w-auto object-contain filter brightness-90 ${!isMobile ? 'hover:brightness-110' : ''} transition-all duration-300`}
                     onError={(e) => {
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'block';
@@ -314,11 +326,11 @@ const Home = () => {
             {mockData.cursos.map((curso, index) => (
               <motion.div
                 key={curso.id}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: isMobile ? 20 : 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                whileHover={{ y: -8 }}
+                transition={{ duration: isMobile ? 0.3 : 0.6, delay: isMobile ? 0 : index * 0.2 }}
+                whileHover={!isMobile ? { y: -8 } : {}}
                 className="cursor-pointer group"
               >
                 <Card className="bg-gradient-to-br from-[#2a2c33] to-[#1a1c22] border-[#8c5cff]/20 hover:border-[#8c5cff] transition-all duration-300 h-full overflow-hidden">
@@ -382,11 +394,11 @@ const Home = () => {
               return (
                 <motion.div
                   key={capacitacion.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: isMobile ? 1 : 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  whileHover={{ y: -8, scale: 1.02 }}
+                  transition={{ duration: isMobile ? 0.3 : 0.5, delay: isMobile ? 0 : index * 0.1 }}
+                  whileHover={!isMobile ? { y: -8, scale: 1.02 } : {}}
                   className="cursor-pointer"
                 >
                   <Card className="bg-[#2a2c33] border-[#8c5cff]/20 hover:border-[#8c5cff] transition-all duration-300 h-full hover:shadow-xl hover:shadow-[#8c5cff]/20 group">
@@ -434,11 +446,11 @@ const Home = () => {
             {mockData.testimonios.map((testimonio, index) => (
               <motion.div
                 key={testimonio.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                whileHover={{ y: -5, scale: 1.02 }}
+                transition={{ duration: isMobile ? 0.3 : 0.6, delay: isMobile ? 0 : index * 0.2 }}
+                whileHover={!isMobile ? { y: -5, scale: 1.02 } : {}}
                 className="cursor-pointer"
               >
                 <Card className="bg-[#2a2c33] border-[#8c5cff]/20 hover:border-[#8c5cff] transition-all duration-300 h-full group hover:shadow-xl hover:shadow-[#8c5cff]/20">
@@ -491,16 +503,19 @@ const Home = () => {
                     {miembros.map((miembro, index) => (
                       <motion.div
                         key={miembro.id}
-                        initial={{ opacity: 0, y: 50 }}
+                        initial={{ opacity: 0, y: isMobile ? 20 : 50 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ 
-                          duration: 0.6, 
-                          delay: index * 0.15,
-                          type: "spring",
-                          stiffness: 100
-                        }}
-                        whileHover={{ y: -5, scale: 1.03 }}
+                        transition={isMobile ?
+                          { duration: 0.3, delay: 0 } :
+                          {
+                            duration: 0.6,
+                            delay: index * 0.15,
+                            type: "spring",
+                            stiffness: 100
+                          }
+                        }
+                        whileHover={!isMobile ? { y: -5, scale: 1.03 } : {}}
                         className="cursor-pointer"
                       >
                         <Card className="bg-gradient-to-br from-[#2a2c33] to-[#1a1c22] border-[#8c5cff]/30 hover:border-[#8c5cff] transition-all duration-300 hover:shadow-lg hover:shadow-[#8c5cff]/20 group">
