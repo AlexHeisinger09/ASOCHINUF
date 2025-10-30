@@ -241,23 +241,14 @@ const Home = () => {
               {[...mockData.sponsors, ...mockData.sponsors].map((sponsor, index) => (
                 <div
                   key={`${sponsor.id}-${index}`}
-                  className="sponsor-logo flex-shrink-0 w-32 h-20 flex items-center justify-center bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-[#8c5cff]/50 transition-all duration-300 hover:scale-110"
+                  className="sponsor-logo flex-shrink-0 flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer"
                 >
-                  <span className="text-white/80 font-bold text-lg">{sponsor.logo}</span>
+                  <span className="text-white/80 hover:text-white font-bold text-2xl transition-colors duration-300">{sponsor.logo}</span>
                 </div>
               ))}
             </motion.div>
           </div>
         </div>
-
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 cursor-pointer"
-          onClick={() => scrollToSection('#cursos')}
-        >
-          <ChevronDown className="text-[#8c5cff]" size={40} />
-        </motion.div>
       </section>
 
       {/* Cursos Section */}
