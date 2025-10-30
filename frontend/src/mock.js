@@ -6,8 +6,29 @@ export const mockData = {
     title: "ASOCHINUF",
     subtitle: "Asociación Chilena de Nutricionistas de Fútbol",
     description: "Profesionales de la nutrición deportiva especializados en equipos de fútbol profesional de Chile",
-    ctaText: "Comencemos"
+    ctaText: "Comencemos",
+    rotatingTexts: [
+      "Especialización en Nutrición Deportiva",
+      "Cursos Certificados Internacionales",
+      "Formación en Alto Rendimiento",
+      "Nutrición Aplicada al Fútbol Profesional",
+      "Capacitación Continua de Excelencia"
+    ]
   },
+
+  // Logos de auspiciadores
+  sponsors: [
+    { id: 1, name: "Universidad de Chile", logo: "U" },
+    { id: 2, name: "Colo-Colo", logo: "CC" },
+    { id: 3, name: "Universidad Católica", logo: "UC" },
+    { id: 4, name: "ANFP", logo: "ANFP" },
+    { id: 5, name: "Federación FIFA", logo: "FIFA" },
+    { id: 6, name: "CONMEBOL", logo: "CONM" },
+    { id: 7, name: "Unión Española", logo: "UE" },
+    { id: 8, name: "Palestino", logo: "PAL" },
+    { id: 9, name: "Cobreloa", logo: "COB" },
+    { id: 10, name: "Everton", logo: "EVE" }
+  ],
 
   // Cursos Section
   cursos: [
