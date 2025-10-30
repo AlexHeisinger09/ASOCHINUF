@@ -148,7 +148,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.7 }}
+                  transition={{ delay: 0.6 }}
                   className="text-center text-gray-500 text-sm mt-6"
                 >
                   ¿No tienes cuenta? <span className="text-[#8c5cff] hover:underline cursor-pointer">Regístrate aquí</span>
