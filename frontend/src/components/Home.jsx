@@ -49,10 +49,10 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-[#1a1c22] text-white">
       {/* Header - Enhanced typography */}
       <motion.header
-        style={{ backgroundColor: `rgba(0, 0, 0, ${headerOpacity.get() * 0.95})` }}
+        style={{ backgroundColor: `rgba(42, 44, 51, ${headerOpacity.get() * 0.95})` }}
         className="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl border-b border-[#8c5cff]/10 shadow-lg shadow-black/20 transition-all duration-300"
       >
         <div className="container mx-auto px-6 py-6 flex items-center justify-between">
@@ -141,7 +141,7 @@ const Home = () => {
 
       {/* Hero Section */}
       <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#1a0a2e] to-black opacity-90"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1c22] via-[#0f1117] to-[#1a1c22] opacity-95"></div>
         
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
@@ -294,7 +294,7 @@ const Home = () => {
       </section>
 
       {/* Cursos Section - Inspired by Fixtergeek */}
-      <section id="cursos" className="py-24 px-4 bg-gradient-to-b from-black to-[#0a0a0a]">
+      <section id="cursos" className="py-24 px-4 bg-gradient-to-b from-[#1a1c22] to-[#0f1117]">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -360,7 +360,7 @@ const Home = () => {
       </section>
 
       {/* Capacitaciones Section */}
-      <section id="capacitaciones" className="py-24 px-4 bg-[#0a0a0a]">
+      <section id="capacitaciones" className="py-24 px-4 bg-[#0f1117]">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -414,7 +414,7 @@ const Home = () => {
       </section>
 
       {/* Profesionales/Testimonios Section */}
-      <section id="profesionales" className="py-24 px-4 bg-gradient-to-b from-[#0a0a0a] to-black">
+      <section id="profesionales" className="py-24 px-4 bg-gradient-to-b from-[#0f1117] to-[#1a1c22]">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -466,7 +466,7 @@ const Home = () => {
       </section>
 
       {/* Organigrama Section */}
-      <section id="organigrama" className="py-24 px-4 bg-black relative overflow-hidden">
+      <section id="organigrama" className="py-24 px-4 bg-[#1a1c22] relative overflow-hidden">
         <div className="container mx-auto max-w-6xl relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -535,7 +535,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0a0a0a] border-t border-[#8c5cff]/20 py-12 px-4">
+      <footer className="bg-[#0f1117] border-t border-[#8c5cff]/20 py-12 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
