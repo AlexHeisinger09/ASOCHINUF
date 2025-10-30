@@ -16,12 +16,11 @@ const LoginModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     // Mock login - guardar en localStorage
     localStorage.setItem('asochinuf_user', JSON.stringify({
-      name: formData.name,
       email: formData.email,
       loginTime: new Date().toISOString()
     }));
     console.log('Login simulado:', formData);
-    alert(`¡Bienvenido ${formData.name}! Login exitoso (mock)`);
+    alert(`¡Bienvenido! Login exitoso (mock)`);
     onClose();
   };
 
