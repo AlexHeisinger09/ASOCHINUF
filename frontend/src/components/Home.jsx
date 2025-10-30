@@ -52,8 +52,8 @@ const Home = () => {
     <div className="min-h-screen bg-black text-white">
       {/* Header - Enhanced typography */}
       <motion.header
-        style={{ backgroundColor: `rgba(0, 0, 0, ${headerOpacity.get() * 0.95})` }}
-        className="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl shadow-lg shadow-black/20 transition-all duration-300"
+        style={{ backgroundColor: `rgba(0, 0, 0, ${headerOpacity.get() * 0.8})` }}
+        className="fixed top-0 left-0 right-0 z-40 backdrop-blur-md transition-all duration-300"
       >
         <div className="container mx-auto px-6 py-6 flex items-center justify-between">
           <motion.div
