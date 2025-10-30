@@ -110,7 +110,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 }}
+                    transition={{ delay: 0.4 }}
                   >
                     <Label htmlFor="password" className="text-gray-300 mb-2 block">
                       Contraseña
