@@ -220,3 +220,110 @@ input:focus-visible {
 .App {
   min-height: 100vh;
 }
+
+/* Sponsors Carousel */
+.sponsors-carousel-wrapper {
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+}
+
+.sponsors-carousel {
+  display: flex;
+  width: max-content;
+}
+
+.sponsor-logo {
+  position: relative;
+}
+
+.sponsor-logo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, rgba(140, 92, 255, 0.3), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sponsor-logo:hover::before {
+  opacity: 1;
+}
+
+/* Enhanced hover effects */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(140, 92, 255, 0.3);
+}
+
+/* Underline animation */
+.nav-underline {
+  position: relative;
+}
+
+.nav-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+.nav-underline:hover::after {
+  width: 100%;
+}
+
+/* Sparkle effect */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+.sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+/* Glow effect for CTA buttons */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(140, 92, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(140, 92, 255, 0.8), 0 0 60px rgba(140, 92, 255, 0.4);
+  }
+}
+
+.glow-animation {
+  animation: glow 2s ease-in-out infinite;
+}
