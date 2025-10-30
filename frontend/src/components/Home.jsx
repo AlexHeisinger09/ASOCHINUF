@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { 
-  Menu, X, ChevronDown, Activity, Utensils, HeartPulse, 
+  Menu, X, Activity, Utensils, HeartPulse, 
   Droplet, Facebook, Instagram, Twitter, Linkedin, 
   GraduationCap, Clock, Award, Sparkles
 } from 'lucide-react';
