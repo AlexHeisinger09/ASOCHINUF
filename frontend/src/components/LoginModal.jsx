@@ -7,7 +7,6 @@ import { Label } from './ui/label';
 
 const LoginModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: ''
   });
