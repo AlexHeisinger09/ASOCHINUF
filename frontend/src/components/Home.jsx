@@ -243,7 +243,18 @@ const Home = () => {
                   key={`${sponsor.id}-${index}`}
                   className="sponsor-logo flex-shrink-0 flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer"
                 >
-                  <span className="text-white/80 hover:text-white font-bold text-2xl transition-colors duration-300">{sponsor.logo}</span>
+                  <img 
+                    src={sponsor.logo} 
+                    alt={sponsor.name}
+                    className="h-12 w-auto object-contain filter brightness-90 hover:brightness-110 transition-all duration-300"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                  />
+                  <span className="text-white/80 hover:text-white font-bold text-xl transition-colors duration-300 hidden">
+                    {sponsor.name.split(' ')[0]}
+                  </span>
                 </div>
               ))}
             </motion.div>
