@@ -82,35 +82,11 @@ const LoginModal = ({ isOpen, onClose }) => {
                 </motion.div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Campo Nombre */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <Label htmlFor="name" className="text-gray-300 mb-2 block">
-                      Nombre Completo
-                    </Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
-                      <Input
-                        id="name"
-                        name="name"
-                        type="text"
-                        placeholder="Juan Pérez"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        className="pl-11 bg-[#1a1c22] border-[#8c5cff]/30 text-white placeholder:text-gray-500 focus:border-[#8c5cff] focus:ring-[#8c5cff]/20 transition-all duration-200"
-                      />
-                    </div>
-                  </motion.div>
-
                   {/* Campo Email */}
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
+                    transition={{ delay: 0.3 }}
                   >
                     <Label htmlFor="email" className="text-gray-300 mb-2 block">
                       Correo Electrónico
