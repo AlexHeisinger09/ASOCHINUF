@@ -210,8 +210,8 @@ const Home = () => {
           className="relative z-10 text-center px-4 max-w-5xl mx-auto flex-1 flex flex-col justify-center"
         >
           <motion.h1
-            initial={isMobile ? {} : { opacity: 0, y: 30 }}
-            animate={isMobile ? {} : { opacity: 1, y: 0 }}
+            initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={isMobile ? {} : { duration: 0.8, delay: 0.2 }}
             className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-white via-[#8c5cff] to-white bg-clip-text text-transparent"
             style={{ fontWeight: 800, letterSpacing: '-0.02em' }}
@@ -220,8 +220,8 @@ const Home = () => {
           </motion.h1>
 
           <motion.p
-            initial={isMobile ? {} : { opacity: 0, y: 30 }}
-            animate={isMobile ? {} : { opacity: 1, y: 0 }}
+            initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={isMobile ? {} : { duration: 0.8, delay: 0.4 }}
             className="text-xl md:text-3xl text-gray-300 mb-4 font-semibold"
             style={{ fontWeight: 600, letterSpacing: '-0.01em' }}
@@ -326,8 +326,8 @@ const Home = () => {
             {mockData.cursos.map((curso, index) => (
               <motion.div
                 key={curso.id}
-                initial={isMobile ? {} : { opacity: 0, y: 50 }}
-                whileInView={isMobile ? {} : { opacity: 1, y: 0 }}
+                initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={isMobile ? {} : { duration: 0.6, delay: index * 0.2 }}
                 whileHover={!isMobile ? { y: -8 } : {}}
@@ -394,8 +394,8 @@ const Home = () => {
               return (
                 <motion.div
                   key={capacitacion.id}
-                  initial={isMobile ? {} : { opacity: 0, scale: 0.9 }}
-                  whileInView={isMobile ? {} : { opacity: 1, scale: 1 }}
+                  initial={isMobile ? { opacity: 1 } : { opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={isMobile ? {} : { duration: 0.5, delay: index * 0.1 }}
                   whileHover={!isMobile ? { y: -8, scale: 1.02 } : {}}
@@ -446,8 +446,8 @@ const Home = () => {
             {mockData.testimonios.map((testimonio, index) => (
               <motion.div
                 key={testimonio.id}
-                initial={isMobile ? {} : { opacity: 0, y: 30 }}
-                whileInView={isMobile ? {} : { opacity: 1, y: 0 }}
+                initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={isMobile ? {} : { duration: 0.6, delay: index * 0.2 }}
                 whileHover={!isMobile ? { y: -5, scale: 1.02 } : {}}
@@ -503,8 +503,8 @@ const Home = () => {
                     {miembros.map((miembro, index) => (
                       <motion.div
                         key={miembro.id}
-                        initial={isMobile ? {} : { opacity: 0, y: 50 }}
-                        whileInView={isMobile ? {} : { opacity: 1, y: 0 }}
+                        initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={isMobile ?
                           {} :
