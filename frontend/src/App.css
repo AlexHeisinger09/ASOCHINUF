@@ -248,24 +248,7 @@ input:focus-visible {
 
 .sponsor-logo {
   position: relative;
-}
-
-.sponsor-logo::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 0.5rem;
-  padding: 1px;
-  background: linear-gradient(135deg, transparent, rgba(140, 92, 255, 0.3), transparent);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.sponsor-logo:hover::before {
-  opacity: 1;
+  min-width: 100px;
 }
 
 /* Enhanced hover effects */
