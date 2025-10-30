@@ -51,32 +51,48 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header - Enhanced typography */}
-      <motion.header 
-        style={{ backgroundColor: `rgba(0, 0, 0, ${headerOpacity.get() * 0.8})` }}
-        className="fixed top-0 left-0 right-0 z-40 backdrop-blur-md transition-all duration-300"
+      <motion.header
+        style={{ backgroundColor: `rgba(0, 0, 0, ${headerOpacity.get() * 0.95})` }}
+        className="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl border-b border-[#8c5cff]/10 shadow-lg shadow-black/20 transition-all duration-300"
       >
-        <div className="container mx-auto px-4 py-5 flex items-center justify-between">
+        <div className="container mx-auto px-6 py-6 flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-2xl font-bold text-[#8c5cff] cursor-pointer hover:scale-105 transition-transform duration-200"
+            className="flex items-center gap-2 cursor-pointer group"
             onClick={() => scrollToSection('#hero')}
-            style={{ fontWeight: 700, letterSpacing: '-0.02em' }}
           >
-            ASOCHINUF
+            <div className="w-10 h-10 bg-gradient-to-br from-[#8c5cff] to-[#6a3dcf] rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-[#8c5cff]/30 group-hover:shadow-xl group-hover:shadow-[#8c5cff]/40 transition-all duration-300 group-hover:scale-110">
+              A
+            </div>
+            <span
+              className="text-2xl font-bold bg-gradient-to-r from-[#8c5cff] to-[#a371ff] bg-clip-text text-transparent group-hover:from-[#a371ff] group-hover:to-[#8c5cff] transition-all duration-300"
+              style={{ fontWeight: 800, letterSpacing: '0.05em' }}
+            >
+              ASOCHINUF
+            </span>
           </motion.div>
 
           {/* Desktop Navigation - Enhanced typography */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {['cursos', 'capacitaciones', 'profesionales', 'organigrama'].map((item) => (
-              <button 
-                key={item}
-                onClick={() => scrollToSection(`#${item}`)} 
-                className="text-gray-200 hover:text-[#8c5cff] transition-colors duration-200 relative group font-medium text-[15px]"
-                style={{ fontWeight: 500, letterSpacing: '-0.01em' }}
+          <nav className="hidden md:flex items-center space-x-2">
+            {[
+              { name: 'cursos', icon: BookOpen },
+              { name: 'capacitaciones', icon: Award },
+              { name: 'profesionales', icon: Users },
+              { name: 'organigrama', icon: Activity }
+            ].map(({ name, icon: IconComponent }) => (
+              <button
+                key={name}
+                onClick={() => scrollToSection(`#${name}`)}
+                className="px-5 py-3 text-gray-200 hover:text-white group font-bold text-base rounded-lg transition-all duration-300 relative overflow-hidden bg-gradient-to-r from-transparent to-transparent hover:from-[#8c5cff]/20 hover:to-[#6a3dcf]/20 border border-transparent hover:border-[#8c5cff]/40"
+                style={{ fontWeight: 700, letterSpacing: '0.03em' }}
               >
-                {item.charAt(0).toUpperCase() + item.slice(1)}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#8c5cff] transition-all duration-300 group-hover:w-full"></span>
+                <span className="relative z-10 flex items-center gap-3">
+                  <IconComponent size={20} className="text-[#8c5cff] group-hover:text-[#a371ff] transition-colors duration-300 transform group-hover:scale-110" />
+                  <span className="capitalize">{name}</span>
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-[#8c5cff]/0 via-[#8c5cff]/10 to-[#8c5cff]/0 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-105 origin-center"></span>
+                <span className="absolute -bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-[#8c5cff] via-[#a371ff] to-[#8c5cff] transition-all duration-500 group-hover:w-full rounded-full shadow-lg shadow-[#8c5cff]/50"></span>
               </button>
             ))}
           </nav>
@@ -84,7 +100,7 @@ const Home = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-white hover:text-[#8c5cff] transition-colors duration-200"
+            className="md:hidden p-2 text-white hover:text-[#8c5cff] hover:bg-[#8c5cff]/10 rounded-lg transition-all duration-300"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -97,13 +113,26 @@ const Home = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-[#2a2c33]"
+              className="md:hidden bg-gradient-to-b from-[#1a1c22] via-[#161821] to-[#0f1117] border-t border-[#8c5cff]/20"
             >
-              <nav className="flex flex-col space-y-4 p-4">
-                <button onClick={() => scrollToSection('#cursos')} className="text-left text-gray-300 hover:text-[#8c5cff] transition-colors duration-200 font-medium">Cursos</button>
-                <button onClick={() => scrollToSection('#capacitaciones')} className="text-left text-gray-300 hover:text-[#8c5cff] transition-colors duration-200 font-medium">Capacitaciones</button>
-                <button onClick={() => scrollToSection('#profesionales')} className="text-left text-gray-300 hover:text-[#8c5cff] transition-colors duration-200 font-medium">Profesionales</button>
-                <button onClick={() => scrollToSection('#organigrama')} className="text-left text-gray-300 hover:text-[#8c5cff] transition-colors duration-200 font-medium">Organigrama</button>
+              <nav className="flex flex-col space-y-3 p-6">
+                {[
+                  { name: 'Cursos', icon: BookOpen },
+                  { name: 'Capacitaciones', icon: Award },
+                  { name: 'Profesionales', icon: Users },
+                  { name: 'Organigrama', icon: Activity }
+                ].map(({ name, icon: IconComponent }) => (
+                  <button
+                    key={name}
+                    onClick={() => scrollToSection(`#${name.toLowerCase()}`)}
+                    className="px-5 py-4 text-left text-gray-200 hover:text-white font-bold text-base transition-all duration-300 rounded-lg group hover:bg-gradient-to-r hover:from-[#8c5cff]/20 hover:to-[#6a3dcf]/20 border border-[#8c5cff]/0 hover:border-[#8c5cff]/40 flex items-center gap-3"
+                    style={{ letterSpacing: '0.03em', fontWeight: 700 }}
+                  >
+                    <IconComponent size={22} className="text-[#8c5cff] group-hover:text-[#a371ff] transition-colors duration-300 flex-shrink-0" />
+                    <span>{name}</span>
+                    <ArrowRight size={18} className="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+                  </button>
+                ))}
               </nav>
             </motion.div>
           )}
