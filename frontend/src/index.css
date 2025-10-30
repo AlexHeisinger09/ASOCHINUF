@@ -14,12 +14,6 @@ body {
 
 /* Performance optimizations for animations */
 @media (max-width: 768px) {
-    /* Reduce motion on mobile for better performance */
-    * {
-        animation-duration: 0.3s !important;
-        transition-duration: 0.2s !important;
-    }
-
     /* Disable expensive effects on mobile */
     .blur-3xl {
         filter: none !important;
@@ -35,6 +29,11 @@ body {
         -webkit-backface-visibility: hidden;
         perspective: 1000px;
         -webkit-perspective: 1000px;
+    }
+
+    /* Smooth transitions for cards and interactive elements */
+    .cursor-pointer {
+        transition: all 0.2s ease-out;
     }
 }
 

@@ -73,7 +73,7 @@ const Home = () => {
             onClick={() => scrollToSection('#hero')}
           >
             <img
-              src="/logos/logo-letras.png"
+              src="/logos/logo.png"
               alt="ASOCHINUF Logo"
               className="h-12 w-auto object-contain group-hover:scale-110 transition-all duration-300 filter brightness-100 group-hover:brightness-110"
             />
@@ -206,23 +206,23 @@ const Home = () => {
         </div>
 
         <motion.div
-          style={{ opacity }}
+          style={isMobile ? {} : { opacity }}
           className="relative z-10 text-center px-4 max-w-5xl mx-auto flex-1 flex flex-col justify-center"
         >
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            initial={isMobile ? {} : { opacity: 0, y: 30 }}
+            animate={isMobile ? {} : { opacity: 1, y: 0 }}
+            transition={isMobile ? {} : { duration: 0.8, delay: 0.2 }}
             className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-white via-[#8c5cff] to-white bg-clip-text text-transparent"
             style={{ fontWeight: 800, letterSpacing: '-0.02em' }}
           >
             {mockData.hero.title}
           </motion.h1>
-          
+
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            initial={isMobile ? {} : { opacity: 0, y: 30 }}
+            animate={isMobile ? {} : { opacity: 1, y: 0 }}
+            transition={isMobile ? {} : { duration: 0.8, delay: 0.4 }}
             className="text-xl md:text-3xl text-gray-300 mb-4 font-semibold"
             style={{ fontWeight: 600, letterSpacing: '-0.01em' }}
           >
@@ -326,10 +326,10 @@ const Home = () => {
             {mockData.cursos.map((curso, index) => (
               <motion.div
                 key={curso.id}
-                initial={{ opacity: 0, y: isMobile ? 20 : 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={isMobile ? {} : { opacity: 0, y: 50 }}
+                whileInView={isMobile ? {} : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: isMobile ? 0.3 : 0.6, delay: isMobile ? 0 : index * 0.2 }}
+                transition={isMobile ? {} : { duration: 0.6, delay: index * 0.2 }}
                 whileHover={!isMobile ? { y: -8 } : {}}
                 className="cursor-pointer group"
               >
@@ -394,10 +394,10 @@ const Home = () => {
               return (
                 <motion.div
                   key={capacitacion.id}
-                  initial={{ opacity: 0, scale: isMobile ? 1 : 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  initial={isMobile ? {} : { opacity: 0, scale: 0.9 }}
+                  whileInView={isMobile ? {} : { opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: isMobile ? 0.3 : 0.5, delay: isMobile ? 0 : index * 0.1 }}
+                  transition={isMobile ? {} : { duration: 0.5, delay: index * 0.1 }}
                   whileHover={!isMobile ? { y: -8, scale: 1.02 } : {}}
                   className="cursor-pointer"
                 >
@@ -446,10 +446,10 @@ const Home = () => {
             {mockData.testimonios.map((testimonio, index) => (
               <motion.div
                 key={testimonio.id}
-                initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={isMobile ? {} : { opacity: 0, y: 30 }}
+                whileInView={isMobile ? {} : { opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: isMobile ? 0.3 : 0.6, delay: isMobile ? 0 : index * 0.2 }}
+                transition={isMobile ? {} : { duration: 0.6, delay: index * 0.2 }}
                 whileHover={!isMobile ? { y: -5, scale: 1.02 } : {}}
                 className="cursor-pointer"
               >
@@ -503,11 +503,11 @@ const Home = () => {
                     {miembros.map((miembro, index) => (
                       <motion.div
                         key={miembro.id}
-                        initial={{ opacity: 0, y: isMobile ? 20 : 50 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={isMobile ? {} : { opacity: 0, y: 50 }}
+                        whileInView={isMobile ? {} : { opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={isMobile ?
-                          { duration: 0.3, delay: 0 } :
+                          {} :
                           {
                             duration: 0.6,
                             delay: index * 0.15,
