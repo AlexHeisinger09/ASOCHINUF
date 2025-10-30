@@ -254,16 +254,16 @@ const Home = () => {
         {/* Sponsors Carousel */}
         <div className="relative z-10 w-full py-12 overflow-hidden">
           <div className="sponsors-carousel-wrapper">
-            <motion.div 
+            <motion.div
               className="sponsors-carousel flex gap-16 items-center"
               animate={{
-                x: [0, -1920]
+                x: [0, -2400]
               }}
               transition={{
                 x: {
                   repeat: Infinity,
                   repeatType: "loop",
-                  duration: 30,
+                  duration: 40,
                   ease: "linear"
                 }
               }}
