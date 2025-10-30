@@ -49,6 +49,42 @@ body {
     will-change: transform;
 }
 
+/* Gradient animation for hero text */
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animate-gradient {
+    animation: gradient 8s ease infinite;
+}
+
+/* Shimmer animation for holographic cards */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s ease-in-out;
+}
+
+/* 3D perspective utility */
+.perspective-1000 {
+    perspective: 1000px;
+}
+
 code {
     font-family:
         source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import {
-  Menu, X, Utensils, HeartPulse,
+  Menu, X, Activity, Utensils, HeartPulse,
   Droplet, Facebook, Instagram, Twitter, Linkedin,
-  GraduationCap, Clock, Sparkles, ArrowRight, Star
+  GraduationCap, Clock, Sparkles, ArrowRight, Star,
+  Users, Award, TrendingUp
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -19,6 +20,8 @@ const Home = () => {
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const headerOpacity = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, -300]);
 
   // Detect mobile devices
   useEffect(() => {
@@ -49,6 +52,7 @@ const Home = () => {
 
   // Icon mapping
   const iconMap = {
+    activity: Activity,
     utensils: Utensils,
     'heart-pulse': HeartPulse,
     droplet: Droplet,
@@ -145,8 +149,23 @@ const Home = () => {
 
       {/* Hero Section */}
       <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#1a0a2e] to-black opacity-90"></div>
-        
+        {/* Background image with blur and overlay */}
+        <div className="absolute inset-0">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(/fondo.webp)',
+              filter: 'blur(8px)',
+              transform: 'scale(1.1)',
+            }}
+          />
+          {/* Dark overlay with gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-[#1a0a2e]/85 to-black/80"></div>
+
+          {/* Purple tint overlay */}
+          <div className="absolute inset-0 bg-[#8c5cff]/10 mix-blend-overlay"></div>
+        </div>
+
         {/* Animated background elements - Optimized for mobile */}
         <div className="absolute inset-0 overflow-hidden">
           {!isMobile && (
@@ -228,7 +247,7 @@ const Home = () => {
           >
             {mockData.hero.subtitle}
           </motion.p>
-          
+
           {/* Rotating text animation */}
           <div className="h-16 md:h-20 mb-8 flex items-center justify-center">
             <AnimatePresence mode="wait">
@@ -244,7 +263,7 @@ const Home = () => {
               </motion.p>
             </AnimatePresence>
           </div>
-          
+
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -305,119 +324,248 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Cursos Section - Inspired by Fixtergeek */}
-      <section id="cursos" className="py-24 px-4 bg-gradient-to-b from-black to-[#0a0a0a]">
-        <div className="container mx-auto max-w-6xl">
+      {/* Cursos Section - Premium Magazine Layout */}
+      <section id="cursos" className="py-24 px-4 bg-gradient-to-b from-black to-[#0a0a0a] relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#8c5cff]/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="container mx-auto max-w-6xl relative z-10">
+          {/* Header with standardized style */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            transition={{ duration: 0.8 }}
+            className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#8c5cff]" style={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
-              Cursos Más Recientes
+            <motion.div
+              initial={isMobile ? { opacity: 1 } : { scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="inline-block mb-4"
+            >
+              <div className="px-6 py-2 bg-gradient-to-r from-[#8c5cff]/20 to-[#6a3dcf]/20 rounded-full border border-[#8c5cff]/30 backdrop-blur-sm">
+                <span className="text-[#8c5cff] font-semibold text-sm tracking-wider uppercase">Educación Continua</span>
+              </div>
+            </motion.div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-[#8c5cff] to-white bg-clip-text text-transparent" style={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+              Cursos Especializados
             </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Aprende con metodología práctica y dinámica que facilita tu crecimiento profesional
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+              Programas de formación integral con metodología práctica y certificación internacional
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          {/* Magazine-style horizontal cards */}
+          <div className="space-y-8">
             {mockData.cursos.map((curso, index) => (
               <motion.div
                 key={curso.id}
-                initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={isMobile ? {} : { duration: 0.6, delay: index * 0.2 }}
-                whileHover={!isMobile ? { y: -8 } : {}}
-                className="cursor-pointer group"
+                initial={isMobile ? { opacity: 1 } : { opacity: 0, x: index % 2 === 0 ? -100 : 100 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={isMobile ? {} : { duration: 0.8, type: "spring", stiffness: 80 }}
+                className="group"
               >
-                <Card className="bg-gradient-to-br from-[#2a2c33] to-[#1a1c22] border-[#8c5cff]/20 hover:border-[#8c5cff] transition-all duration-300 h-full overflow-hidden">
-                  <div className="relative h-48 bg-gradient-to-br from-[#8c5cff]/20 to-[#2a2c33] overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
-                      <GraduationCap size={64} className="text-[#8c5cff]" />
+                <div className={`relative bg-gradient-to-br from-[#2a2c33] via-[#1f2127] to-[#1a1c22] rounded-3xl overflow-hidden border border-[#8c5cff]/20 hover:border-[#8c5cff]/60 transition-all duration-700 hover:shadow-2xl hover:shadow-[#8c5cff]/30 ${
+                  index % 2 === 0 ? '' : 'md:flex-row-reverse'
+                }`}>
+                  {/* Animated gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#8c5cff]/0 via-[#8c5cff]/5 to-[#8c5cff]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+
+                  <div className="relative flex flex-col md:flex-row">
+                    {/* Visual Section with Number */}
+                    <div className={`relative md:w-2/5 h-48 md:h-auto bg-gradient-to-br from-[#8c5cff]/30 via-[#6a3dcf]/20 to-transparent p-6 flex flex-col justify-between ${
+                      index % 2 === 0 ? 'md:order-1' : 'md:order-2'
+                    }`}>
+                      {/* Large decorative number */}
+                      <div className="absolute top-4 right-4 text-[80px] md:text-[120px] font-black text-[#8c5cff]/10 leading-none" style={{ fontWeight: 900 }}>
+                        {String(index + 1).padStart(2, '0')}
+                      </div>
+
+                      {/* Floating icon */}
+                      <motion.div
+                        className="relative z-10 mt-auto"
+                        animate={!isMobile ? { y: [0, -10, 0] } : {}}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <div className="relative inline-block">
+                          <div className="absolute inset-0 bg-[#8c5cff] rounded-2xl blur-xl opacity-50"></div>
+                          <div className="relative bg-gradient-to-br from-[#8c5cff] to-[#6a3dcf] rounded-2xl p-4 shadow-2xl">
+                            <GraduationCap size={40} className="text-white" strokeWidth={1.5} />
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      {/* Level badge */}
+                      <div className="absolute top-4 left-4 z-20">
+                        <div className="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full border border-[#8c5cff]/40">
+                          <span className="text-white text-xs font-bold tracking-wide">{curso.level}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="absolute top-4 right-4">
-                      <Badge className="bg-[#8c5cff]/90 text-white">{curso.level}</Badge>
+
+                    {/* Content Section */}
+                    <div className={`relative md:w-3/5 p-6 md:p-7 flex flex-col justify-center ${
+                      index % 2 === 0 ? 'md:order-2' : 'md:order-1'
+                    }`}>
+                      <div className="space-y-3">
+                        {/* Title */}
+                        <h3 className="text-xl md:text-2xl font-bold text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-[#8c5cff] group-hover:bg-clip-text transition-all duration-500" style={{ fontWeight: 800 }}>
+                          {curso.title}
+                        </h3>
+
+                        {/* Description */}
+                        <p className="text-gray-400 group-hover:text-gray-300 text-sm md:text-base leading-relaxed transition-colors duration-500">
+                          {curso.description}
+                        </p>
+
+                        {/* Footer with duration and CTA */}
+                        <div className="flex items-center justify-between pt-3 border-t border-[#8c5cff]/20 group-hover:border-[#8c5cff]/40 transition-colors duration-500">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-[#8c5cff]/10 rounded-lg">
+                              <Clock size={16} className="text-[#8c5cff]" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-gray-500 uppercase tracking-wide">Duración</p>
+                              <p className="text-[#8c5cff] font-bold text-sm">{curso.duration}</p>
+                            </div>
+                          </div>
+
+                          {/* Explore button */}
+                          <motion.button
+                            whileHover={!isMobile ? { scale: 1.05, x: 5 } : {}}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] rounded-full text-white font-semibold text-sm shadow-lg hover:shadow-xl hover:shadow-[#8c5cff]/50 transition-all duration-300"
+                          >
+                            <span>Explorar</span>
+                            <ArrowRight size={16} />
+                          </motion.button>
+                        </div>
+                      </div>
+
+                      {/* Decorative corner accent */}
+                      <div className="absolute bottom-0 right-0 w-32 h-32 border-r-2 border-b-2 border-[#8c5cff]/20 rounded-br-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     </div>
                   </div>
-                  <CardHeader>
-                    <CardTitle className="text-white text-xl group-hover:text-[#8c5cff] transition-colors duration-300" style={{ fontWeight: 600 }}>
-                      {curso.title}
-                    </CardTitle>
-                    <CardDescription className="text-gray-400 line-clamp-3">
-                      {curso.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-[#8c5cff]">
-                        <Clock size={18} />
-                        <span className="text-sm font-medium">{curso.duration}</span>
-                      </div>
-                      <motion.div 
-                        className="text-[#8c5cff] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        whileHover={{ x: 5 }}
-                      >
-                        <ArrowRight size={20} />
-                      </motion.div>
-                    </div>
-                  </CardContent>
-                </Card>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Capacitaciones Section */}
-      <section id="capacitaciones" className="py-24 px-4 bg-[#0a0a0a]">
-        <div className="container mx-auto max-w-6xl">
+      {/* Capacitaciones Section - Ultra Premium Bento Box Design */}
+      <section id="capacitaciones" className="py-24 px-4 bg-gradient-to-b from-black via-[#0a0a0a] to-black relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-[#8c5cff]/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#6a3dcf]/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+
+        <div className="container mx-auto max-w-7xl relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            transition={{ duration: 0.8 }}
+            className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#8c5cff]" style={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
+            <motion.div
+              initial={isMobile ? { opacity: 1 } : { scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="inline-block mb-4"
+            >
+              <div className="px-6 py-2 bg-gradient-to-r from-[#8c5cff]/20 to-[#6a3dcf]/20 rounded-full border border-[#8c5cff]/30 backdrop-blur-sm">
+                <span className="text-[#8c5cff] font-semibold text-sm tracking-wider uppercase">Formación Profesional</span>
+              </div>
+            </motion.div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-[#8c5cff] to-white bg-clip-text text-transparent" style={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
               Capacitaciones Especializadas
             </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Talleres intensivos diseñados para profesionales del fútbol
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+              Talleres intensivos de vanguardia diseñados para elevar tu práctica profesional
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Bento Box Grid - Single row with 4 columns */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {mockData.capacitaciones.map((capacitacion, index) => {
               const IconComponent = iconMap[capacitacion.icon];
               return (
                 <motion.div
                   key={capacitacion.id}
-                  initial={isMobile ? { opacity: 1 } : { opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={isMobile ? {} : { duration: 0.5, delay: index * 0.1 }}
-                  whileHover={!isMobile ? { y: -8, scale: 1.02 } : {}}
-                  className="cursor-pointer"
+                  initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={isMobile ? {} : { duration: 0.6, delay: index * 0.15, type: "spring", stiffness: 100 }}
+                  className="group cursor-pointer"
                 >
-                  <Card className="bg-[#2a2c33] border-[#8c5cff]/20 hover:border-[#8c5cff] transition-all duration-300 h-full hover:shadow-xl hover:shadow-[#8c5cff]/20 group">
-                    <CardHeader>
-                      <div className="w-16 h-16 bg-[#8c5cff]/20 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#8c5cff]/30 transition-all duration-300 group-hover:rotate-12">
-                        {IconComponent && <IconComponent className="text-[#8c5cff] group-hover:scale-110 transition-transform duration-300" size={32} />}
+                  <div className="relative h-full bg-gradient-to-br from-[#2a2c33] via-[#1f2127] to-[#1a1c22] rounded-2xl overflow-hidden border border-[#8c5cff]/20 hover:border-[#8c5cff]/60 transition-all duration-700 hover:shadow-2xl hover:shadow-[#8c5cff]/40">
+                    {/* Animated gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#8c5cff]/0 via-[#8c5cff]/5 to-[#8c5cff]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+
+                    {/* Glowing orb effect */}
+                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#8c5cff]/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-150"></div>
+
+                    <div className="relative p-5">
+                      {/* Icon Section with floating animation */}
+                      <motion.div
+                        className="mb-4 relative"
+                        whileHover={!isMobile ? { y: -10 } : {}}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <div className="relative inline-block">
+                          {/* Glow effect */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-[#8c5cff] to-[#6a3dcf] rounded-xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
+
+                          {/* Icon container */}
+                          <div className="relative w-14 h-14 bg-gradient-to-br from-[#8c5cff] to-[#6a3dcf] rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-2xl group-hover:shadow-[#8c5cff]/50 transition-all duration-500 group-hover:rotate-6 group-hover:scale-110">
+                            {IconComponent && <IconComponent className="text-white" size={28} strokeWidth={2.5} />}
+                          </div>
+
+                          {/* Orbiting dots */}
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#8c5cff] rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping"></div>
+                          <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-[#a371ff] rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                      </motion.div>
+
+                      {/* Content */}
+                      <div className="space-y-3">
+                        <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-[#8c5cff] group-hover:bg-clip-text transition-all duration-500" style={{ fontWeight: 700 }}>
+                          {capacitacion.title}
+                        </h3>
+
+                        <p className="text-gray-400 group-hover:text-gray-300 text-sm leading-relaxed transition-colors duration-500">
+                          {capacitacion.description}
+                        </p>
+
+                        {/* Duration badge */}
+                        <div className="flex items-center gap-2 pt-2">
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#8c5cff]/10 group-hover:bg-[#8c5cff]/20 rounded-full border border-[#8c5cff]/30 transition-all duration-500">
+                            <Clock size={14} className="text-[#8c5cff]" />
+                            <span className="text-[#8c5cff] font-semibold text-xs">{capacitacion.duration}</span>
+                          </div>
+
+                          {/* Arrow indicator */}
+                          <motion.div
+                            className="ml-auto opacity-0 group-hover:opacity-100 transition-all duration-500"
+                            animate={!isMobile ? { x: [0, 5, 0] } : {}}
+                            transition={{ repeat: Infinity, duration: 1.5 }}
+                          >
+                            <ArrowRight className="text-[#8c5cff]" size={20} />
+                          </motion.div>
+                        </div>
                       </div>
-                      <CardTitle className="text-white text-xl group-hover:text-[#8c5cff] transition-colors duration-300" style={{ fontWeight: 600 }}>{capacitacion.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="text-gray-400 mb-4">
-                        {capacitacion.description}
-                      </CardDescription>
-                      <div className="flex items-center gap-2 text-[#8c5cff] text-sm">
-                        <Clock size={16} />
-                        <span className="font-medium">{capacitacion.duration}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
+
+                      {/* Bottom decorative line */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#8c5cff] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </div>
+                  </div>
                 </motion.div>
               );
             })}
@@ -537,70 +685,153 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Organigrama Section */}
-      <section id="organigrama" className="py-24 px-4 bg-black relative overflow-hidden">
-        <div className="container mx-auto max-w-6xl relative z-10">
+      {/* Organigrama Section - Ultra Modern Org Chart */}
+      <section id="organigrama" className="py-32 px-4 bg-gradient-to-b from-black via-[#0a0a0a] to-black relative overflow-hidden">
+        {/* Animated grid background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'linear-gradient(#8c5cff 1px, transparent 1px), linear-gradient(90deg, #8c5cff 1px, transparent 1px)',
+            backgroundSize: '50px 50px'
+          }}></div>
+        </div>
+
+        {/* Radial gradient overlays */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[#8c5cff]/5 rounded-full blur-3xl"></div>
+
+        <div className="container mx-auto max-w-7xl relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            transition={{ duration: 0.8 }}
+            className="text-center mb-24"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#8c5cff]" style={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
+            <motion.div
+              initial={isMobile ? { opacity: 1 } : { scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="inline-block mb-6"
+            >
+              <div className="px-8 py-3 bg-gradient-to-r from-[#8c5cff]/20 to-[#6a3dcf]/20 rounded-full border border-[#8c5cff]/40 backdrop-blur-sm">
+                <span className="text-[#8c5cff] font-bold text-base tracking-widest uppercase">Liderazgo</span>
+              </div>
+            </motion.div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-[#8c5cff] to-white bg-clip-text text-transparent" style={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
               {mockData.organigrama.title}
             </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
               {mockData.organigrama.subtitle}
             </p>
           </motion.div>
 
-          <div className="space-y-8">
+          <div className="space-y-16">
             {[1, 2, 3].map((nivel) => {
               const miembros = mockData.organigrama.estructura.filter(m => m.nivel === nivel);
               return (
                 <div key={nivel} className="flex flex-col items-center">
-                  <div className={`grid gap-6 w-full ${nivel === 1 ? 'grid-cols-1 max-w-md' : nivel === 2 ? 'md:grid-cols-2 max-w-3xl' : 'md:grid-cols-3 max-w-5xl'}`}>
+                  <div className={`grid gap-8 w-full ${nivel === 1 ? 'grid-cols-1 max-w-2xl' : nivel === 2 ? 'md:grid-cols-2 max-w-4xl' : 'md:grid-cols-3 max-w-6xl'}`}>
                     {miembros.map((miembro, index) => (
                       <motion.div
                         key={miembro.id}
-                        initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 50 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
+                        initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 60, scale: 0.8 }}
+                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                        viewport={{ once: true, margin: "-50px" }}
                         transition={isMobile ?
                           {} :
                           {
-                            duration: 0.6,
-                            delay: index * 0.15,
+                            duration: 0.7,
+                            delay: index * 0.2,
                             type: "spring",
-                            stiffness: 100
+                            stiffness: 80
                           }
                         }
-                        whileHover={!isMobile ? { y: -5, scale: 1.03 } : {}}
-                        className="cursor-pointer"
+                        className="group cursor-pointer"
                       >
-                        <Card className="bg-gradient-to-br from-[#2a2c33] to-[#1a1c22] border-[#8c5cff]/30 hover:border-[#8c5cff] transition-all duration-300 hover:shadow-lg hover:shadow-[#8c5cff]/20 group">
-                          <CardHeader>
-                            <div className="w-16 h-16 bg-gradient-to-br from-[#8c5cff] to-[#6a3dcf] rounded-full mb-3 flex items-center justify-center text-white text-xl font-bold mx-auto group-hover:scale-110 transition-transform duration-300">
-                              {miembro.nombre.split(' ').map(n => n.charAt(0)).join('')}
+                        <div className="relative">
+                          {/* Connecting line top */}
+                          {nivel > 1 && (
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-0.5 h-8 bg-gradient-to-b from-[#8c5cff]/50 to-[#8c5cff] hidden md:block"></div>
+                          )}
+
+                          <div className="relative bg-gradient-to-br from-[#2a2c33] via-[#1f2127] to-[#1a1c22] rounded-2xl overflow-hidden border border-[#8c5cff]/30 group-hover:border-[#8c5cff] transition-all duration-500 hover:shadow-xl hover:shadow-[#8c5cff]/30 p-4">
+                            {/* Glowing background effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#8c5cff]/0 via-[#8c5cff]/10 to-[#8c5cff]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                            <div className="relative z-10 flex flex-col items-center text-center space-y-3">
+                              {/* Avatar */}
+                              <motion.div
+                                className="relative"
+                                whileHover={!isMobile ? { scale: 1.08 } : {}}
+                                transition={{ type: "spring", stiffness: 300 }}
+                              >
+                                {/* Glow ring */}
+                                <div className="absolute inset-0 rounded-full bg-[#8c5cff] blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+                                {/* Avatar circle */}
+                                <div className={`relative ${
+                                  nivel === 1 ? 'w-16 h-16' : nivel === 2 ? 'w-14 h-14' : 'w-12 h-12'
+                                } bg-gradient-to-br from-[#8c5cff] to-[#6a3dcf] rounded-full flex items-center justify-center text-white font-bold shadow-lg border-2 border-[#1a1c22] group-hover:border-[#8c5cff]/50 transition-all duration-500`}
+                                  style={{ fontSize: nivel === 1 ? '1rem' : nivel === 2 ? '0.875rem' : '0.75rem' }}
+                                >
+                                  {miembro.nombre.split(' ').map(n => n.charAt(0)).join('')}
+                                </div>
+                              </motion.div>
+
+                              {/* Content */}
+                              <div className="space-y-1">
+                                <h3 className={`${
+                                  nivel === 1 ? 'text-lg md:text-xl' : nivel === 2 ? 'text-base md:text-lg' : 'text-sm md:text-base'
+                                } font-bold text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-[#8c5cff] group-hover:to-white group-hover:bg-clip-text transition-all duration-500`}
+                                  style={{ fontWeight: 700 }}
+                                >
+                                  {miembro.cargo}
+                                </h3>
+
+                                <p className="text-sm text-[#8c5cff] font-semibold">
+                                  {miembro.nombre}
+                                </p>
+
+                                <div className="inline-flex items-center px-3 py-1 bg-[#8c5cff]/10 group-hover:bg-[#8c5cff]/20 rounded-full border border-[#8c5cff]/30 transition-all duration-500 mt-2">
+                                  <span className="text-xs text-gray-400 group-hover:text-gray-300 font-medium">
+                                    {miembro.area}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <CardTitle className="text-white text-center text-lg group-hover:text-[#8c5cff] transition-colors duration-300" style={{ fontWeight: 600 }}>{miembro.cargo}</CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-center">
-                            <p className="text-[#8c5cff] font-semibold mb-2">{miembro.nombre}</p>
-                            <p className="text-gray-400 text-sm">{miembro.area}</p>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </div>
                       </motion.div>
                     ))}
                   </div>
+
+                  {/* Connecting lines between levels */}
                   {nivel < 3 && (
                     <motion.div
-                      initial={{ opacity: 0, scaleY: 0 }}
+                      initial={isMobile ? { opacity: 1 } : { opacity: 0, scaleY: 0 }}
                       whileInView={{ opacity: 1, scaleY: 1 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.5 }}
-                      className="w-0.5 h-12 bg-gradient-to-b from-[#8c5cff] to-transparent my-4"
-                    />
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                      className="relative my-8 hidden md:block"
+                    >
+                      {/* Main vertical line */}
+                      <div className="w-1 h-16 bg-gradient-to-b from-[#8c5cff] via-[#8c5cff]/50 to-[#8c5cff] mx-auto relative">
+                        {/* Pulsing dot */}
+                        <motion.div
+                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#8c5cff] rounded-full"
+                          animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        ></motion.div>
+                      </div>
+
+                      {/* Horizontal branching lines */}
+                      {nivel === 1 && (
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 flex gap-32">
+                          <div className="w-0.5 h-8 bg-gradient-to-b from-[#8c5cff] to-transparent"></div>
+                          <div className="w-0.5 h-8 bg-gradient-to-b from-[#8c5cff] to-transparent"></div>
+                        </div>
+                      )}
+                    </motion.div>
                   )}
                 </div>
               );
@@ -610,48 +841,84 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0a0a0a] border-t border-[#8c5cff]/20 py-12 px-4">
+      <footer className="bg-gradient-to-b from-[#0a0a0a] to-black border-t border-[#8c5cff]/20 py-16 px-4">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="text-2xl font-bold text-[#8c5cff] mb-4" style={{ fontWeight: 700 }}>ASOCHINUF</h3>
-              <p className="text-gray-400">Asociación Chilena de Nutricionistas de Fútbol</p>
+          <div className="grid md:grid-cols-2 gap-12 mb-12">
+            {/* Brand Section */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-[#8c5cff] to-[#a371ff] bg-clip-text text-transparent" style={{ fontWeight: 800 }}>
+                  ASOCHINUF
+                </h3>
+                <p className="text-gray-400 text-lg leading-relaxed">
+                  Asociación Chilena de Nutricionistas de Fútbol
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-gray-500 text-sm">
+                  Elevando los estándares de la nutrición deportiva en el fútbol profesional chileno
+                </p>
+              </div>
+
+              {/* Contact Info */}
+              <div className="pt-4 space-y-2">
+                <p className="text-gray-400 text-sm flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-[#8c5cff] rounded-full"></span>
+                  contacto@asochinuf.cl
+                </p>
+                <p className="text-gray-400 text-sm flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-[#8c5cff] rounded-full"></span>
+                  Santiago, Chile
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4" style={{ fontWeight: 600 }}>Navegación</h4>
-              <nav className="flex flex-col space-y-2">
-                {mockData.footer.navigation.map((link) => (
-                  <button
-                    key={link.name}
-                    onClick={() => scrollToSection(link.href)}
-                    className="text-gray-400 hover:text-[#8c5cff] transition-colors duration-200 text-left hover:translate-x-2 transform transition-transform font-medium"
-                  >
-                    {link.name}
-                  </button>
-                ))}
-              </nav>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4" style={{ fontWeight: 600 }}>Redes Sociales</h4>
-              <div className="flex gap-4">
-                {mockData.footer.social.map((social) => {
-                  const IconComponent = iconMap[social.icon];
-                  return (
-                    <a
-                      key={social.name}
-                      href={social.url}
-                      className="w-10 h-10 bg-[#2a2c33] rounded-full flex items-center justify-center text-[#8c5cff] hover:bg-[#8c5cff] hover:text-white transition-all duration-300 hover:scale-110 hover:rotate-12"
-                      aria-label={social.name}
-                    >
-                      {IconComponent && <IconComponent size={20} />}
-                    </a>
-                  );
-                })}
+
+            {/* Social Section */}
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-white font-bold mb-6 text-xl" style={{ fontWeight: 700 }}>Síguenos</h4>
+                <div className="flex gap-4 flex-wrap">
+                  {mockData.footer.social.map((social) => {
+                    const IconComponent = iconMap[social.icon];
+                    return (
+                      <a
+                        key={social.name}
+                        href={social.url}
+                        className="group relative"
+                        aria-label={social.name}
+                      >
+                        <div className="absolute inset-0 bg-[#8c5cff] rounded-xl blur opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
+                        <div className="relative w-12 h-12 bg-gradient-to-br from-[#2a2c33] to-[#1a1c22] rounded-xl flex items-center justify-center text-[#8c5cff] border border-[#8c5cff]/30 group-hover:border-[#8c5cff] group-hover:bg-[#8c5cff] group-hover:text-white transition-all duration-300 group-hover:scale-110">
+                          {IconComponent && <IconComponent size={22} strokeWidth={2} />}
+                        </div>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Stats or Info */}
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <div className="bg-gradient-to-br from-[#2a2c33] to-[#1a1c22] rounded-xl p-4 border border-[#8c5cff]/20">
+                  <p className="text-2xl font-bold text-[#8c5cff]">100+</p>
+                  <p className="text-xs text-gray-400 mt-1">Profesionales certificados</p>
+                </div>
+                <div className="bg-gradient-to-br from-[#2a2c33] to-[#1a1c22] rounded-xl p-4 border border-[#8c5cff]/20">
+                  <p className="text-2xl font-bold text-[#8c5cff]">10+</p>
+                  <p className="text-xs text-gray-400 mt-1">Clubes asociados</p>
+                </div>
               </div>
             </div>
           </div>
-          <div className="border-t border-[#8c5cff]/20 pt-8 text-center text-gray-500">
-            <p>{mockData.footer.copyright}</p>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-[#8c5cff]/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-500 text-sm">{mockData.footer.copyright}</p>
+            <div className="flex gap-6 text-xs text-gray-500">
+              <button className="hover:text-[#8c5cff] transition-colors">Política de Privacidad</button>
+              <button className="hover:text-[#8c5cff] transition-colors">Términos de Uso</button>
+            </div>
           </div>
         </div>
       </footer>
