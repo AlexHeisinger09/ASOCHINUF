@@ -94,24 +94,24 @@ export const mockData = {
   testimonios: [
     {
       id: 1,
-      name: "Dr. Carlos Muñoz",
-      role: "Nutricionista - Club Deportivo Universidad de Chile",
-      quote: "ASOCHINUF ha transformado mi práctica profesional. Las capacitaciones y el apoyo constante son invaluables.",
-      team: "Universidad de Chile"
+      name: "Gabriella Riveri",
+      role: "Nutricionista Deportiva",
+      quote: "Ser un buen deportista requiere de muchas horas de entrenamiento, constancia y dedicación, pero lograr sostener tu rendimiento al máximo los 90 min de juego y evitar lesiones, no es solo talento, se requiere una adecuada nutrición e hidratación en conjunto. No dejes nada al azar",
+      photo: "/nutri1.PNG"
     },
     {
       id: 2,
-      name: "Dra. María González",
-      role: "Nutricionista - Colo-Colo",
-      quote: "La red de profesionales y el intercambio de conocimientos han elevado los estándares de nutrición deportiva en Chile.",
-      team: "Colo-Colo"
+      name: "Felipe González",
+      role: "Nutricionista Deportiva",
+      quote: "Ciencia y nutrición estratégica para llevar el fútbol al siguiente nivel",
+      photo: "/nutri2.PNG"
     },
     {
       id: 3,
-      name: "Lic. Roberto Silva",
-      role: "Nutricionista - Universidad Católica",
-      quote: "Ser parte de ASOCHINUF significa estar a la vanguardia de la nutrición deportiva en el fútbol profesional.",
-      team: "Universidad Católica"
+      name: "Cristián Muñoz",
+      role: "Nutricionista Deportiva",
+      quote: "El movimiento y una adecuada alimentación son los responsables de una salud óptima y una mejor calidad de vida",
+      photo: "/nutri3.PNG"
     }
   ],
 
