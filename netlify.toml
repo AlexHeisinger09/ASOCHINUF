@@ -1,0 +1,20 @@
+[build]
+  command = "cd frontend && yarn build"
+  publish = "frontend/build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[context.production]
+  command = "cd frontend && yarn build"
+  publish = "frontend/build"
+
+[context.deploy-preview]
+  command = "cd frontend && yarn build"
+  publish = "frontend/build"
+
+[context.branch-deploy]
+  command = "cd frontend && yarn build"
+  publish = "frontend/build"

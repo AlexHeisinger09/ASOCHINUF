@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn install)",
+      "Bash(yarn start)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nConfigure Netlify deployment with netlify.toml and remove .emergent folder\n\n- Add netlify.toml with proper build and redirect configuration for React Router\n- Remove _redirects file (replaced by netlify.toml)\n- Delete .emergent folder and all its contents\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
