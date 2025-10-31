@@ -17,6 +17,7 @@ const Home = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [showMemberDescription, setShowMemberDescription] = useState(null);
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const headerOpacity = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
@@ -730,7 +731,11 @@ const Home = () => {
               const miembros = mockData.organigrama.estructura.filter(m => m.nivel === nivel);
               return (
                 <div key={nivel} className="flex flex-col items-center">
-                  <div className={`grid gap-8 w-full ${nivel === 1 ? 'grid-cols-1 max-w-2xl' : nivel === 2 ? 'md:grid-cols-2 max-w-4xl' : 'md:grid-cols-3 max-w-6xl'}`}>
+                  <div className={`grid gap-4 md:gap-8 w-full ${
+                    nivel === 1 ? 'grid-cols-1 max-w-2xl' :
+                    nivel === 2 ? 'grid-cols-3 max-w-6xl' :
+                    'grid-cols-3 max-w-6xl'
+                  }`}>
                     {miembros.map((miembro, index) => (
                       <motion.div
                         key={miembro.id}
@@ -754,56 +759,186 @@ const Home = () => {
                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-0.5 h-8 bg-gradient-to-b from-[#8c5cff]/50 to-[#8c5cff] hidden md:block"></div>
                           )}
 
-                          <div className="relative bg-gradient-to-br from-[#2a2c33] via-[#1f2127] to-[#1a1c22] rounded-2xl overflow-hidden border border-[#8c5cff]/30 group-hover:border-[#8c5cff] transition-all duration-500 hover:shadow-xl hover:shadow-[#8c5cff]/30 p-4">
-                            {/* Glowing background effect */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#8c5cff]/0 via-[#8c5cff]/10 to-[#8c5cff]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                            <div className="relative z-10 flex flex-col items-center text-center space-y-3">
-                              {/* Avatar */}
+                          {miembro.foto ? (
+                            /* Layout for members with photo - expandable card */
+                            <div className="relative group/member">
+                              {/* Photo */}
                               <motion.div
-                                className="relative"
-                                whileHover={!isMobile ? { scale: 1.08 } : {}}
+                                className="relative cursor-pointer"
+                                whileHover={!isMobile ? { scale: 1.03 } : {}}
                                 transition={{ type: "spring", stiffness: 300 }}
+                                onClick={() => isMobile && setShowMemberDescription(showMemberDescription === miembro.id ? null : miembro.id)}
                               >
-                                {/* Glow ring */}
-                                <div className="absolute inset-0 rounded-full bg-[#8c5cff] blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
-
-                                {/* Avatar circle */}
-                                <div className={`relative ${
-                                  nivel === 1 ? 'w-16 h-16' : nivel === 2 ? 'w-14 h-14' : 'w-12 h-12'
-                                } bg-gradient-to-br from-[#8c5cff] to-[#6a3dcf] rounded-full flex items-center justify-center text-white font-bold shadow-lg border-2 border-[#1a1c22] group-hover:border-[#8c5cff]/50 transition-all duration-500`}
-                                  style={{ fontSize: nivel === 1 ? '1rem' : nivel === 2 ? '0.875rem' : '0.75rem' }}
-                                >
-                                  {miembro.nombre.split(' ').map(n => n.charAt(0)).join('')}
-                                </div>
+                                <img
+                                  src={miembro.foto}
+                                  alt={miembro.nombre}
+                                  className={`${
+                                    nivel === 1 ? 'w-full max-w-[200px] md:max-w-md' :
+                                    nivel === 2 ? 'w-full max-w-[100px] md:max-w-xs' :
+                                    'w-full max-w-[100px] md:max-w-sm'
+                                  } h-auto object-contain drop-shadow-2xl transition-all duration-300 mx-auto`}
+                                />
                               </motion.div>
 
-                              {/* Content */}
-                              <div className="space-y-1">
+                              {/* Name and Title below photo */}
+                              <div className="mt-2 md:mt-6 text-center space-y-0.5 md:space-y-2">
                                 <h3 className={`${
-                                  nivel === 1 ? 'text-lg md:text-xl' : nivel === 2 ? 'text-base md:text-lg' : 'text-sm md:text-base'
-                                } font-bold text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-[#8c5cff] group-hover:to-white group-hover:bg-clip-text transition-all duration-500`}
-                                  style={{ fontWeight: 700 }}
+                                  nivel === 1 ? 'text-base md:text-3xl' :
+                                  nivel === 2 ? 'text-xs md:text-2xl' :
+                                  'text-xs md:text-xl'
+                                } font-bold text-white leading-tight`}
+                                  style={{ fontWeight: 800, letterSpacing: '-0.02em' }}
                                 >
-                                  {miembro.cargo}
-                                </h3>
-
-                                <p className="text-sm text-[#8c5cff] font-semibold">
                                   {miembro.nombre}
+                                </h3>
+                                <p className={`${
+                                  nivel === 1 ? 'text-xs md:text-xl' :
+                                  nivel === 2 ? 'text-[10px] md:text-lg' :
+                                  'text-[10px] md:text-base'
+                                } text-[#8c5cff] font-semibold uppercase tracking-wide leading-tight`}>
+                                  {miembro.cargo}
                                 </p>
+                              </div>
 
-                                <div className="inline-flex items-center px-3 py-1 bg-[#8c5cff]/10 group-hover:bg-[#8c5cff]/20 rounded-full border border-[#8c5cff]/30 transition-all duration-500 mt-2">
-                                  <span className="text-xs text-gray-400 group-hover:text-gray-300 font-medium">
-                                    {miembro.area}
-                                  </span>
+                              {/* Expandable Description Card - appears on hover (Desktop) */}
+                              {miembro.descripcion && !isMobile && (
+                                <div className="absolute left-full top-0 ml-8 w-80 opacity-0 group-hover/member:opacity-100 invisible group-hover/member:visible transition-all duration-500 z-50">
+                                  {/* Arrow pointing to image */}
+                                  <div className="absolute left-0 top-8 -translate-x-full">
+                                    <div className="w-0 h-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-r-8 border-r-[#2a2c33]"></div>
+                                  </div>
+
+                                  {/* Description card */}
+                                  <div className="relative bg-gradient-to-br from-[#2a2c33] via-[#1f2127] to-[#1a1c22] rounded-2xl border border-[#8c5cff]/40 shadow-2xl shadow-[#8c5cff]/20 p-6 backdrop-blur-xl transform group-hover/member:translate-x-0 -translate-x-4 transition-transform duration-500">
+                                    {/* Glowing effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-[#8c5cff]/10 via-transparent to-[#6a3dcf]/10 rounded-2xl"></div>
+
+                                    {/* Content */}
+                                    <div className="relative z-10">
+                                      {/* Title badge */}
+                                      <div className="inline-flex items-center px-3 py-1 bg-[#8c5cff]/20 rounded-full border border-[#8c5cff]/40 mb-4">
+                                        <span className="text-xs text-[#8c5cff] font-bold uppercase tracking-wider">
+                                          Perfil Profesional
+                                        </span>
+                                      </div>
+
+                                      {/* Description text */}
+                                      <p className="text-sm text-gray-300 leading-relaxed">
+                                        {miembro.descripcion}
+                                      </p>
+                                    </div>
+
+                                    {/* Decorative corner */}
+                                    <div className="absolute top-0 right-0 w-20 h-20 border-t-2 border-r-2 border-[#8c5cff]/30 rounded-tr-2xl"></div>
+                                    <div className="absolute bottom-0 left-0 w-20 h-20 border-b-2 border-l-2 border-[#8c5cff]/30 rounded-bl-2xl"></div>
+                                  </div>
+                                </div>
+                              )}
+
+                            </div>
+                          ) : (
+                            /* Layout for members without photo - keep card */
+                            <div className="relative bg-gradient-to-br from-[#2a2c33] via-[#1f2127] to-[#1a1c22] rounded-2xl overflow-hidden border border-[#8c5cff]/30 group-hover:border-[#8c5cff] transition-all duration-500 hover:shadow-xl hover:shadow-[#8c5cff]/30 p-6">
+                              {/* Glowing background effect */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-[#8c5cff]/0 via-[#8c5cff]/10 to-[#8c5cff]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                              <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                                {/* Avatar */}
+                                <motion.div
+                                  className="relative"
+                                  whileHover={!isMobile ? { scale: 1.05 } : {}}
+                                  transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                  <div className={`relative ${
+                                    nivel === 1 ? 'w-24 h-24' : nivel === 2 ? 'w-20 h-20' : 'w-16 h-16'
+                                  } mx-auto bg-gradient-to-br from-[#8c5cff] to-[#6a3dcf] rounded-full flex items-center justify-center text-white font-bold shadow-lg border-2 border-[#1a1c22] group-hover:border-[#8c5cff]/50 transition-all duration-500`}
+                                    style={{ fontSize: nivel === 1 ? '1.5rem' : nivel === 2 ? '1.25rem' : '1rem' }}
+                                  >
+                                    {miembro.nombre.split(' ').map(n => n.charAt(0)).join('')}
+                                  </div>
+                                </motion.div>
+
+                                {/* Content */}
+                                <div className="space-y-2">
+                                  <h3 className={`${
+                                    nivel === 1 ? 'text-xl md:text-2xl' : nivel === 2 ? 'text-lg md:text-xl' : 'text-base md:text-lg'
+                                  } font-bold text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-[#8c5cff] group-hover:to-white group-hover:bg-clip-text transition-all duration-500`}
+                                    style={{ fontWeight: 800 }}
+                                  >
+                                    {miembro.cargo}
+                                  </h3>
+
+                                  <p className={`${
+                                    nivel === 1 ? 'text-base' : 'text-sm'
+                                  } text-[#8c5cff] font-semibold`}>
+                                    {miembro.nombre}
+                                  </p>
+
+                                  {/* Description */}
+                                  {miembro.descripcion && (
+                                    <p className="text-sm text-gray-400 leading-relaxed pt-3 border-t border-[#8c5cff]/20">
+                                      {miembro.descripcion}
+                                    </p>
+                                  )}
+
+                                  {/* Area badge */}
+                                  {miembro.area && (
+                                    <div className="inline-flex items-center px-4 py-1.5 bg-[#8c5cff]/10 group-hover:bg-[#8c5cff]/20 rounded-full border border-[#8c5cff]/30 transition-all duration-500 mt-3">
+                                      <span className="text-xs text-gray-400 group-hover:text-gray-300 font-medium">
+                                        {miembro.area}
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                       </motion.div>
                     ))}
                   </div>
+
+                  {/* Mobile: Full-width description card */}
+                  {isMobile && showMemberDescription && (
+                    <AnimatePresence>
+                      {miembros.find(m => m.id === showMemberDescription) && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="mt-4 overflow-hidden w-full"
+                        >
+                          {/* Description card - full width */}
+                          <div className="relative bg-gradient-to-br from-[#2a2c33] via-[#1f2127] to-[#1a1c22] rounded-2xl border border-[#8c5cff]/40 shadow-2xl shadow-[#8c5cff]/20 p-4 backdrop-blur-xl">
+                            {/* Glowing effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#8c5cff]/10 via-transparent to-[#6a3dcf]/10 rounded-2xl"></div>
+
+                            {/* Content */}
+                            <div className="relative z-10">
+                              {/* Title badge */}
+                              <div className="inline-flex items-center px-3 py-1 bg-[#8c5cff]/20 rounded-full border border-[#8c5cff]/40 mb-3">
+                                <span className="text-xs text-[#8c5cff] font-bold uppercase tracking-wider">
+                                  Perfil Profesional
+                                </span>
+                              </div>
+
+                              {/* Description text - full text for nivel 1 and Vicepresidente (id:2), truncated for others */}
+                              <p className="text-xs text-gray-300 leading-relaxed">
+                                {(nivel === 1 || showMemberDescription === 2)
+                                  ? miembros.find(m => m.id === showMemberDescription)?.descripcion
+                                  : miembros.find(m => m.id === showMemberDescription)?.descripcion.split('.')[0] + '.'}
+                              </p>
+                            </div>
+
+                            {/* Decorative corner */}
+                            <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-[#8c5cff]/30 rounded-tr-2xl"></div>
+                            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 border-[#8c5cff]/30 rounded-bl-2xl"></div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  )}
 
                   {/* Connecting lines between levels */}
                   {nivel < 3 && (

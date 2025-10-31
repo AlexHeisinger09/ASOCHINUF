@@ -117,50 +117,71 @@ export const mockData = {
 
   // Organigrama Section
   organigrama: {
-    title: "Nuestra Organización",
+    title: "Organización 2025-2027",
     subtitle: "Estructura que impulsa la excelencia en nutrición deportiva",
     estructura: [
       {
         id: 1,
         nivel: 1,
         cargo: "Presidente",
-        nombre: "Dr. Juan Pérez Rojas",
+        nombre: "Cristian Fuentes",
+        descripcion: "Nutricionistas de Alto rendimiento, formado en la Universidad de Concepcion, Magister en Nutrición para la actividad fisica y el deporte. Antropometrista ISAK 3. 12 años trabajando en el fútbol chileno, 10 años en Unión San Felipe. Empresario y desarrollador de innovadores proyectos para el funcionamiento de los profesionales de la Nutricion.",
+        foto: "/organigrama/presidente.png",
         area: "Dirección General"
       },
       {
         id: 2,
         nivel: 2,
         cargo: "Vicepresidente",
-        nombre: "Dra. Ana María Torres",
+        nombre: "Cristian Püschel",
+        descripcion: "Nutricionista de rendimiento deportivo, Mg. Nutrición y Suplementación Deportiva (UMU), con formación avanzada en Fisiología del Ejercicio y Nutrición Deportiva, certificado ISAK Nivel II, y con experiencia consolidada en el fútbol profesional y selecciones nacionales. Especializado en optimizar el rendimiento, la disponibilidad física y la composición corporal del futbolista mediante estrategias basadas en evidencia y control de procesos.",
+        foto: "/organigrama/vicepresidente.png",
         area: "Coordinación Académica"
       },
       {
         id: 3,
         nivel: 2,
-        cargo: "Secretario General",
-        nombre: "Lic. Pedro Ramírez",
+        cargo: "Tesorera",
+        nombre: "Gabriella Rivera",
+        descripcion: "Nutricionista, Diplomada fisiológia del ejercicio, ayudas ergogenicas y rendimiento deportivo ©️Magíster en Nutrición para la Actividad Física y el Deporte . Antropometrista Isak nivel 3 ©️Magister Microbioma y Salud 8 años como Nutricionista Plantel profesional masculino Colo colo. Participación en Libro \"Medicina y Ciencias aplicadas al fútbol\" .clínica MEDS.",
+        foto: "/organigrama/tesorera.png",
         area: "Administración"
       },
       {
         id: 4,
-        nivel: 3,
-        cargo: "Director de Capacitación",
-        nombre: "Dr. Luis Fernández",
-        area: "Formación Continua"
+        nivel: 2,
+        cargo: "Secretaria General",
+        nombre: "Danniela Garcia",
+        descripcion: "Nutricionista, Magíster en Nutrición para la Actividad Física y el Deporte, Diplomada en docencia universitaria con mención TIC, ISAK nivel II, con 6 años de experiencia en el fútbol profesional y en el desarrollo de deportistas de alto rendimiento. Nutricionista del Programa Promesas Chile, en la Región de Tarapacá, docencia universitaria y técnico profesional, autora de un artículo científico publicado en Journal of the International Society of Sports Nutrition (2020).",
+        foto: "/organigrama/secretaria.png",
+        area: "Administración"
       },
       {
         id: 5,
         nivel: 3,
-        cargo: "Director de Investigación",
-        nombre: "Dra. Carmen Vega",
-        area: "Desarrollo Científico"
+        cargo: "Directora Capacitaciones",
+        nombre: "Catalina Carabias",
+        descripcion: "Nutricionista de rendimiento deportivo (SENR, Reino Unido), con másteres en Nutrición Deportiva, Psiconeuroinmunología y Fisiología del Ejercicio, certificada ISAK III, y con amplia experiencia en equipos de fútbol de élite mundial como FC Barcelona, Athletic Club, Olympique Lyonnais y Watford FC. Actualmente desarrolla su doctorado en la Cátedra Udinese Calcio – Universidad Europea de Madrid, enfocado en nutrición sostenible aplicada al rendimiento y recuperación en el fútbol profesional.",
+        foto: "/organigrama/capacitaciones.png",
+        area: "Formación Continua"
       },
       {
         id: 6,
         nivel: 3,
-        cargo: "Director de Comunicaciones",
-        nombre: "Lic. Francisco Soto",
-        area: "Difusión y Marketing"
+        cargo: "Directora Femenino",
+        nombre: "Consuelo Rivera",
+        descripcion: "Nutricionista, Diplomada en Nutrición deportiva, Diplomada en nutricion Vegetariana y Vegana. Antropometrista Isak II Cursos de actualización en suplementacion y ayudas ergogenicas, deportista vegano, y manejo integral paciente con anorexia y bulimia. 2 años como Nutricionista Plantel profesional Femenino Colo colo y apoyo en categorías inferiores Formativas. Participación en 2 copas libertadores femenina Participación en WWC (Womans World Cup 2024) Nutricionista de CEDAR - Vitacura (centro para el desarrollo del alto rendimiento) apoyando a deportistas juveniles",
+        foto: "/organigrama/femenino.png",
+        area: "Fútbol Femenino"
+      },
+      {
+        id: 7,
+        nivel: 3,
+        cargo: "Director Investigación",
+        nombre: "Felipe Gonzalez",
+        descripcion: "Nutricionista deportivo, con posgrados en Fisiología del Ejercicio, Metodología de la Investigación e Inteligencia Artificial aplicada a las Ciencias de la Salud, y certificación ISAK Nivel II. Se desempeña como académico en la Universidad Santo Tomás y nutricionista del Club Deportes Antofagasta. Actualmente cursa el Doctorado en Ciencias de la Actividad Física y del Deporte en la Universidad Autónoma de Madrid, con una línea de investigación enfocada en la psicometría aplicada a la validación de instrumentos y al estudio del conocimiento y las conductas alimentarias en el fútbol profesional. Cuenta con publicaciones científicas en el ámbito de la nutrición, el comportamiento alimentario y la actividad física.",
+        foto: "/organigrama/investigacion.png",
+        area: "Desarrollo Científico"
       }
     ]
   },
