@@ -3,8 +3,9 @@ import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Home from './components/Home';
-import Dashboard from './pages/Dashboard';
+import Inicio from './pages/Inicio';
 import ProtectedRoute from './components/ProtectedRoute';
+import ResetPassword from './components/ResetPassword';
 
 function App() {
   return (
@@ -13,11 +14,12 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/restablecer-contrasena" element={<ResetPassword />} />
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Inicio />
                 </ProtectedRoute>
               }
             />

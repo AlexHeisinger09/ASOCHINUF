@@ -1,0 +1,52 @@
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import MainContent from '../components/MainContent';
+import BottomNav from '../components/BottomNav';
+
+const Inicio = () => {
+  const { usuario, logout, isDarkMode } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('inicio');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'bg-black text-white' : 'bg-gradient-to-b from-[#fafafa] to-[#f5f5f7] text-gray-900'} flex`}>
+      {/* Sidebar - Desktop only */}
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        handleLogout={handleLogout}
+      />
+
+      {/* Header + Main Content Container */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <Header
+          setActiveTab={setActiveTab}
+          setSettingsMenuOpen={setSettingsMenuOpen}
+          settingsMenuOpen={settingsMenuOpen}
+          handleLogout={handleLogout}
+        />
+
+        {/* Main Content */}
+        <MainContent activeTab={activeTab} />
+      </div>
+
+      {/* Bottom Navigation Bar - Mobile only */}
+      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+    </div>
+  );
+};
+
+export default Inicio;
