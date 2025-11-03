@@ -4,12 +4,12 @@ import {
   Menu, X, Activity, Utensils, HeartPulse,
   Droplet, Facebook, Instagram, Twitter, Linkedin,
   GraduationCap, Clock, Sparkles, ArrowRight, Star,
-  Users, Award, TrendingUp
+  Users, Award, TrendingUp, Lock
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import LoginModal from './LoginModal';
+import AuthModal from './AuthModal';
 import { mockData } from '../mock';
 
 const Home = () => {
@@ -116,32 +116,82 @@ const Home = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Mejorado */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-gradient-to-b from-[#1a1c22] via-[#161821] to-[#0f1117] border-t border-[#8c5cff]/20"
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="md:hidden overflow-hidden"
             >
-              <nav className="flex flex-col space-y-3 p-6">
+              {/* Fondo con efecto glassmorphism */}
+              <div className="absolute inset-0 bg-gradient-to-b from-[#1a1c22]/95 via-[#0f1117]/95 to-[#161821]/95 backdrop-blur-xl border-t border-[#8c5cff]/20" />
+
+              {/* Efecto de luz */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#8c5cff]/5 rounded-full blur-3xl" />
+
+              {/* Contenido */}
+              <nav className="relative flex flex-col space-y-2 p-6 pt-8 pb-8">
                 {[
-                  { name: 'Cursos' },
-                  { name: 'Capacitaciones' },
-                  { name: 'Profesionales' },
-                  { name: 'Organigrama' }
-                ].map(({ name }) => (
-                  <button
+                  { name: 'Cursos', icon: GraduationCap },
+                  { name: 'Capacitaciones', icon: Sparkles },
+                  { name: 'Profesionales', icon: Award },
+                  { name: 'Organigrama', icon: Users }
+                ].map(({ name, icon: Icon }, index) => (
+                  <motion.button
                     key={name}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
                     onClick={() => scrollToSection(`#${name.toLowerCase()}`)}
-                    className="px-5 py-4 text-left text-gray-200 hover:text-white font-bold text-base transition-all duration-300 rounded-lg group hover:bg-gradient-to-r hover:from-[#8c5cff]/20 hover:to-[#6a3dcf]/20 border border-[#8c5cff]/0 hover:border-[#8c5cff]/40 flex items-center gap-3"
+                    className="group px-6 py-4 text-left text-gray-300 hover:text-white font-bold text-base transition-all duration-300 rounded-xl flex items-center gap-4 relative overflow-hidden"
                     style={{ letterSpacing: '0.03em', fontWeight: 700 }}
                   >
-                    <span>{name}</span>
-                    <ArrowRight size={18} className="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
-                  </button>
+                    {/* Fondo hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#8c5cff]/20 via-[#8c5cff]/10 to-[#6a3dcf]/20 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl" />
+
+                    {/* Borde hover */}
+                    <div className="absolute inset-0 border border-[#8c5cff]/0 group-hover:border-[#8c5cff]/40 rounded-xl transition-all duration-300" />
+
+                    {/* Contenido */}
+                    <div className="relative flex items-center gap-4 w-full">
+                      <div className="p-2 bg-[#8c5cff]/10 group-hover:bg-[#8c5cff]/20 rounded-lg transition-all duration-300 group-hover:scale-110">
+                        <Icon size={20} className="text-[#8c5cff] group-hover:text-[#a371ff] transition-all duration-300" />
+                      </div>
+                      <span className="flex-1">{name}</span>
+                      <ArrowRight size={18} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 text-[#8c5cff]" />
+                    </div>
+                  </motion.button>
                 ))}
+
+                {/* Botón Login en mobile */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="pt-4 mt-4 border-t border-[#8c5cff]/10"
+                >
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setIsLoginOpen(true);
+                    }}
+                    className="w-full py-3 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] hover:from-[#a371ff] hover:to-[#7a4de6] transition-all duration-300 shadow-lg hover:shadow-[#8c5cff]/50 flex items-center justify-center gap-2 group"
+                  >
+                    <Lock size={18} />
+                    Iniciar Sesión
+                    <motion.div
+                      animate={{ x: [0, 4, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <ArrowRight size={18} />
+                    </motion.div>
+                  </motion.button>
+                </motion.div>
               </nav>
             </motion.div>
           )}
@@ -1058,8 +1108,8 @@ const Home = () => {
         </div>
       </footer>
 
-      {/* Login Modal */}
-      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      {/* Auth Modal - Login, Registro, Recuperación */}
+      <AuthModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </div>
   );
 };

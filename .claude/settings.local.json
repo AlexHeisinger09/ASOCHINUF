@@ -1,20 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(yarn install)",
-      "Bash(yarn start)",
-      "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nConfigure Netlify deployment with netlify.toml and remove .emergent folder\n\n- Add netlify.toml with proper build and redirect configuration for React Router\n- Remove _redirects file (replaced by netlify.toml)\n- Delete .emergent folder and all its contents\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nFix Netlify build configuration - use npm instead of yarn\n\n- Change build command to use npm install and npm run build\n- Yarn is not available by default in Netlify build environment\n- npm is the standard package manager in Netlify\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(npm run build:*)",
-      "Bash(git commit:*)",
-      "Bash(git revert:*)",
-      "Bash(npm install)",
-      "Bash(npm install:*)",
-      "Bash(npm start)",
-      "Bash(rm:*)",
-      "Bash(curl:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(PORT=3000 npm start)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwidGlwb19wZXJmaWwiOiJjbGllbnRlIiwiaWF0IjoxNzYyMTc3MjIyLCJleHAiOjE3NjI3ODIwMjJ9.Zu27Nr7-nGeParKRyIxq3yWvWKkM4EbgswEcPiZzdk4\")",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []

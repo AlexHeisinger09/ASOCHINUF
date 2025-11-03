@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Lock } from 'lucide-react';
+import { X, Mail, Lock, Eye, EyeOff, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -10,17 +10,32 @@ const LoginModal = ({ isOpen, onClose }) => {
     email: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [focusedField, setFocusedField] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Mock login - guardar en localStorage
-    localStorage.setItem('asochinuf_user', JSON.stringify({
-      email: formData.email,
-      loginTime: new Date().toISOString()
-    }));
-    console.log('Login simulado:', formData);
-    alert(`¡Bienvenido! Login exitoso (mock)`);
-    onClose();
+    setIsSubmitting(true);
+
+    setTimeout(() => {
+      // Mock login - guardar en localStorage
+      localStorage.setItem('asochinuf_user', JSON.stringify({
+        email: formData.email,
+        loginTime: new Date().toISOString()
+      }));
+      console.log('Login simulado:', formData);
+
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setFormData({ email: '', password: '' });
+        setIsSubmitting(false);
+        setShowSuccess(false);
+        onClose();
+      }, 1500);
+    }, 800);
   };
 
   const handleChange = (e) => {
@@ -30,127 +45,282 @@ const LoginModal = ({ isOpen, onClose }) => {
     });
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: 'spring', stiffness: 100, damping: 10 },
+    },
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop con blur */}
+          {/* Backdrop mejorado con blur */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-lg z-50"
             onClick={onClose}
           />
 
-          {/* Modal */}
+          {/* Modal principal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.85, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ 
-                duration: 0.4,
+              exit={{ opacity: 0, scale: 0.85, y: 40 }}
+              transition={{
+                duration: 0.5,
                 type: "spring",
-                stiffness: 300,
-                damping: 25
+                stiffness: 200,
+                damping: 20
               }}
-              className="relative w-full max-w-md bg-[#2a2c33] rounded-2xl shadow-2xl border border-[#8c5cff]/20"
+              className="relative w-full max-w-md"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Botón cerrar */}
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200 z-10"
-              >
-                <X size={24} />
-              </button>
+              {/* Fondo glassmorphism con gradiente */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#8c5cff]/10 to-[#6a3dcf]/10 rounded-3xl blur-xl" />
 
-              {/* Contenido del modal */}
-              <div className="p-8">
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-center mb-8"
-                >
-                  <h2 className="text-3xl font-bold text-white mb-2">¡Bienvenido!</h2>
-                  <p className="text-gray-400">Ingresa a tu cuenta ASOCHINUF</p>
-                </motion.div>
+              {/* Card principal */}
+              <div className="relative bg-gradient-to-br from-[#1a1c22]/95 via-[#0f1117]/95 to-[#1a1c22]/95 rounded-3xl shadow-2xl border border-[#8c5cff]/20 backdrop-blur-xl overflow-hidden">
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Campo Email */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
+                {/* Efecto de luz en la esquina */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-[#8c5cff]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-50" />
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#6a3dcf]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 opacity-50" />
+
+                {/* Contenido */}
+                <div className="relative p-8 md:p-10">
+                  {/* Botón cerrar mejorado */}
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={onClose}
+                    className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors duration-200 z-10 p-2 hover:bg-white/10 rounded-full"
                   >
-                    <Label htmlFor="email" className="text-gray-300 mb-2 block">
-                      Correo Electrónico
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="tu@email.com"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        className="pl-11 bg-[#1a1c22] border-[#8c5cff]/30 text-white placeholder:text-gray-500 focus:border-[#8c5cff] focus:ring-[#8c5cff]/20 transition-all duration-200"
-                      />
-                    </div>
-                  </motion.div>
+                    <X size={24} />
+                  </motion.button>
 
-                  {/* Campo Contraseña */}
+                  {/* Header */}
                   <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="text-center mb-8"
                   >
-                    <Label htmlFor="password" className="text-gray-300 mb-2 block">
-                      Contraseña
-                    </Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
-                      <Input
-                        id="password"
-                        name="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                        className="pl-11 bg-[#1a1c22] border-[#8c5cff]/30 text-white placeholder:text-gray-500 focus:border-[#8c5cff] focus:ring-[#8c5cff]/20 transition-all duration-200"
-                      />
-                    </div>
-                  </motion.div>
-
-                  {/* Botón Submit */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#8c5cff] hover:bg-[#7a4de6] text-white font-semibold py-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-[#8c5cff]/50"
+                    <motion.div
+                      variants={itemVariants}
+                      className="inline-block mb-4 p-3 bg-gradient-to-br from-[#8c5cff]/20 to-[#6a3dcf]/20 rounded-full border border-[#8c5cff]/30"
                     >
-                      Iniciar Sesión
-                    </Button>
-                  </motion.div>
-                </form>
+                      <img
+                        src="/logos/logo.png"
+                        alt="ASOCHINUF"
+                        className="h-10 w-auto brightness-125"
+                      />
+                    </motion.div>
 
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="text-center text-gray-500 text-sm mt-6"
-                >
-                  ¿No tienes cuenta? <span className="text-[#8c5cff] hover:underline cursor-pointer">Regístrate aquí</span>
-                </motion.p>
+                    <motion.h2
+                      variants={itemVariants}
+                      className="text-4xl font-bold bg-gradient-to-r from-white via-[#8c5cff] to-white bg-clip-text text-transparent mb-3"
+                    >
+                      ¡Bienvenido!
+                    </motion.h2>
+
+                    <motion.p
+                      variants={itemVariants}
+                      className="text-gray-400 text-base"
+                    >
+                      Accede a tu cuenta ASOCHINUF
+                    </motion.p>
+                  </motion.div>
+
+                  {/* Formulario */}
+                  {!showSuccess ? (
+                    <motion.form
+                      onSubmit={handleSubmit}
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="space-y-5"
+                    >
+                      {/* Campo Email */}
+                      <motion.div variants={itemVariants}>
+                        <Label
+                          htmlFor="email"
+                          className="text-sm font-semibold text-gray-300 mb-3 block uppercase tracking-wide"
+                        >
+                          Correo Electrónico
+                        </Label>
+                        <motion.div
+                          className="relative"
+                          animate={focusedField === 'email' ? { scale: 1.02 } : { scale: 1 }}
+                        >
+                          <Mail
+                            className={`absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${
+                              focusedField === 'email'
+                                ? 'text-[#8c5cff] scale-110'
+                                : 'text-gray-500'
+                            }`}
+                            size={20}
+                          />
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="tu@email.com"
+                            value={formData.email}
+                            onChange={handleChange}
+                            onFocus={() => setFocusedField('email')}
+                            onBlur={() => setFocusedField(null)}
+                            required
+                            disabled={isSubmitting}
+                            className="pl-12 pr-4 py-3 bg-[#0f1117]/80 border border-[#8c5cff]/20 text-white placeholder:text-gray-600 focus:border-[#8c5cff] focus:ring-2 focus:ring-[#8c5cff]/30 transition-all duration-300 rounded-xl font-medium"
+                          />
+                        </motion.div>
+                      </motion.div>
+
+                      {/* Campo Contraseña */}
+                      <motion.div variants={itemVariants}>
+                        <Label
+                          htmlFor="password"
+                          className="text-sm font-semibold text-gray-300 mb-3 block uppercase tracking-wide"
+                        >
+                          Contraseña
+                        </Label>
+                        <motion.div
+                          className="relative"
+                          animate={focusedField === 'password' ? { scale: 1.02 } : { scale: 1 }}
+                        >
+                          <Lock
+                            className={`absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${
+                              focusedField === 'password'
+                                ? 'text-[#8c5cff] scale-110'
+                                : 'text-gray-500'
+                            }`}
+                            size={20}
+                          />
+                          <Input
+                            id="password"
+                            name="password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="••••••••"
+                            value={formData.password}
+                            onChange={handleChange}
+                            onFocus={() => setFocusedField('password')}
+                            onBlur={() => setFocusedField(null)}
+                            required
+                            disabled={isSubmitting}
+                            className="pl-12 pr-12 py-3 bg-[#0f1117]/80 border border-[#8c5cff]/20 text-white placeholder:text-gray-600 focus:border-[#8c5cff] focus:ring-2 focus:ring-[#8c5cff]/30 transition-all duration-300 rounded-xl font-medium"
+                          />
+                          <motion.button
+                            type="button"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#8c5cff] transition-colors duration-200 p-1"
+                          >
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                          </motion.button>
+                        </motion.div>
+                      </motion.div>
+
+                      {/* Botón Submit mejorado */}
+                      <motion.div variants={itemVariants} className="pt-4">
+                        <motion.button
+                          type="submit"
+                          disabled={isSubmitting || !formData.email || !formData.password}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full relative overflow-hidden group py-3 px-6 rounded-xl font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {/* Fondo gradiente */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-[#8c5cff] via-[#a371ff] to-[#8c5cff] opacity-100 group-hover:opacity-110 transition-opacity duration-300" />
+
+                          {/* Brillo */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white to-transparent translate-x-full group-hover:translate-x-0 transition-all duration-700" style={{ filter: 'blur(20px)' }} />
+
+                          {/* Contenido */}
+                          <div className="relative flex items-center justify-center gap-2">
+                            {isSubmitting ? (
+                              <>
+                                <motion.div
+                                  animate={{ rotate: 360 }}
+                                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                  className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                                />
+                                Iniciando sesión...
+                              </>
+                            ) : (
+                              <>
+                                Iniciar Sesión
+                                <motion.div
+                                  className="flex-shrink-0"
+                                  animate={{ x: [0, 4, 0] }}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                >
+                                  <ArrowRight size={18} />
+                                </motion.div>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Shadow */}
+                          <div className="absolute inset-0 rounded-xl shadow-lg shadow-[#8c5cff]/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </motion.button>
+                      </motion.div>
+                    </motion.form>
+                  ) : (
+                    /* Pantalla de éxito */
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                      className="flex flex-col items-center justify-center py-8"
+                    >
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        <CheckCircle2 size={64} className="text-[#8c5cff] mb-4" />
+                      </motion.div>
+                      <h3 className="text-2xl font-bold text-white mb-2">¡Bienvenido!</h3>
+                      <p className="text-gray-400 text-center">Tu sesión ha sido iniciada correctamente</p>
+                    </motion.div>
+                  )}
+
+                  {/* Link registro */}
+                  {!showSuccess && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.8 }}
+                      className="text-center text-gray-500 text-sm mt-8"
+                    >
+                      ¿No tienes cuenta?{' '}
+                      <motion.span
+                        className="text-[#8c5cff] hover:text-[#a371ff] cursor-pointer font-semibold transition-colors duration-200"
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        Regístrate aquí
+                      </motion.span>
+                    </motion.p>
+                  )}
+                </div>
               </div>
             </motion.div>
           </div>
