@@ -279,6 +279,7 @@ const GestionUsuariosSection = ({ containerVariants }) => {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
                 disabled={!!editingId}
+                autoComplete="off"
                 className={`w-full px-4 py-2 rounded-lg border transition-all ${
                   isDarkMode
                     ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500 disabled:opacity-50'
@@ -297,6 +298,7 @@ const GestionUsuariosSection = ({ containerVariants }) => {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required={!editingId}
+                autoComplete="new-password"
                 className={`w-full px-4 py-2 rounded-lg border transition-all ${
                   isDarkMode
                     ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500'
