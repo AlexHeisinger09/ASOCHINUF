@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, Settings, ChevronDown } from 'lucide-react';
+import { LogOut, Settings, ChevronDown, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLogout }) => {
-  const { usuario, isDarkMode } = useAuth();
+  const { usuario, isDarkMode, toggleTheme } = useAuth();
   const [isDesktop, setIsDesktop] = React.useState(window.innerWidth > 768);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth > 768);
@@ -22,7 +23,7 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
           isDarkMode
             ? 'bg-gradient-to-r from-[#1a1c22] to-[#0f1117] border-[#8c5cff]/20'
             : 'bg-gradient-to-r from-white to-[#f5f5f7] border-purple-200'
-        } border-b backdrop-blur-xl sticky top-0 z-40 px-4 py-3 flex items-center justify-between`}
+        } border-b backdrop-blur-xl sticky top-0 z-40 px-4 py-3 flex items-center justify-between relative`}
       >
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-xs font-bold">
@@ -34,12 +35,82 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={handleLogout}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="p-2 hover:bg-[#8c5cff]/20 rounded-lg transition-colors duration-300"
-          title="Cerrar sesión"
+          title="Opciones"
         >
-          <LogOut size={18} className="text-[#8c5cff]" />
+          <Settings size={18} className="text-[#8c5cff]" />
         </motion.button>
+
+        {/* Mobile Menu Dropdown */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className={`absolute top-full right-4 mt-2 ${
+                isDarkMode ? 'bg-[#1a1c22] border-[#8c5cff]/20' : 'bg-white border-purple-200'
+              } border rounded-lg shadow-lg overflow-hidden z-50 min-w-max`}
+            >
+              {/* Configuración */}
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(140, 92, 255, 0.1)' }}
+                onClick={() => {
+                  setActiveTab('configuracion');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors border-b ${
+                  isDarkMode
+                    ? 'text-gray-300 hover:text-white border-[#8c5cff]/10'
+                    : 'text-gray-700 hover:text-gray-900 border-purple-100'
+                }`}
+              >
+                <Settings size={16} className="text-[#8c5cff]" />
+                <span>Configuración</span>
+              </motion.button>
+
+              {/* Modo Claro/Oscuro */}
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(140, 92, 255, 0.1)' }}
+                onClick={() => {
+                  toggleTheme();
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors border-b ${
+                  isDarkMode
+                    ? 'text-gray-300 hover:text-white border-[#8c5cff]/10'
+                    : 'text-gray-700 hover:text-gray-900 border-purple-100'
+                }`}
+              >
+                {isDarkMode ? (
+                  <Sun size={16} className="text-[#8c5cff]" />
+                ) : (
+                  <Moon size={16} className="text-[#8c5cff]" />
+                )}
+                <span>{isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
+              </motion.button>
+
+              {/* Cerrar Sesión */}
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
+                onClick={() => {
+                  handleLogout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
+                  isDarkMode
+                    ? 'text-gray-300 hover:text-red-400'
+                    : 'text-gray-700 hover:text-red-600'
+                }`}
+              >
+                <LogOut size={16} className={isDarkMode ? 'text-red-400' : 'text-red-600'} />
+                <span>Cerrar sesión</span>
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.header>
     );
   }

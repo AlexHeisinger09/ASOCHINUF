@@ -1,18 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Home, BookOpen, User, Upload, Settings } from 'lucide-react';
+import { Home, BookOpen, User, Upload, Settings, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const BottomNav = ({ activeTab, setActiveTab }) => {
-  const { isDarkMode } = useAuth();
+  const { isDarkMode, usuario } = useAuth();
 
-  const menuItems = [
+  const baseMenuItems = [
     { id: 'inicio', label: 'Inicio', icon: Home },
     { id: 'cursos', label: 'Cursos', icon: BookOpen },
     { id: 'datos', label: 'Mis Datos', icon: User },
     { id: 'excel', label: 'Excel', icon: Upload },
     { id: 'configuracion', label: 'Config', icon: Settings },
   ];
+
+  // Agregar opción de gestión de usuarios solo para admins
+  const menuItems = usuario?.tipo_perfil === 'admin'
+    ? [...baseMenuItems, { id: 'gestion', label: 'Usuarios', icon: Users }]
+    : baseMenuItems;
 
   return (
     <motion.nav
