@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export const enviarCorreoRecuperacion = async (email, nombre, token) => {
-  const enlaceRecuperacion = `${process.env.FRONTEND_URL}/recuperar-contrasena?token=${token}`;
+  const enlaceRecuperacion = `${process.env.FRONTEND_URL}/restablecer-contrasena?token=${token}`;
 
   const htmlContent = `
     <!DOCTYPE html>

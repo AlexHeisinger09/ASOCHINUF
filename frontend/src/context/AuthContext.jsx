@@ -7,15 +7,22 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(true); // Dark mode por defecto
 
-  // Restaurar sesión al cargar
+  // Restaurar sesión y tema al cargar
   useEffect(() => {
     const storedToken = localStorage.getItem('asochinuf_token');
     const storedUsuario = localStorage.getItem('asochinuf_usuario');
+    const storedTheme = localStorage.getItem('asochinuf_theme');
 
     if (storedToken && storedUsuario) {
       setToken(storedToken);
       setUsuario(JSON.parse(storedUsuario));
+
+      // Restaurar tema si existe
+      if (storedTheme === 'light') {
+        setIsDarkMode(false);
+      }
     }
 
     setIsLoading(false);
@@ -26,7 +33,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('http://localhost:5001/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -58,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/registro', {
+      const response = await fetch('http://localhost:5001/api/auth/registro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, nombre, apellido }),
@@ -93,13 +100,26 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    localStorage.setItem('asochinuf_theme', newTheme ? 'dark' : 'light');
+
+    // Actualizar clase en el documento
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
   const obtenerPerfil = async () => {
     if (!token) {
       throw new Error('No hay token disponible');
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/me', {
+      const response = await fetch('http://localhost:5001/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -129,6 +149,8 @@ export const AuthProvider = ({ children }) => {
     token,
     isLoading,
     error,
+    isDarkMode,
+    toggleTheme,
     login,
     registro,
     logout,

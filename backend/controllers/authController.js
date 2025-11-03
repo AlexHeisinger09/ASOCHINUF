@@ -2,6 +2,7 @@ import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/database.js';
 import Joi from 'joi';
+import crypto from 'crypto';
 
 // Esquemas de validación
 const schemaRegistro = Joi.object({
@@ -175,13 +176,12 @@ export const solicitarRecuperacion = async (req, res) => {
     const usuario = resultado.rows[0];
 
     // Generar token único
-    const token = require('crypto').randomBytes(32).toString('hex');
-    const fechaExpiracion = new Date(Date.now() + 3600000); // 1 hora
+    const token = crypto.randomBytes(32).toString('hex');
 
-    // Guardar token en BD
+    // Guardar token en BD (PostgreSQL calcula la fecha de expiración)
     await pool.query(
-      'INSERT INTO t_recovery_tokens (usuario_id, token, fecha_expiracion) VALUES ($1, $2, $3)',
-      [usuario.id, token, fechaExpiracion]
+      'INSERT INTO t_recovery_tokens (usuario_id, token, fecha_expiracion) VALUES ($1, $2, NOW() + INTERVAL \'1 hour\')',
+      [usuario.id, token]
     );
 
     // Enviar email

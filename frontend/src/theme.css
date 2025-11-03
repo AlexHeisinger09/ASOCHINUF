@@ -1,0 +1,146 @@
+/* Theme variables for light mode */
+:not(.dark) {
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f5f5f7;
+    --color-bg-tertiary: #f0f0f3;
+    --color-text-primary: #1d1d1f;
+    --color-text-secondary: #666666;
+    --color-text-tertiary: #999999;
+    --color-border: #d5d5d7;
+    --color-border-light: #e5e5e7;
+    --color-accent: #8c5cff;
+    --color-accent-dark: #6a3dcf;
+    --color-accent-light: #a371ff;
+    --color-hover: #f0f0f3;
+}
+
+/* Dashboard light mode overrides */
+:not(.dark) .min-h-screen {
+    background: linear-gradient(to bottom, #fafafa, #f5f5f7);
+    color: rgb(17, 24, 39);
+}
+
+/* Gradient from backgrounds */
+:not(.dark) [class*="from-\[#1a1c22\]"] {
+    --tw-gradient-from: #ffffff;
+    --tw-gradient-to: #f5f5f7;
+}
+
+:not(.dark) [class*="to-\[#0f1117\]"] {
+    --tw-gradient-to: #f5f5f7;
+}
+
+/* Solid background overrides */
+:not(.dark) [class*="bg-\[#1a1c22\]"] {
+    background-color: #ffffff;
+}
+
+:not(.dark) [class*="bg-\[#0f1117\]"] {
+    background-color: #f5f5f7;
+}
+
+/* Border colors */
+:not(.dark) [class*="border-\[#8c5cff\]/20"] {
+    border-color: rgb(229, 224, 255);
+}
+
+:not(.dark) [class*="border-\[#8c5cff\]/10"] {
+    border-color: rgb(243, 232, 255);
+}
+
+/* Text colors */
+:not(.dark) .text-white {
+    color: rgb(17, 24, 39);
+}
+
+:not(.dark) .text-gray-400 {
+    color: rgb(75, 85, 99);
+}
+
+:not(.dark) .text-gray-300 {
+    color: rgb(55, 65, 81);
+}
+
+/* Hover states */
+:not(.dark) [class*="hover:bg-\[#8c5cff\]/10"]:hover {
+    background-color: rgb(243, 232, 255);
+}
+
+:not(.dark) [class*="hover:text-\[#8c5cff\]"]:hover {
+    color: rgb(139, 92, 255);
+}
+
+:not(.dark) .hover\:text-white:hover {
+    color: rgb(17, 24, 39);
+}
+
+/* Card backgrounds */
+:not(.dark) [class*="bg-\[#1a1c22\]/50"] {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Sidebar styling */
+:not(.dark) aside {
+    background: linear-gradient(to bottom, #ffffff, #f5f5f7);
+}
+
+/* Header styling */
+:not(.dark) header {
+    background: linear-gradient(to right, #ffffff, #f5f5f7);
+}
+
+/* Main content */
+:not(.dark) main {
+    background: linear-gradient(to bottom, #fafafa, #f5f5f7);
+}
+
+/* Shadow effects for light mode */
+:not(.dark) [class*="shadow-lg shadow-\[#8c5cff\]"] {
+    box-shadow: 0 10px 15px -3px rgba(139, 92, 255, 0.2);
+}
+
+/* Bottom navigation */
+:not(.dark) nav[class*="from-\[#1a1c22\]"] {
+    background: linear-gradient(to bottom, #ffffff, #f5f5f7);
+}
+
+/* Text styling */
+:not(.dark) .text-sm.font-semibold {
+    color: rgb(17, 24, 39);
+}
+
+:not(.dark) .text-xs.text-gray-400 {
+    color: rgb(75, 85, 99);
+}
+
+/* Backdrop blur effects */
+:not(.dark) [class*="backdrop-blur"] {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Specific class overrides for gradient text */
+:not(.dark) .bg-clip-text.text-transparent {
+    background-image: linear-gradient(to right, rgb(17, 24, 39), rgb(139, 92, 255), rgb(17, 24, 39));
+}
+
+/* Avatar styling */
+:not(.dark) .rounded-full.bg-gradient-to-r {
+    background: linear-gradient(to right, rgb(168, 85, 247), rgb(139, 92, 255));
+    color: white;
+}
+
+/* Hover button effects */
+:not(.dark) button:hover {
+    transition: all 0.3s ease;
+}
+
+/* Border styling */
+:not(.dark) [class*="border-t"][class*="border-\[#8c5cff\]"] {
+    border-top-color: rgb(229, 224, 255);
+}
+
+/* Active menu items */
+:not(.dark) [class*="from-\[#8c5cff\]"][class*="to-\[#6a3dcf\]"] {
+    background: linear-gradient(to right, rgb(139, 92, 255), rgb(106, 61, 207));
+    color: white;
+}
