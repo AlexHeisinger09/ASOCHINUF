@@ -92,15 +92,13 @@ async function testFullUpload() {
         pacienteId = pacienteResult.rows[0].id;
       }
 
-      // Check for duplicates (using fecha_medicion as part of the unique key)
+      // Check for duplicates (using fecha_medicion as the unique key)
       const duplicateCheck = await pool.query(
         `SELECT id FROM t_informe_antropometrico
          WHERE paciente_id = $1
          AND sesion_id = $2
-         AND (fecha_medicion::date = $3::date OR ($3 IS NULL AND fecha_medicion IS NULL))
-         AND peso = $4
-         AND talla = $5`,
-        [pacienteId, sesionId, measurement.fecha_medicion, measurement.peso, measurement.talla]
+         AND (fecha_medicion::date = $3::date OR ($3 IS NULL AND fecha_medicion IS NULL))`,
+        [pacienteId, sesionId, measurement.fecha_medicion]
       );
 
       if (duplicateCheck.rows.length > 0) {

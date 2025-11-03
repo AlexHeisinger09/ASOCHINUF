@@ -109,16 +109,14 @@ export const uploadExcelFile = async (req, res) => {
         pacienteId = pacienteResult.rows[0].id;
       }
 
-      // Verificar si ya existe un registro idéntico para este paciente en esta sesión
-      // Usando fecha_medicion como parte de la clave única para detectar duplicados
+      // Verificar si ya existe un registro para este paciente en esta sesión y fecha
+      // Usando fecha_medicion como la clave única para detectar duplicados
       const duplicateCheck = await pool.query(
         `SELECT id FROM t_informe_antropometrico
          WHERE paciente_id = $1
          AND sesion_id = $2
-         AND (fecha_medicion::date = $3::date OR ($3 IS NULL AND fecha_medicion IS NULL))
-         AND peso = $4
-         AND talla = $5`,
-        [pacienteId, sesionId, measurement.fecha_medicion, measurement.peso, measurement.talla]
+         AND (fecha_medicion::date = $3::date OR ($3 IS NULL AND fecha_medicion IS NULL))`,
+        [pacienteId, sesionId, measurement.fecha_medicion]
       );
 
       if (duplicateCheck.rows.length > 0) {
