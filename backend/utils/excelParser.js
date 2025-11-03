@@ -10,7 +10,7 @@ import crypto from 'crypto';
  * - Row 6+: Datos de pacientes
  *   * Cada paciente nuevo aparece en columna A
  *   * Filas posteriores sin nombre en A son mediciones adicionales del mismo paciente (diferentes fechas)
- *   * Tomamos el ÚLTIMO registro (más reciente) de cada paciente
+ *   * Se cargan TODOS los registros (datos longitudinales completos)
  */
 export const parseExcelFile = (filePath) => {
   try {
@@ -148,13 +148,12 @@ export const parseExcelFile = (filePath) => {
       return isNaN(val) ? null : val;
     }
 
-    // Tomar el ÚLTIMO registro (más reciente) de cada paciente
+    // Tomar TODOS los registros de cada paciente (datos longitudinales completos)
     const measurements = [];
-    for (const [paciente, records] of Object.entries(measurementsByPatient)) {
+    for (const records of Object.values(measurementsByPatient)) {
       if (records.length > 0) {
-        // Tomar el último registro del paciente
-        const lastRecord = records[records.length - 1];
-        measurements.push(lastRecord);
+        // Agregar TODOS los registros del paciente
+        measurements.push(...records);
       }
     }
 
