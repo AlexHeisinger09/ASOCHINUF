@@ -22,7 +22,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
   return (
     <motion.aside
       initial={{ width: 256 }}
-      animate={{ width: sidebarOpen ? 256 : 80 }}
+      animate={{ width: sidebarOpen ? 256 : 110 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
       className={`hidden md:flex ${
         isDarkMode
@@ -40,7 +40,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
           <img
             src="/logos/logo.png"
             alt="ASOCHINUF"
-            className={`flex-shrink-0 ${sidebarOpen ? 'h-12' : 'h-10'} w-auto`}
+            className={`flex-shrink-0 ${sidebarOpen ? 'h-16' : 'h-10'} w-auto`}
           />
           <AnimatePresence>
             {sidebarOpen && (
