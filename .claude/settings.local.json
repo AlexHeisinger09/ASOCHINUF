@@ -26,7 +26,10 @@
       "Bash(/c/MisProyectosReact/ASOCHINUF/USER_MANAGEMENT_SUMMARY.txt)",
       "Bash(node:*)",
       "Bash(npm install:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

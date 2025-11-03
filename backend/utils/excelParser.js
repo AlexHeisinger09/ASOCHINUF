@@ -84,8 +84,38 @@ export const parseExcelFile = (filePath) => {
 
       // Si tenemos paciente actual, extraer el registro de esta fila
       if (currentPatient) {
+        // Extraer fecha de medición de la columna B
+        let fechaMedicion = null;
+        const cellB = worksheet[`B${rowNum}`];
+        if (cellB) {
+          try {
+            let fechaValue = cellB.v;
+            if (typeof fechaValue === 'number') {
+              // Excel date serial number
+              const excelDate = new Date((fechaValue - 25569) * 86400 * 1000);
+              if (!isNaN(excelDate.getTime())) {
+                fechaMedicion = excelDate.toISOString().split('T')[0];
+              }
+            } else if (typeof fechaValue === 'string') {
+              // Date string (formato dd/mm/yyyy)
+              fechaValue = fechaValue.trim();
+              const parts = fechaValue.split('/');
+              if (parts.length === 3) {
+                // dd/mm/yyyy -> yyyy-mm-dd
+                const day = parts[0];
+                const month = parts[1];
+                const year = parts[2];
+                fechaMedicion = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+              }
+            }
+          } catch (e) {
+            // Si falla el parse, dejar null
+          }
+        }
+
         const measurement = {
           nombre_paciente: currentPatient,
+          fecha_medicion: fechaMedicion, // NUEVA: Fecha de la medición individual
           // Medidas básicas
           peso: getCellValue(worksheet, `D${rowNum}`),
           talla: getCellValue(worksheet, `E${rowNum}`),

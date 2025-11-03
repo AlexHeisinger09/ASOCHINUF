@@ -8,16 +8,14 @@ import path from 'path';
  * Solo nutricionistas y administradores pueden acceder
  */
 export const uploadExcelFile = async (req, res) => {
-  const client = await pool.connect();
-
   try {
     // Verificar que se envió un archivo
     if (!req.file) {
       return res.status(400).json({ error: 'No se proporcionó archivo' });
     }
 
-    const usuarioId = req.user.id;
-    const tipoPerf = req.user.tipo_perfil;
+    const usuarioId = req.usuario.id;
+    const tipoPerf = req.usuario.tipo_perfil;
 
     // Verificar que sea nutricionista o admin
     if (tipoPerf !== 'nutricionista' && tipoPerf !== 'admin') {
@@ -28,7 +26,11 @@ export const uploadExcelFile = async (req, res) => {
     const fileHash = generateFileHash(req.file.buffer);
 
     // Parsear el archivo Excel
-    const tempPath = path.join('/tmp', req.file.originalname);
+    const tempDir = path.join(process.cwd(), 'temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+    const tempPath = path.join(tempDir, req.file.originalname);
     fs.writeFileSync(tempPath, req.file.buffer);
 
     const parsedData = parseExcelFile(tempPath);
@@ -41,18 +43,15 @@ export const uploadExcelFile = async (req, res) => {
 
     const { plantel, fecha_sesion, measurements, cantidad_registros } = parsedData;
 
-    // Iniciar transacción
-    await client.query('BEGIN');
-
     // 1. Verificar si el plantel existe, si no crearlo
-    let plantelResult = await client.query(
+    let plantelResult = await pool.query(
       'SELECT id FROM t_planteles WHERE nombre = $1',
       [plantel]
     );
 
     let plantelId;
     if (plantelResult.rows.length === 0) {
-      const createPlantelResult = await client.query(
+      const createPlantelResult = await pool.query(
         'INSERT INTO t_planteles (nombre) VALUES ($1) RETURNING id',
         [plantel]
       );
@@ -62,13 +61,12 @@ export const uploadExcelFile = async (req, res) => {
     }
 
     // 2. Verificar si la sesión ya existe (detectar duplicados)
-    const existingSessionResult = await client.query(
+    const existingSessionResult = await pool.query(
       'SELECT id FROM t_sesion_mediciones WHERE plantel_id = $1 AND fecha_sesion = $2 AND hash_archivo = $3',
       [plantelId, fecha_sesion, fileHash]
     );
 
     if (existingSessionResult.rows.length > 0) {
-      await client.query('ROLLBACK');
       return res.status(409).json({
         error: 'Este archivo ya ha sido cargado previamente para este plantel en esta fecha',
         sesionId: existingSessionResult.rows[0].id,
@@ -76,7 +74,7 @@ export const uploadExcelFile = async (req, res) => {
     }
 
     // 3. Crear sesión de mediciones
-    const sessionResult = await client.query(
+    const sessionResult = await pool.query(
       `INSERT INTO t_sesion_mediciones
        (plantel_id, nutricionista_id, fecha_sesion, nombre_archivo, hash_archivo, cantidad_registros)
        VALUES ($1, $2, $3, $4, $5, $6)
@@ -92,7 +90,7 @@ export const uploadExcelFile = async (req, res) => {
 
     for (const measurement of measurements) {
       // Buscar o crear paciente en t_pacientes
-      let pacienteResult = await client.query(
+      let pacienteResult = await pool.query(
         `SELECT id FROM t_pacientes WHERE nombre ILIKE $1`,
         [measurement.nombre_paciente]
       );
@@ -100,7 +98,7 @@ export const uploadExcelFile = async (req, res) => {
       let pacienteId;
       if (pacienteResult.rows.length === 0) {
         // Crear nuevo paciente
-        const createPacienteResult = await client.query(
+        const createPacienteResult = await pool.query(
           `INSERT INTO t_pacientes (nombre, activo, fecha_registro)
            VALUES ($1, true, NOW())
            RETURNING id`,
@@ -112,13 +110,15 @@ export const uploadExcelFile = async (req, res) => {
       }
 
       // Verificar si ya existe un registro idéntico para este paciente en esta sesión
-      const duplicateCheck = await client.query(
+      // Usando fecha_medicion como parte de la clave única para detectar duplicados
+      const duplicateCheck = await pool.query(
         `SELECT id FROM t_informe_antropometrico
          WHERE paciente_id = $1
          AND sesion_id = $2
-         AND peso = $3
-         AND talla = $4`,
-        [pacienteId, sesionId, measurement.peso, measurement.talla]
+         AND (fecha_medicion::date = $3::date OR ($3 IS NULL AND fecha_medicion IS NULL))
+         AND peso = $4
+         AND talla = $5`,
+        [pacienteId, sesionId, measurement.fecha_medicion, measurement.peso, measurement.talla]
       );
 
       if (duplicateCheck.rows.length > 0) {
@@ -127,7 +127,7 @@ export const uploadExcelFile = async (req, res) => {
       }
 
       // Insertar la medición con paciente_id
-      await client.query(
+      await pool.query(
         `INSERT INTO t_informe_antropometrico
          (paciente_id, nutricionista_id, sesion_id,
           peso, talla, talla_sentado,
@@ -139,7 +139,7 @@ export const uploadExcelFile = async (req, res) => {
           masa_adiposa_superior, masa_adiposa_media, masa_adiposa_inferior,
           imo, imc, icc, ica,
           suma_6_pliegues, suma_8_pliegues,
-          fecha_registro)
+          fecha_medicion, fecha_registro)
          VALUES ($1, $2, $3,
           $4, $5, $6,
           $7, $8, $9, $10, $11, $12, $13,
@@ -148,7 +148,7 @@ export const uploadExcelFile = async (req, res) => {
           $24, $25, $26,
           $27, $28, $29, $30,
           $31, $32,
-          CURRENT_TIMESTAMP)`,
+          $33, CURRENT_TIMESTAMP)`,
         [
           pacienteId,
           usuarioId,
@@ -182,6 +182,7 @@ export const uploadExcelFile = async (req, res) => {
           measurement.ica,
           measurement.suma_6_pliegues,
           measurement.suma_8_pliegues,
+          measurement.fecha_medicion,
         ]
       );
 
@@ -189,13 +190,10 @@ export const uploadExcelFile = async (req, res) => {
     }
 
     // Actualizar cantidad de registros en la sesión
-    await client.query(
+    await pool.query(
       'UPDATE t_sesion_mediciones SET cantidad_registros = $1 WHERE id = $2',
       [registrosInsertados, sesionId]
     );
-
-    // Confirmar transacción
-    await client.query('COMMIT');
 
     res.status(201).json({
       success: true,
@@ -208,12 +206,6 @@ export const uploadExcelFile = async (req, res) => {
       cantidad_total: measurements.length,
     });
   } catch (error) {
-    try {
-      await client.query('ROLLBACK');
-    } catch (rollbackError) {
-      console.error('Error en ROLLBACK:', rollbackError);
-    }
-
     console.error('Error en uploadExcelFile:', error);
 
     if (error.message.includes('Error al procesar archivo Excel')) {
@@ -221,8 +213,6 @@ export const uploadExcelFile = async (req, res) => {
     }
 
     res.status(500).json({ error: 'Error al procesar el archivo: ' + error.message });
-  } finally {
-    client.release();
   }
 };
 
@@ -231,8 +221,8 @@ export const uploadExcelFile = async (req, res) => {
  */
 export const getUploadHistory = async (req, res) => {
   try {
-    const usuarioId = req.user.id;
-    const tipoPerf = req.user.tipo_perfil;
+    const usuarioId = req.usuario.id;
+    const tipoPerf = req.usuario.tipo_perfil;
 
     // Verificar que sea nutricionista o admin
     if (tipoPerf !== 'nutricionista' && tipoPerf !== 'admin') {
@@ -277,8 +267,8 @@ export const getUploadHistory = async (req, res) => {
 export const getSessionDetails = async (req, res) => {
   try {
     const { sesionId } = req.params;
-    const usuarioId = req.user.id;
-    const tipoPerf = req.user.tipo_perfil;
+    const usuarioId = req.usuario.id;
+    const tipoPerf = req.usuario.tipo_perfil;
 
     // Obtener detalles de la sesión
     const sessionResult = await pool.query(

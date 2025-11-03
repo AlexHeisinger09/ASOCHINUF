@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from 'multer';
+import path from 'path';
 import {
   uploadExcelFile,
   getUploadHistory,
@@ -23,7 +24,7 @@ const upload = multer({
     ];
 
     const allowedExtensions = ['.xlsx', '.xls'];
-    const fileExt = require('path').extname(file.originalname).toLowerCase();
+    const fileExt = path.extname(file.originalname).toLowerCase();
 
     if (allowedMimes.includes(file.mimetype) || allowedExtensions.includes(fileExt)) {
       cb(null, true);

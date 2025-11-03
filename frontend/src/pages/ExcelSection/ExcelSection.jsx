@@ -129,7 +129,7 @@ const ExcelSection = ({ containerVariants }) => {
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
+          // axios maneja automáticamente Content-Type y boundary para FormData
         },
       };
 
