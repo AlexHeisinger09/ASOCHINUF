@@ -52,7 +52,7 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
         isDarkMode
           ? 'bg-gradient-to-r from-[#1a1c22] to-[#0f1117] border-[#8c5cff]/20'
           : 'bg-gradient-to-r from-white to-[#f5f5f7] border-purple-200'
-      } border-b backdrop-blur-xl sticky top-0 z-40 px-6 py-4 items-center justify-end gap-6`}
+      } border backdrop-blur-xl sticky top-4 z-40 px-6 py-4 items-center justify-end gap-6 mx-4 rounded-2xl shadow-lg`}
     >
       <div className="flex items-center gap-3 relative">
         <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-sm font-bold">

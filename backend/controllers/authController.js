@@ -269,3 +269,185 @@ export const restablecerContrasena = async (req, res) => {
     res.status(500).json({ error: 'Error al restablecer contraseña' });
   }
 };
+
+// ==================== GESTIÓN DE USUARIOS (ADMIN) ====================
+
+// Obtener todos los usuarios
+export const obtenerUsuarios = async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      'SELECT id, email, nombre, apellido, tipo_perfil, activo, fecha_registro FROM t_usuarios ORDER BY fecha_registro DESC'
+    );
+
+    res.json(resultado.rows);
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+};
+
+// Crear usuario (admin crea nutricionista o admin)
+export const crearUsuario = async (req, res) => {
+  try {
+    const { email, password, nombre, apellido, tipo_perfil } = req.body;
+
+    // Validar datos
+    if (!email || !password || !nombre || !apellido || !tipo_perfil) {
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+
+    if (!['cliente', 'nutricionista', 'admin'].includes(tipo_perfil)) {
+      return res.status(400).json({ error: 'Tipo de perfil inválido. Debe ser cliente, nutricionista o admin' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+    }
+
+    // Verificar si el email ya existe
+    const usuarioExistente = await pool.query(
+      'SELECT id FROM t_usuarios WHERE email = $1',
+      [email]
+    );
+
+    if (usuarioExistente.rows.length > 0) {
+      return res.status(400).json({ error: 'El email ya está registrado' });
+    }
+
+    // Hash de la contraseña
+    const salt = await bcryptjs.genSalt(10);
+    const passwordHash = await bcryptjs.hash(password, salt);
+
+    // Crear usuario
+    const resultado = await pool.query(
+      'INSERT INTO t_usuarios (email, password_hash, nombre, apellido, tipo_perfil, activo, fecha_registro) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING id, email, nombre, apellido, tipo_perfil, activo, fecha_registro',
+      [email, passwordHash, nombre, apellido, tipo_perfil, true]
+    );
+
+    const usuario = resultado.rows[0];
+
+    res.status(201).json({
+      mensaje: 'Usuario creado exitosamente',
+      usuario,
+    });
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+    res.status(500).json({ error: 'Error al crear usuario' });
+  }
+};
+
+// Actualizar usuario
+export const actualizarUsuario = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, apellido, tipo_perfil, activo, password } = req.body;
+
+    // Validar que id sea válido
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ error: 'ID de usuario inválido' });
+    }
+
+    // Verificar que el usuario existe
+    const usuarioExiste = await pool.query(
+      'SELECT id FROM t_usuarios WHERE id = $1',
+      [id]
+    );
+
+    if (usuarioExiste.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    let campos = [];
+    let valores = [];
+    let contador = 1;
+
+    if (nombre !== undefined) {
+      campos.push(`nombre = $${contador}`);
+      valores.push(nombre);
+      contador++;
+    }
+
+    if (apellido !== undefined) {
+      campos.push(`apellido = $${contador}`);
+      valores.push(apellido);
+      contador++;
+    }
+
+    if (tipo_perfil !== undefined) {
+      if (!['cliente', 'nutricionista', 'admin'].includes(tipo_perfil)) {
+        return res.status(400).json({ error: 'Tipo de perfil inválido' });
+      }
+      campos.push(`tipo_perfil = $${contador}`);
+      valores.push(tipo_perfil);
+      contador++;
+    }
+
+    if (activo !== undefined) {
+      campos.push(`activo = $${contador}`);
+      valores.push(activo);
+      contador++;
+    }
+
+    if (password !== undefined) {
+      if (password.length < 6) {
+        return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+      }
+      const salt = await bcryptjs.genSalt(10);
+      const passwordHash = await bcryptjs.hash(password, salt);
+      campos.push(`password_hash = $${contador}`);
+      valores.push(passwordHash);
+      contador++;
+    }
+
+    if (campos.length === 0) {
+      return res.status(400).json({ error: 'No hay campos para actualizar' });
+    }
+
+    valores.push(id);
+    const sql = `UPDATE t_usuarios SET ${campos.join(', ')} WHERE id = $${contador} RETURNING id, email, nombre, apellido, tipo_perfil, activo, fecha_registro`;
+
+    const resultado = await pool.query(sql, valores);
+    const usuarioActualizado = resultado.rows[0];
+
+    res.json({
+      mensaje: 'Usuario actualizado exitosamente',
+      usuario: usuarioActualizado,
+    });
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    res.status(500).json({ error: 'Error al actualizar usuario' });
+  }
+};
+
+// Eliminar usuario
+export const eliminarUsuario = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validar que id sea válido
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ error: 'ID de usuario inválido' });
+    }
+
+    // Verificar que el usuario existe
+    const usuarioExiste = await pool.query(
+      'SELECT id, tipo_perfil FROM t_usuarios WHERE id = $1',
+      [id]
+    );
+
+    if (usuarioExiste.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Eliminar usuario
+    await pool.query(
+      'DELETE FROM t_usuarios WHERE id = $1',
+      [id]
+    );
+
+    res.json({ mensaje: 'Usuario eliminado exitosamente' });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ error: 'Error al eliminar usuario' });
+  }
+};

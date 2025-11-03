@@ -1,18 +1,23 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, ChevronsLeft, Home, BookOpen, User, Upload, Settings, Moon, Sun } from 'lucide-react';
+import { LogOut, ChevronsLeft, Home, BookOpen, User, Upload, Settings, Moon, Sun, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleLogout }) => {
-  const { isDarkMode, toggleTheme } = useAuth();
+  const { isDarkMode, toggleTheme, usuario } = useAuth();
 
-  const menuItems = [
+  const baseMenuItems = [
     { id: 'inicio', label: 'Inicio', icon: Home },
     { id: 'cursos', label: 'Cursos', icon: BookOpen },
     { id: 'datos', label: 'Mis Datos', icon: User },
     { id: 'excel', label: 'Cargar Excel', icon: Upload },
     { id: 'configuracion', label: 'Configuración', icon: Settings },
   ];
+
+  // Agregar opción de gestión de usuarios solo para admins
+  const menuItems = usuario?.tipo_perfil === 'admin'
+    ? [...baseMenuItems, { id: 'gestion', label: 'Gestión Usuarios', icon: Users }]
+    : baseMenuItems;
 
   return (
     <motion.aside

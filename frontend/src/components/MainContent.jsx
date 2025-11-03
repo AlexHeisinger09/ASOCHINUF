@@ -6,6 +6,7 @@ import CursosSection from '../pages/CursosSection/CursosSection';
 import DatosSection from '../pages/DatosSection/DatosSection';
 import ExcelSection from '../pages/ExcelSection/ExcelSection';
 import ConfiguracionSection from '../pages/ConfiguracionSection/ConfiguracionSection';
+import GestionUsuariosSection from '../pages/GestionUsuariosSection/GestionUsuariosSection';
 
 const MainContent = ({ activeTab }) => {
   const { isDarkMode } = useAuth();
@@ -37,6 +38,7 @@ const MainContent = ({ activeTab }) => {
         {activeTab === 'datos' && <DatosSection containerVariants={containerVariants} />}
         {activeTab === 'excel' && <ExcelSection containerVariants={containerVariants} />}
         {activeTab === 'configuracion' && <ConfiguracionSection containerVariants={containerVariants} />}
+        {activeTab === 'gestion' && <GestionUsuariosSection containerVariants={containerVariants} />}
       </AnimatePresence>
     </main>
   );
