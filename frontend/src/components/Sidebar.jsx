@@ -34,13 +34,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
       <div className={`pb-6 border-b ${isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'}`}>
         <motion.div
           whileHover={{ scale: 1.05 }}
-          className="flex items-center gap-3 cursor-pointer"
+          className="flex items-center gap-3 cursor-pointer justify-center"
           onClick={() => setActiveTab('inicio')}
         >
           <img
             src="/logos/logo.png"
             alt="ASOCHINUF"
-            className="h-12 w-auto flex-shrink-0"
+            className={`flex-shrink-0 ${sidebarOpen ? 'h-12' : 'h-10'} w-auto`}
           />
           <AnimatePresence>
             {sidebarOpen && (
