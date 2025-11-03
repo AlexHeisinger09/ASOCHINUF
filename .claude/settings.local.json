@@ -25,7 +25,8 @@
       "Bash(git push:*)",
       "Bash(/c/MisProyectosReact/ASOCHINUF/USER_MANAGEMENT_SUMMARY.txt)",
       "Bash(node:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": []

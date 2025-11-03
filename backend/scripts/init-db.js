@@ -5,9 +5,9 @@ dotenv.config();
 
 const inicializarBD = async () => {
   try {
-    console.log('Inicializando base de datos...\n');
+    console.log('Inicializando base de datos...\\n');
 
-    // Crear tabla t_usuarios
+    // ========== TABLA t_usuarios ==========
     console.log('Creando tabla t_usuarios...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_usuarios (
@@ -16,16 +16,44 @@ const inicializarBD = async () => {
         password_hash VARCHAR(255) NOT NULL,
         nombre VARCHAR(100) NOT NULL,
         apellido VARCHAR(100) NOT NULL,
-        tipo_perfil VARCHAR(50) NOT NULL DEFAULT 'cliente',
+        tipo_perfil VARCHAR(50) NOT NULL CHECK (tipo_perfil IN ('admin', 'nutricionista', 'cliente')),
         activo BOOLEAN DEFAULT true,
         fecha_registro TIMESTAMP DEFAULT NOW(),
-        CONSTRAINT email_unique UNIQUE(email),
-        CONSTRAINT tipo_perfil_check CHECK (tipo_perfil IN ('admin', 'nutricionista', 'cliente'))
+        CONSTRAINT email_unique UNIQUE(email)
       );
     `);
-    console.log('✓ Tabla t_usuarios creada\n');
+    console.log('✓ Tabla t_usuarios creada');
 
-    // Crear tabla t_clientes
+    // Índices para t_usuarios
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_usuarios_email ON t_usuarios(email);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_usuarios_tipo_perfil ON t_usuarios(tipo_perfil);`);
+    console.log('✓ Índices en t_usuarios creados\\n');
+
+    // ========== TABLA t_pacientes (NEW) ==========
+    console.log('Creando tabla t_pacientes...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS t_pacientes (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(100) NOT NULL,
+        apellido VARCHAR(100),
+        cedula VARCHAR(20),
+        email VARCHAR(255),
+        telefono VARCHAR(20),
+        fecha_nacimiento DATE,
+        activo BOOLEAN DEFAULT true,
+        fecha_registro TIMESTAMP DEFAULT NOW(),
+        CONSTRAINT cedula_unique UNIQUE(cedula)
+      );
+    `);
+    console.log('✓ Tabla t_pacientes creada');
+
+    // Índices para t_pacientes
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pacientes_nombre ON t_pacientes(nombre);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pacientes_cedula ON t_pacientes(cedula);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pacientes_email ON t_pacientes(email);`);
+    console.log('✓ Índices en t_pacientes creados\\n');
+
+    // ========== TABLA t_clientes ==========
     console.log('Creando tabla t_clientes...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_clientes (
@@ -38,9 +66,13 @@ const inicializarBD = async () => {
         FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE
       );
     `);
-    console.log('✓ Tabla t_clientes creada\n');
+    console.log('✓ Tabla t_clientes creada');
 
-    // Crear tabla t_nutricionistas
+    // Índices para t_clientes
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_clientes_usuario_id ON t_clientes(usuario_id);`);
+    console.log('✓ Índices en t_clientes creados\\n');
+
+    // ========== TABLA t_nutricionistas ==========
     console.log('Creando tabla t_nutricionistas...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_nutricionistas (
@@ -53,9 +85,13 @@ const inicializarBD = async () => {
         FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE
       );
     `);
-    console.log('✓ Tabla t_nutricionistas creada\n');
+    console.log('✓ Tabla t_nutricionistas creada');
 
-    // Crear tabla t_cursos
+    // Índices para t_nutricionistas
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_nutricionistas_usuario_id ON t_nutricionistas(usuario_id);`);
+    console.log('✓ Índices en t_nutricionistas creados\\n');
+
+    // ========== TABLA t_cursos ==========
     console.log('Creando tabla t_cursos...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_cursos (
@@ -67,9 +103,13 @@ const inicializarBD = async () => {
         fecha_creacion TIMESTAMP DEFAULT NOW()
       );
     `);
-    console.log('✓ Tabla t_cursos creada\n');
+    console.log('✓ Tabla t_cursos creada');
 
-    // Crear tabla t_inscripciones
+    // Índices para t_cursos
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cursos_activo ON t_cursos(activo);`);
+    console.log('✓ Índices en t_cursos creados\\n');
+
+    // ========== TABLA t_inscripciones ==========
     console.log('Creando tabla t_inscripciones...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_inscripciones (
@@ -83,23 +123,72 @@ const inicializarBD = async () => {
         UNIQUE(usuario_id, curso_id)
       );
     `);
-    console.log('✓ Tabla t_inscripciones creada\n');
+    console.log('✓ Tabla t_inscripciones creada');
 
-    // Crear tabla t_informe_antropometrico
+    // Índices para t_inscripciones
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_inscripciones_usuario_id ON t_inscripciones(usuario_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_inscripciones_curso_id ON t_inscripciones(curso_id);`);
+    console.log('✓ Índices en t_inscripciones creados\\n');
+
+    // ========== TABLA t_planteles ==========
+    console.log('Creando tabla t_planteles...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS t_planteles (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(255) NOT NULL UNIQUE,
+        activo BOOLEAN DEFAULT true,
+        fecha_creacion TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    console.log('✓ Tabla t_planteles creada');
+
+    // Índices para t_planteles
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_planteles_nombre ON t_planteles(nombre);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_planteles_activo ON t_planteles(activo);`);
+    console.log('✓ Índices en t_planteles creados\\n');
+
+    // ========== TABLA t_sesion_mediciones ==========
+    console.log('Creando tabla t_sesion_mediciones...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS t_sesion_mediciones (
+        id SERIAL PRIMARY KEY,
+        plantel_id INTEGER NOT NULL,
+        nutricionista_id INTEGER NOT NULL,
+        fecha_sesion DATE NOT NULL,
+        fecha_carga TIMESTAMP DEFAULT NOW(),
+        nombre_archivo VARCHAR(255),
+        hash_archivo VARCHAR(64),
+        cantidad_registros INTEGER DEFAULT 0,
+        activo BOOLEAN DEFAULT true,
+        FOREIGN KEY (plantel_id) REFERENCES t_planteles(id) ON DELETE CASCADE,
+        FOREIGN KEY (nutricionista_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
+        UNIQUE(plantel_id, fecha_sesion, hash_archivo)
+      );
+    `);
+    console.log('✓ Tabla t_sesion_mediciones creada');
+
+    // Índices para t_sesion_mediciones
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_mediciones_plantel_id ON t_sesion_mediciones(plantel_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_mediciones_nutricionista_id ON t_sesion_mediciones(nutricionista_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_mediciones_fecha ON t_sesion_mediciones(fecha_sesion);`);
+    console.log('✓ Índices en t_sesion_mediciones creados\\n');
+
+    // ========== TABLA t_informe_antropometrico ==========
     console.log('Creando tabla t_informe_antropometrico...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_informe_antropometrico (
         id SERIAL PRIMARY KEY,
-        nombre_paciente VARCHAR(255) NOT NULL,
-        nutricionista_id INTEGER,
+        paciente_id INTEGER NOT NULL,
+        sesion_id INTEGER NOT NULL,
+        nutricionista_id INTEGER NOT NULL,
         fecha_registro TIMESTAMP DEFAULT NOW(),
 
-        -- Medidas básicas
+        -- Medidas básicas [kg, cm]
         peso DECIMAL(6, 2),
         talla DECIMAL(5, 2),
         talla_sentado DECIMAL(5, 2),
 
-        -- Diámetros [cms]
+        -- Diámetros [cm]
         diametro_biacromial DECIMAL(6, 2),
         diametro_torax DECIMAL(6, 2),
         diametro_antpost_torax DECIMAL(6, 2),
@@ -108,7 +197,7 @@ const inicializarBD = async () => {
         diametro_humero DECIMAL(6, 2),
         diametro_femur DECIMAL(6, 2),
 
-        -- Perímetros [cms]
+        -- Perímetros [cm]
         perimetro_brazo_relajado DECIMAL(6, 2),
         perimetro_brazo_flexionado DECIMAL(6, 2),
         perimetro_muslo_anterior DECIMAL(6, 2),
@@ -137,69 +226,84 @@ const inicializarBD = async () => {
         suma_6_pliegues DECIMAL(6, 2),
         suma_8_pliegues DECIMAL(6, 2),
 
+        -- Notas
         notas TEXT,
+
+        FOREIGN KEY (paciente_id) REFERENCES t_pacientes(id) ON DELETE CASCADE,
+        FOREIGN KEY (sesion_id) REFERENCES t_sesion_mediciones(id) ON DELETE CASCADE,
         FOREIGN KEY (nutricionista_id) REFERENCES t_usuarios(id) ON DELETE SET NULL
       );
     `);
-    console.log('✓ Tabla t_informe_antropometrico creada\n');
+    console.log('✓ Tabla t_informe_antropometrico creada');
 
-    // Crear tabla t_planteles (teams/squads)
-    console.log('Creando tabla t_planteles...');
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_planteles (
-        id SERIAL PRIMARY KEY,
-        nombre VARCHAR(255) NOT NULL UNIQUE,
-        activo BOOLEAN DEFAULT true,
-        fecha_creacion TIMESTAMP DEFAULT NOW()
-      );
-    `);
-    console.log('✓ Tabla t_planteles creada\n');
+    // Índices para t_informe_antropometrico (CRÍTICO PARA PERFORMANCE)
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_paciente_id ON t_informe_antropometrico(paciente_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_sesion_id ON t_informe_antropometrico(sesion_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_nutricionista_id ON t_informe_antropometrico(nutricionista_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_paciente_sesion ON t_informe_antropometrico(paciente_id, sesion_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_fecha ON t_informe_antropometrico(fecha_registro);`);
+    console.log('✓ Índices en t_informe_antropometrico creados\\n');
 
-    // Crear tabla t_sesion_mediciones (measurement sessions)
-    console.log('Creando tabla t_sesion_mediciones...');
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_sesion_mediciones (
-        id SERIAL PRIMARY KEY,
-        plantel_id INTEGER NOT NULL,
-        nutricionista_id INTEGER NOT NULL,
-        fecha_sesion DATE NOT NULL,
-        fecha_carga TIMESTAMP DEFAULT NOW(),
-        nombre_archivo VARCHAR(255),
-        hash_archivo VARCHAR(64),
-        cantidad_registros INTEGER,
-        activo BOOLEAN DEFAULT true,
-        FOREIGN KEY (plantel_id) REFERENCES t_planteles(id) ON DELETE CASCADE,
-        FOREIGN KEY (nutricionista_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
-        UNIQUE(plantel_id, fecha_sesion, hash_archivo)
-      );
-    `);
-    console.log('✓ Tabla t_sesion_mediciones creada\n');
-
-    // Agregar columna sesion_id a t_informe_antropometrico si no existe
-    console.log('Agregando columna sesion_id a t_informe_antropometrico...');
-    await pool.query(`
-      ALTER TABLE t_informe_antropometrico
-      ADD COLUMN IF NOT EXISTS sesion_id INTEGER,
-      ADD CONSTRAINT IF NOT EXISTS fk_sesion_mediciones FOREIGN KEY (sesion_id) REFERENCES t_sesion_mediciones(id) ON DELETE SET NULL;
-    `);
-    console.log('✓ Columna sesion_id agregada a t_informe_antropometrico\n');
-
-    // Crear tabla t_excel_uploads
+    // ========== TABLA t_excel_uploads ==========
     console.log('Creando tabla t_excel_uploads...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_excel_uploads (
         id SERIAL PRIMARY KEY,
+        sesion_id INTEGER NOT NULL,
         nutricionista_id INTEGER NOT NULL,
-        nombre_archivo VARCHAR(255),
-        datos_json JSONB,
+        nombre_archivo VARCHAR(255) NOT NULL,
+        hash_archivo VARCHAR(64) NOT NULL,
+        cantidad_registros INTEGER DEFAULT 0,
         fecha_carga TIMESTAMP DEFAULT NOW(),
-        cantidad_registros INTEGER,
-        FOREIGN KEY (nutricionista_id) REFERENCES t_usuarios(id) ON DELETE CASCADE
+        FOREIGN KEY (sesion_id) REFERENCES t_sesion_mediciones(id) ON DELETE CASCADE,
+        FOREIGN KEY (nutricionista_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
+        UNIQUE(hash_archivo)
       );
     `);
-    console.log('✓ Tabla t_excel_uploads creada\n');
+    console.log('✓ Tabla t_excel_uploads creada');
 
-    console.log('✓ Base de datos inicializada correctamente');
+    // Índices para t_excel_uploads
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_excel_uploads_sesion_id ON t_excel_uploads(sesion_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_excel_uploads_nutricionista_id ON t_excel_uploads(nutricionista_id);`);
+    console.log('✓ Índices en t_excel_uploads creados\\n');
+
+    // ========== TABLA t_recovery_tokens ==========
+    console.log('Creando tabla t_recovery_tokens...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS t_recovery_tokens (
+        id SERIAL PRIMARY KEY,
+        usuario_id INTEGER NOT NULL,
+        token VARCHAR(255) NOT NULL UNIQUE,
+        activo BOOLEAN DEFAULT true,
+        fecha_creacion TIMESTAMP DEFAULT NOW(),
+        fecha_expiracion TIMESTAMP NOT NULL,
+        FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE
+      );
+    `);
+    console.log('✓ Tabla t_recovery_tokens creada');
+
+    // Índices para t_recovery_tokens
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_recovery_tokens_usuario_id ON t_recovery_tokens(usuario_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_recovery_tokens_token ON t_recovery_tokens(token);`);
+    console.log('✓ Índices en t_recovery_tokens creados\\n');
+
+    console.log('\\n========================================');
+    console.log('✓ BASE DE DATOS INICIALIZADA CORRECTAMENTE');
+    console.log('========================================\\n');
+    console.log('Tablas creadas:');
+    console.log('  • t_usuarios (admin, nutricionista, cliente)');
+    console.log('  • t_pacientes (datos de pacientes)');
+    console.log('  • t_clientes (relación usuario-cliente)');
+    console.log('  • t_nutricionistas (relación usuario-nutricionista)');
+    console.log('  • t_cursos (cursos disponibles)');
+    console.log('  • t_inscripciones (inscripciones a cursos)');
+    console.log('  • t_planteles (equipos/planteles)');
+    console.log('  • t_sesion_mediciones (sesiones de mediciones)');
+    console.log('  • t_informe_antropometrico (mediciones detalladas)');
+    console.log('  • t_excel_uploads (control de cargas Excel)');
+    console.log('  • t_recovery_tokens (tokens de recuperación)\\n');
+    console.log('Índices creados para optimizar consultas frecuentes.\\n');
+
     process.exit(0);
   } catch (error) {
     console.error('✗ Error al inicializar la base de datos:', error);

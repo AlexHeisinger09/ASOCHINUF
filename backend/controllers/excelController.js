@@ -91,14 +91,34 @@ export const uploadExcelFile = async (req, res) => {
     let registrosDuplicados = 0;
 
     for (const measurement of measurements) {
+      // Buscar o crear paciente en t_pacientes
+      let pacienteResult = await client.query(
+        `SELECT id FROM t_pacientes WHERE nombre ILIKE $1`,
+        [measurement.nombre_paciente]
+      );
+
+      let pacienteId;
+      if (pacienteResult.rows.length === 0) {
+        // Crear nuevo paciente
+        const createPacienteResult = await client.query(
+          `INSERT INTO t_pacientes (nombre, activo, fecha_registro)
+           VALUES ($1, true, NOW())
+           RETURNING id`,
+          [measurement.nombre_paciente]
+        );
+        pacienteId = createPacienteResult.rows[0].id;
+      } else {
+        pacienteId = pacienteResult.rows[0].id;
+      }
+
       // Verificar si ya existe un registro idéntico para este paciente en esta sesión
       const duplicateCheck = await client.query(
         `SELECT id FROM t_informe_antropometrico
-         WHERE nombre_paciente ILIKE $1
+         WHERE paciente_id = $1
          AND sesion_id = $2
          AND peso = $3
          AND talla = $4`,
-        [measurement.nombre_paciente, sesionId, measurement.peso, measurement.talla]
+        [pacienteId, sesionId, measurement.peso, measurement.talla]
       );
 
       if (duplicateCheck.rows.length > 0) {
@@ -106,10 +126,10 @@ export const uploadExcelFile = async (req, res) => {
         continue;
       }
 
-      // Insertar la medición directamente sin crear usuario
+      // Insertar la medición con paciente_id
       await client.query(
         `INSERT INTO t_informe_antropometrico
-         (nombre_paciente, nutricionista_id, sesion_id,
+         (paciente_id, nutricionista_id, sesion_id,
           peso, talla, talla_sentado,
           diametro_biacromial, diametro_torax, diametro_antpost_torax,
           diametro_biiliocristal, diametro_bitrocanterea, diametro_humero, diametro_femur,
@@ -130,7 +150,7 @@ export const uploadExcelFile = async (req, res) => {
           $31, $32,
           CURRENT_TIMESTAMP)`,
         [
-          measurement.nombre_paciente,
+          pacienteId,
           usuarioId,
           sesionId,
           measurement.peso,
@@ -292,17 +312,17 @@ export const getSessionDetails = async (req, res) => {
     const measurementsResult = await pool.query(
       `SELECT
         ia.id,
-        ia.nombre_paciente,
+        p.nombre as nombre_paciente,
         ia.peso,
-        ia.altura,
+        ia.talla,
         ia.imc,
-        ia.circunferencia_cintura,
-        ia.circunferencia_cadera,
-        ia.porcentaje_grasa,
+        ia.suma_6_pliegues,
+        ia.suma_8_pliegues,
         ia.fecha_registro
       FROM t_informe_antropometrico ia
+      JOIN t_pacientes p ON ia.paciente_id = p.id
       WHERE ia.sesion_id = $1
-      ORDER BY ia.nombre_paciente`,
+      ORDER BY p.nombre`,
       [sesionId]
     );
 
