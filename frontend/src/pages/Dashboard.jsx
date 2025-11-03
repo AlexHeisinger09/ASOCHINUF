@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, User, BookOpen, Upload, Settings, Home, ChevronLeft } from 'lucide-react';
+import { LogOut, User, BookOpen, Upload, Settings, Home, ChevronsLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,57 +43,25 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-[#1a1c22] to-[#0f1117] border-b border-[#8c5cff]/20 backdrop-blur-xl"
+    <div className="min-h-screen bg-black text-white flex">
+      {/* Sidebar - Overlapping header */}
+      <motion.aside
+        initial={{ width: 256 }}
+        animate={{ width: sidebarOpen ? 256 : 80 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className="bg-gradient-to-b from-[#1a1c22] to-[#0f1117] border-r border-[#8c5cff]/20 flex flex-col p-6 gap-8 overflow-y-auto relative fixed h-screen left-0 top-0 z-50"
       >
-        <div className="mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
+            {/* Collapse Button */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-[#8c5cff]/20 rounded-lg"
+              className="p-2 hover:bg-[#8c5cff]/20 rounded-lg self-end"
+              title={sidebarOpen ? 'Colapsar' : 'Expandir'}
             >
-              <ChevronLeft size={24} className={`transition-transform duration-300 ${sidebarOpen ? '' : 'rotate-180'}`} />
+              <ChevronsLeft size={24} className={`transition-transform duration-300 ${sidebarOpen ? '' : 'rotate-180'}`} />
             </motion.button>
-          </div>
 
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-sm font-bold">
-                {usuario?.nombre[0]}
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-sm font-semibold">{usuario?.nombre} {usuario?.apellido}</p>
-                <p className="text-xs text-gray-400 capitalize">{usuario?.tipo_perfil}</p>
-              </div>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLogout}
-              className="p-2 hover:bg-[#8c5cff]/20 rounded-lg transition-colors duration-300"
-              title="Cerrar sesión"
-            >
-              <LogOut size={20} className="text-[#8c5cff]" />
-            </motion.button>
-          </div>
-        </div>
-      </motion.header>
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <motion.aside
-          initial={{ width: 256 }}
-          animate={{ width: sidebarOpen ? 256 : 80 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="bg-gradient-to-b from-[#1a1c22] to-[#0f1117] border-r border-[#8c5cff]/20 flex flex-col p-6 gap-8 overflow-y-auto relative"
-        >
             {/* Sidebar Header - Logo y nombre */}
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -194,6 +162,37 @@ const Dashboard = () => {
               </AnimatePresence>
             </motion.button>
         </motion.aside>
+
+      {/* Header + Main Content Container */}
+      <div className="flex-1 flex flex-col" style={{ marginLeft: sidebarOpen ? 256 : 80, transition: 'margin-left 0.3s ease-in-out' }}>
+        {/* Header */}
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-[#1a1c22] to-[#0f1117] border-b border-[#8c5cff]/20 backdrop-blur-xl sticky top-0 z-40"
+        >
+          <div className="px-6 py-4 flex items-center justify-end gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-sm font-bold">
+                {usuario?.nombre[0]}
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-sm font-semibold">{usuario?.nombre} {usuario?.apellido}</p>
+                <p className="text-xs text-gray-400 capitalize">{usuario?.tipo_perfil}</p>
+              </div>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLogout}
+              className="p-2 hover:bg-[#8c5cff]/20 rounded-lg transition-colors duration-300"
+              title="Cerrar sesión"
+            >
+              <LogOut size={20} className="text-[#8c5cff]" />
+            </motion.button>
+          </div>
+        </motion.header>
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-6 md:p-10">
@@ -337,6 +336,7 @@ const Dashboard = () => {
             )}
           </AnimatePresence>
         </main>
+      </div>
       </div>
     </div>
   );
