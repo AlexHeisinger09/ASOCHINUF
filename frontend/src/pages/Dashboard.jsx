@@ -51,32 +51,15 @@ const Dashboard = () => {
         className="bg-gradient-to-r from-[#1a1c22] to-[#0f1117] border-b border-[#8c5cff]/20 backdrop-blur-xl"
       >
         <div className="mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 md:hidden">
+          <div className="flex items-center gap-3 flex-1">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 hover:bg-[#8c5cff]/20 rounded-lg"
             >
-              <ChevronLeft size={24} className={`transition-transform ${sidebarOpen ? 'rotate-180' : ''}`} />
+              <ChevronLeft size={24} className={`transition-transform duration-300 ${sidebarOpen ? '' : 'rotate-180'}`} />
             </motion.button>
-          </div>
-
-          <div className="flex-1 md:flex-initial">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="flex items-center gap-2 cursor-pointer w-fit"
-              onClick={() => setActiveTab('inicio')}
-            >
-              <img
-                src="/logos/logo.png"
-                alt="ASOCHINUF"
-                className="h-9 w-auto"
-              />
-              <h1 className="text-lg font-bold bg-gradient-to-r from-white via-[#8c5cff] to-white bg-clip-text text-transparent">
-                ASOCHINUF
-              </h1>
-            </motion.div>
           </div>
 
           <div className="flex items-center gap-6">
@@ -105,13 +88,12 @@ const Dashboard = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <AnimatePresence>
-          <motion.aside
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="hidden md:flex md:w-64 bg-gradient-to-b from-[#1a1c22] to-[#0f1117] border-r border-[#8c5cff]/20 flex-col p-6 gap-8 overflow-y-auto"
-          >
+        <motion.aside
+          initial={{ width: 256 }}
+          animate={{ width: sidebarOpen ? 256 : 80 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className="bg-gradient-to-b from-[#1a1c22] to-[#0f1117] border-r border-[#8c5cff]/20 flex flex-col p-6 gap-8 overflow-y-auto relative"
+        >
             {/* Sidebar Header - Logo y nombre */}
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -121,14 +103,23 @@ const Dashboard = () => {
               <img
                 src="/logos/logo.png"
                 alt="ASOCHINUF"
-                className="h-12 w-auto"
+                className="h-12 w-auto flex-shrink-0"
               />
-              <div>
-                <h2 className="text-lg font-bold bg-gradient-to-r from-white via-[#8c5cff] to-white bg-clip-text text-transparent">
-                  ASOCHINUF
-                </h2>
-                <p className="text-xs text-gray-400">Panel de Control</p>
-              </div>
+              <AnimatePresence>
+                {sidebarOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h2 className="text-lg font-bold bg-gradient-to-r from-white via-[#8c5cff] to-white bg-clip-text text-transparent whitespace-nowrap">
+                      ASOCHINUF
+                    </h2>
+                    <p className="text-xs text-gray-400 whitespace-nowrap">Panel de Control</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {/* Menu Items */}
@@ -140,18 +131,33 @@ const Dashboard = () => {
                 return (
                   <motion.button
                     key={item.id}
-                    whileHover={{ x: 5 }}
+                    whileHover={{ x: sidebarOpen ? 5 : 0 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveTab(item.id)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 w-full ${
+                    title={item.label}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
+                      sidebarOpen ? 'w-full justify-start' : 'w-full justify-center'
+                    } ${
                       isActive
                         ? 'bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] text-white shadow-lg shadow-[#8c5cff]/25'
                         : 'text-gray-400 hover:text-white hover:bg-[#8c5cff]/10'
                     }`}
                   >
-                    <Icon size={20} />
-                    <span className="font-semibold">{item.label}</span>
-                    {isActive && (
+                    <Icon size={20} className="flex-shrink-0" />
+                    <AnimatePresence>
+                      {sidebarOpen && (
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: 'auto' }}
+                          exit={{ opacity: 0, width: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="font-semibold whitespace-nowrap"
+                        >
+                          {item.label}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                    {isActive && sidebarOpen && (
                       <motion.div
                         layoutId="activeIndicator"
                         className="ml-auto w-2 h-2 rounded-full bg-white"
@@ -164,16 +170,30 @@ const Dashboard = () => {
 
             {/* Sidebar Footer */}
             <motion.button
-              whileHover={{ scale: 1.02, x: 5 }}
+              whileHover={{ scale: 1.02, x: sidebarOpen ? 5 : 0 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-300 w-full border-t border-[#8c5cff]/20 pt-4"
+              title="Cerrar sesión"
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-300 w-full border-t border-[#8c5cff]/20 pt-4 ${
+                sidebarOpen ? 'justify-start' : 'justify-center'
+              }`}
             >
-              <LogOut size={20} />
-              <span className="font-semibold">Cerrar sesión</span>
+              <LogOut size={20} className="flex-shrink-0" />
+              <AnimatePresence>
+                {sidebarOpen && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="font-semibold whitespace-nowrap"
+                  >
+                    Cerrar sesión
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </motion.button>
-          </motion.aside>
-        </AnimatePresence>
+        </motion.aside>
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-6 md:p-10">
