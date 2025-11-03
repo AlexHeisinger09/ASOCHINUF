@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import UsuarioModal from './UsuarioModal';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 const GestionUsuariosSection = ({ containerVariants }) => {
   const { isDarkMode, token } = useAuth();
@@ -12,6 +13,8 @@ const GestionUsuariosSection = ({ containerVariants }) => {
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -95,17 +98,27 @@ const GestionUsuariosSection = ({ containerVariants }) => {
     }
   };
 
-  // Eliminar usuario
-  const handleEliminarUsuario = async (id) => {
-    if (!confirm('¿Está seguro de que desea eliminar este usuario?')) return;
+  // Abrir dialog de confirmación para eliminar
+  const handleAbrirConfirmDialog = (usuario) => {
+    setUsuarioAEliminar(usuario);
+    setShowConfirmDialog(true);
+  };
+
+  // Confirmar eliminación de usuario
+  const handleConfirmarEliminar = async () => {
+    if (!usuarioAEliminar) return;
 
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`${API_URL}/usuarios/${id}`, config);
-      setUsuarios(usuarios.filter((u) => u.id !== id));
+      await axios.delete(`${API_URL}/usuarios/${usuarioAEliminar.id}`, config);
+      setUsuarios(usuarios.filter((u) => u.id !== usuarioAEliminar.id));
+      setShowConfirmDialog(false);
+      setUsuarioAEliminar(null);
       setError('');
     } catch (err) {
       setError(err.response?.data?.error || 'Error al eliminar usuario');
+      setShowConfirmDialog(false);
+      setUsuarioAEliminar(null);
     }
   };
 
@@ -321,7 +334,7 @@ const GestionUsuariosSection = ({ containerVariants }) => {
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => handleEliminarUsuario(usuario.id)}
+                      onClick={() => handleAbrirConfirmDialog(usuario)}
                       className={`p-2 rounded-lg transition-colors ${
                         isDarkMode ? 'text-red-400 hover:bg-red-500/20' : 'text-red-600 hover:bg-red-100'
                       }`}
@@ -336,6 +349,21 @@ const GestionUsuariosSection = ({ containerVariants }) => {
           </div>
         )}
       </div>
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title="Eliminar Usuario"
+        message={`¿Está seguro de que desea eliminar a ${usuarioAEliminar?.nombre} ${usuarioAEliminar?.apellido}? Esta acción no se puede deshacer.`}
+        onConfirm={handleConfirmarEliminar}
+        onCancel={() => {
+          setShowConfirmDialog(false);
+          setUsuarioAEliminar(null);
+        }}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        isDanger={true}
+      />
     </motion.div>
   );
 };
