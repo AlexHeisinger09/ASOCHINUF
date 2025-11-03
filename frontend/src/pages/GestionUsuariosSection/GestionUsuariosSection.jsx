@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import UsuarioModal from './UsuarioModal';
@@ -15,6 +15,7 @@ const GestionUsuariosSection = ({ containerVariants }) => {
   const [editingId, setEditingId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -162,6 +163,16 @@ const GestionUsuariosSection = ({ containerVariants }) => {
     setError('');
   };
 
+  // Filtrar usuarios por nombre/apellido
+  const usuariosFiltrados = usuarios.filter((usuario) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      usuario.nombre.toLowerCase().includes(searchLower) ||
+      usuario.apellido.toLowerCase().includes(searchLower) ||
+      usuario.email.toLowerCase().includes(searchLower)
+    );
+  });
+
   const containerVariantsLocal = {
     hidden: { opacity: 0, x: 20 },
     visible: {
@@ -185,7 +196,7 @@ const GestionUsuariosSection = ({ containerVariants }) => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
             Gestión de Usuarios
@@ -210,6 +221,27 @@ const GestionUsuariosSection = ({ containerVariants }) => {
           <Plus size={20} />
           Nuevo Usuario
         </motion.button>
+      </div>
+
+      {/* Search Filter */}
+      <div className="relative">
+        <Search
+          size={20}
+          className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+          }`}
+        />
+        <input
+          type="text"
+          placeholder="Buscar por nombre, apellido o email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={`w-full pl-12 pr-4 py-2 rounded-lg border transition-all ${
+            isDarkMode
+              ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20 text-white placeholder-gray-500 focus:border-[#8c5cff]/40'
+              : 'bg-white/50 border-purple-200 text-gray-900 placeholder-gray-400 focus:border-purple-400'
+          } focus:outline-none`}
+        />
       </div>
 
       {/* Error Message */}
@@ -261,9 +293,19 @@ const GestionUsuariosSection = ({ containerVariants }) => {
               No hay usuarios registrados aún. Crea uno para empezar.
             </p>
           </div>
+        ) : usuariosFiltrados.length === 0 ? (
+          <div
+            className={`p-8 text-center rounded-2xl border ${
+              isDarkMode ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20' : 'bg-white/50 border-purple-200'
+            }`}
+          >
+            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+              No hay resultados que coincidan con tu búsqueda.
+            </p>
+          </div>
         ) : (
           <div className="grid gap-3">
-            {usuarios.map((usuario) => (
+            {usuariosFiltrados.map((usuario) => (
               <motion.div
                 key={usuario.id}
                 whileHover={{ y: -2 }}
