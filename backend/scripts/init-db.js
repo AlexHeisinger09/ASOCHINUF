@@ -85,10 +85,10 @@ const inicializarBD = async () => {
     `);
     console.log('✓ Tabla t_inscripciones creada\n');
 
-    // Crear tabla t_datos_antropologicos
-    console.log('Creando tabla t_datos_antropologicos...');
+    // Crear tabla t_informe_antropometrico
+    console.log('Creando tabla t_informe_antropometrico...');
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_datos_antropologicos (
+      CREATE TABLE IF NOT EXISTS t_informe_antropometrico (
         id SERIAL PRIMARY KEY,
         cliente_id INTEGER NOT NULL,
         nutricionista_id INTEGER,
@@ -104,7 +104,7 @@ const inicializarBD = async () => {
         FOREIGN KEY (nutricionista_id) REFERENCES t_usuarios(id) ON DELETE SET NULL
       );
     `);
-    console.log('✓ Tabla t_datos_antropologicos creada\n');
+    console.log('✓ Tabla t_informe_antropometrico creada\n');
 
     // Crear tabla t_excel_uploads
     console.log('Creando tabla t_excel_uploads...');

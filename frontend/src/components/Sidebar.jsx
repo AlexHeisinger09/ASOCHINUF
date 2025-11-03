@@ -9,7 +9,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
   const baseMenuItems = [
     { id: 'inicio', label: 'Inicio', icon: Home },
     { id: 'cursos', label: 'Cursos', icon: BookOpen },
-    { id: 'datos', label: 'Mis Datos', icon: User },
+    { id: 'datos', label: 'Informe Antropométrico', icon: User },
     { id: 'excel', label: 'Cargar Excel', icon: Upload },
     { id: 'configuracion', label: 'Configuración', icon: Settings },
   ];

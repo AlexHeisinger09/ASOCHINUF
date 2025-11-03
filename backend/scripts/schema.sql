@@ -58,8 +58,8 @@ CREATE TABLE IF NOT EXISTS t_inscripciones (
   UNIQUE(usuario_id, curso_id)
 );
 
--- Tabla de datos antropologicos
-CREATE TABLE IF NOT EXISTS t_datos_antropologicos (
+-- Tabla de informe antropométrico
+CREATE TABLE IF NOT EXISTS t_informe_antropometrico (
   id SERIAL PRIMARY KEY,
   cliente_id INTEGER NOT NULL,
   nutricionista_id INTEGER,

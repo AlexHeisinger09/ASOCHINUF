@@ -9,7 +9,7 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
   const baseMenuItems = [
     { id: 'inicio', label: 'Inicio', icon: Home },
     { id: 'cursos', label: 'Cursos', icon: BookOpen },
-    { id: 'datos', label: 'Mis Datos', icon: User },
+    { id: 'datos', label: 'Informe', icon: User },
     { id: 'excel', label: 'Excel', icon: Upload },
     { id: 'configuracion', label: 'Config', icon: Settings },
   ];

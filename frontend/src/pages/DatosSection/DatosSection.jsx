@@ -14,7 +14,7 @@ const DatosSection = ({ containerVariants }) => {
       animate="visible"
       exit="exit"
     >
-      <h2 className={`text-3xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Mis Datos Antropológicos</h2>
+      <h2 className={`text-3xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Mi Informe Antropométrico</h2>
       <div
         className={`${
           isDarkMode ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20' : 'bg-white/50 border-purple-200'
