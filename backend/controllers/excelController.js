@@ -91,68 +91,77 @@ export const uploadExcelFile = async (req, res) => {
     let registrosDuplicados = 0;
 
     for (const measurement of measurements) {
-      // Buscar si el paciente existe por nombre (búsqueda simple)
-      const pacienteSearch = await client.query(
-        `SELECT id FROM t_usuarios
-         WHERE tipo_perfil = 'cliente'
-         AND (nombre || ' ' || apellido) ILIKE $1
-         LIMIT 1`,
-        [`%${measurement.nombre_paciente}%`]
+      // Verificar si ya existe un registro idéntico para este paciente en esta sesión
+      const duplicateCheck = await client.query(
+        `SELECT id FROM t_informe_antropometrico
+         WHERE nombre_paciente ILIKE $1
+         AND sesion_id = $2
+         AND peso = $3
+         AND talla = $4`,
+        [measurement.nombre_paciente, sesionId, measurement.peso, measurement.talla]
       );
 
-      let clienteId;
-
-      if (pacienteSearch.rows.length > 0) {
-        clienteId = pacienteSearch.rows[0].id;
-
-        // Verificar si ya existe un registro idéntico para este cliente en esta sesión
-        const duplicateCheck = await client.query(
-          `SELECT id FROM t_informe_antropometrico
-           WHERE cliente_id = $1
-           AND sesion_id = $2
-           AND peso = $3
-           AND altura = $4`,
-          [clienteId, sesionId, measurement.peso, measurement.altura]
-        );
-
-        if (duplicateCheck.rows.length > 0) {
-          registrosDuplicados++;
-          continue;
-        }
-      } else {
-        // Si el paciente no existe, crear uno como cliente
-        const newClientResult = await client.query(
-          `INSERT INTO t_usuarios
-           (email, password_hash, nombre, apellido, tipo_perfil, activo)
-           VALUES ($1, $2, $3, $4, 'cliente', true)
-           RETURNING id`,
-          [
-            `${measurement.nombre_paciente.toLowerCase().replace(/\s+/g, '.')}@asochinuf.cl`,
-            'temp_hash', // Contraseña temporal, el usuario debe cambiarla
-            measurement.nombre_paciente.split(' ')[0] || measurement.nombre_paciente,
-            measurement.nombre_paciente.split(' ').slice(1).join(' ') || '',
-          ]
-        );
-        clienteId = newClientResult.rows[0].id;
+      if (duplicateCheck.rows.length > 0) {
+        registrosDuplicados++;
+        continue;
       }
 
-      // Insertar la medición
+      // Insertar la medición directamente sin crear usuario
       await client.query(
         `INSERT INTO t_informe_antropometrico
-         (cliente_id, nutricionista_id, sesion_id, nombre_paciente, peso, altura, imc,
-          circunferencia_cintura, circunferencia_cadera, porcentaje_grasa, fecha_registro)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)`,
+         (nombre_paciente, nutricionista_id, sesion_id,
+          peso, talla, talla_sentado,
+          diametro_biacromial, diametro_torax, diametro_antpost_torax,
+          diametro_biiliocristal, diametro_bitrocanterea, diametro_humero, diametro_femur,
+          perimetro_brazo_relajado, perimetro_brazo_flexionado, perimetro_muslo_anterior, perimetro_pantorrilla,
+          pliegue_triceps, pliegue_subescapular, pliegue_supraespinal, pliegue_abdominal,
+          pliegue_muslo_anterior, pliegue_pantorrilla_medial,
+          masa_adiposa_superior, masa_adiposa_media, masa_adiposa_inferior,
+          imo, imc, icc, ica,
+          suma_6_pliegues, suma_8_pliegues,
+          fecha_registro)
+         VALUES ($1, $2, $3,
+          $4, $5, $6,
+          $7, $8, $9, $10, $11, $12, $13,
+          $14, $15, $16, $17,
+          $18, $19, $20, $21, $22, $23,
+          $24, $25, $26,
+          $27, $28, $29, $30,
+          $31, $32,
+          CURRENT_TIMESTAMP)`,
         [
-          clienteId,
+          measurement.nombre_paciente,
           usuarioId,
           sesionId,
-          measurement.nombre_paciente,
           measurement.peso,
-          measurement.altura,
+          measurement.talla,
+          measurement.talla_sentado,
+          measurement.diametro_biacromial,
+          measurement.diametro_torax,
+          measurement.diametro_antpost_torax,
+          measurement.diametro_biiliocristal,
+          measurement.diametro_bitrocanterea,
+          measurement.diametro_humero,
+          measurement.diametro_femur,
+          measurement.perimetro_brazo_relajado,
+          measurement.perimetro_brazo_flexionado,
+          measurement.perimetro_muslo_anterior,
+          measurement.perimetro_pantorrilla,
+          measurement.pliegue_triceps,
+          measurement.pliegue_subescapular,
+          measurement.pliegue_supraespinal,
+          measurement.pliegue_abdominal,
+          measurement.pliegue_muslo_anterior,
+          measurement.pliegue_pantorrilla_medial,
+          measurement.masa_adiposa_superior,
+          measurement.masa_adiposa_media,
+          measurement.masa_adiposa_inferior,
+          measurement.imo,
           measurement.imc,
-          measurement.circunferencia_cintura,
-          measurement.circunferencia_cadera,
-          measurement.porcentaje_grasa,
+          measurement.icc,
+          measurement.ica,
+          measurement.suma_6_pliegues,
+          measurement.suma_8_pliegues,
         ]
       );
 

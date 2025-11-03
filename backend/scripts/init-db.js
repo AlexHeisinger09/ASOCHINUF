@@ -90,17 +90,54 @@ const inicializarBD = async () => {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_informe_antropometrico (
         id SERIAL PRIMARY KEY,
-        cliente_id INTEGER NOT NULL,
+        nombre_paciente VARCHAR(255) NOT NULL,
         nutricionista_id INTEGER,
-        peso DECIMAL(6, 2),
-        altura DECIMAL(5, 2),
-        imc DECIMAL(5, 2),
-        circunferencia_cintura DECIMAL(6, 2),
-        circunferencia_cadera DECIMAL(6, 2),
-        porcentaje_grasa DECIMAL(5, 2),
         fecha_registro TIMESTAMP DEFAULT NOW(),
+
+        -- Medidas básicas
+        peso DECIMAL(6, 2),
+        talla DECIMAL(5, 2),
+        talla_sentado DECIMAL(5, 2),
+
+        -- Diámetros [cms]
+        diametro_biacromial DECIMAL(6, 2),
+        diametro_torax DECIMAL(6, 2),
+        diametro_antpost_torax DECIMAL(6, 2),
+        diametro_biiliocristal DECIMAL(6, 2),
+        diametro_bitrocanterea DECIMAL(6, 2),
+        diametro_humero DECIMAL(6, 2),
+        diametro_femur DECIMAL(6, 2),
+
+        -- Perímetros [cms]
+        perimetro_brazo_relajado DECIMAL(6, 2),
+        perimetro_brazo_flexionado DECIMAL(6, 2),
+        perimetro_muslo_anterior DECIMAL(6, 2),
+        perimetro_pantorrilla DECIMAL(6, 2),
+
+        -- Pliegues [mm]
+        pliegue_triceps DECIMAL(6, 2),
+        pliegue_subescapular DECIMAL(6, 2),
+        pliegue_supraespinal DECIMAL(6, 2),
+        pliegue_abdominal DECIMAL(6, 2),
+        pliegue_muslo_anterior DECIMAL(6, 2),
+        pliegue_pantorrilla_medial DECIMAL(6, 2),
+
+        -- Masa Adiposa por Zona [%]
+        masa_adiposa_superior DECIMAL(5, 2),
+        masa_adiposa_media DECIMAL(5, 2),
+        masa_adiposa_inferior DECIMAL(5, 2),
+
+        -- Índices
+        imo DECIMAL(5, 2),
+        imc DECIMAL(5, 2),
+        icc DECIMAL(5, 2),
+        ica DECIMAL(5, 2),
+
+        -- Sumatoria de Pliegues [mm]
+        suma_6_pliegues DECIMAL(6, 2),
+        suma_8_pliegues DECIMAL(6, 2),
+
         notas TEXT,
-        FOREIGN KEY (cliente_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
         FOREIGN KEY (nutricionista_id) REFERENCES t_usuarios(id) ON DELETE SET NULL
       );
     `);
@@ -138,15 +175,14 @@ const inicializarBD = async () => {
     `);
     console.log('✓ Tabla t_sesion_mediciones creada\n');
 
-    // Modificar tabla t_informe_antropometrico para agregar sesion_id
-    console.log('Modificando tabla t_informe_antropometrico...');
+    // Agregar columna sesion_id a t_informe_antropometrico si no existe
+    console.log('Agregando columna sesion_id a t_informe_antropometrico...');
     await pool.query(`
       ALTER TABLE t_informe_antropometrico
       ADD COLUMN IF NOT EXISTS sesion_id INTEGER,
-      ADD COLUMN IF NOT EXISTS nombre_paciente VARCHAR(255),
-      ADD CONSTRAINT fk_sesion_mediciones FOREIGN KEY (sesion_id) REFERENCES t_sesion_mediciones(id) ON DELETE SET NULL;
+      ADD CONSTRAINT IF NOT EXISTS fk_sesion_mediciones FOREIGN KEY (sesion_id) REFERENCES t_sesion_mediciones(id) ON DELETE SET NULL;
     `);
-    console.log('✓ Tabla t_informe_antropometrico modificada\n');
+    console.log('✓ Columna sesion_id agregada a t_informe_antropometrico\n');
 
     // Crear tabla t_excel_uploads
     console.log('Creando tabla t_excel_uploads...');

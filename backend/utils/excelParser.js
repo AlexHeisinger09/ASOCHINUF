@@ -42,23 +42,61 @@ export const parseExcelFile = (filePath) => {
 
     // Mapear los datos extraídos a la estructura esperada
     const measurements = jsonData.map((row) => {
-      // Buscar el nombre del paciente en las columnas A, B, o C
+      // Buscar el nombre del paciente
       const nombrePaciente = row['Paciente'] || row['A'] || row['Nombre'] || '';
 
       return {
+        // Datos básicos
         nombre_paciente: nombrePaciente.toString().trim(),
-        peso: parseFloat(row['Peso'] || row['B'] || 0) || null,
-        altura: parseFloat(row['Altura'] || row['C'] || 0) || null,
-        imc: parseFloat(row['IMC'] || row['D'] || 0) || null,
-        circunferencia_cintura: parseFloat(row['Cintura'] || row['G'] || 0) || null,
-        circunferencia_cadera: parseFloat(row['Cadera'] || row['M'] || 0) || null,
-        porcentaje_grasa: parseFloat(row['Grasa'] || row['Grasa %'] || 0) || null,
+
+        // Medidas básicas
+        peso: parseFloat(row['M. corporal'] || row['Peso'] || 0) || null,
+        talla: parseFloat(row['Talla'] || row['altura'] || 0) || null,
+        talla_sentado: parseFloat(row['Talla sent.'] || 0) || null,
+
+        // Diámetros [cms]
+        diametro_biacromial: parseFloat(row['Biacromial'] || 0) || null,
+        diametro_torax: parseFloat(row['T. del tórax'] || 0) || null,
+        diametro_antpost_torax: parseFloat(row['Ant.-post. del tórax'] || 0) || null,
+        diametro_biiliocristal: parseFloat(row['Biiliocristal'] || 0) || null,
+        diametro_bitrocanterea: parseFloat(row['Bi-trocanterea'] || 0) || null,
+        diametro_humero: parseFloat(row['Húmero'] || 0) || null,
+        diametro_femur: parseFloat(row['Fémur'] || 0) || null,
+
+        // Perímetros [cms]
+        perimetro_brazo_relajado: parseFloat(row['Brazo relajado'] || 0) || null,
+        perimetro_brazo_flexionado: parseFloat(row['Brazo flexionado'] || 0) || null,
+        perimetro_muslo_anterior: parseFloat(row['Muslo anterior'] || 0) || null,
+        perimetro_pantorrilla: parseFloat(row['Pantorrilla'] || 0) || null,
+
+        // Pliegues [mm]
+        pliegue_triceps: parseFloat(row['Tríceps'] || 0) || null,
+        pliegue_subescapular: parseFloat(row['Subescapular'] || 0) || null,
+        pliegue_supraespinal: parseFloat(row['Supraespinal'] || 0) || null,
+        pliegue_abdominal: parseFloat(row['Abdominal'] || 0) || null,
+        pliegue_muslo_anterior: parseFloat(row['Muslo anterior'] || 0) || null,
+        pliegue_pantorrilla_medial: parseFloat(row['Pantorrilla medial'] || 0) || null,
+
+        // Masa Adiposa por Zona [%]
+        masa_adiposa_superior: parseFloat(row['Superior'] || 0) || null,
+        masa_adiposa_media: parseFloat(row['Media'] || 0) || null,
+        masa_adiposa_inferior: parseFloat(row['Inferior'] || 0) || null,
+
+        // Índices
+        imo: parseFloat(row['IMO'] || 0) || null,
+        imc: parseFloat(row['IMC'] || 0) || null,
+        icc: parseFloat(row['ICC'] || 0) || null,
+        ica: parseFloat(row['ICA'] || 0) || null,
+
+        // Sumatoria de Pliegues [mm]
+        suma_6_pliegues: parseFloat(row['6 Pliegues'] || 0) || null,
+        suma_8_pliegues: parseFloat(row['8 Pliegues'] || 0) || null,
       };
     });
 
-    // Filtrar registros vacíos
+    // Filtrar registros vacíos (si al menos tiene nombre y una medida)
     const measurementsFiltered = measurements.filter(
-      (m) => m.nombre_paciente && (m.peso || m.altura || m.imc)
+      (m) => m.nombre_paciente && (m.peso || m.talla || m.imc)
     );
 
     return {
