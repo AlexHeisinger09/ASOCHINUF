@@ -169,7 +169,19 @@ const GestionUsuariosSection = ({ containerVariants }) => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => !showForm && setShowForm(true)}
+          onClick={() => {
+            if (!showForm) {
+              setFormData({
+                nombre: '',
+                apellido: '',
+                email: '',
+                password: '',
+                tipo_perfil: 'cliente',
+              });
+              setEditingId(null);
+              setShowForm(true);
+            }
+          }}
           disabled={showForm}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
             showForm
