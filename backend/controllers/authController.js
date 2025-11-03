@@ -276,7 +276,7 @@ export const restablecerContrasena = async (req, res) => {
 export const obtenerUsuarios = async (req, res) => {
   try {
     const resultado = await pool.query(
-      'SELECT id, email, nombre, apellido, tipo_perfil, activo, fecha_registro FROM t_usuarios ORDER BY fecha_registro DESC'
+      'SELECT id, email, nombre, apellido, tipo_perfil, activo, fecha_registro FROM t_usuarios WHERE activo = true ORDER BY fecha_registro DESC'
     );
 
     res.json(resultado.rows);
@@ -439,13 +439,13 @@ export const eliminarUsuario = async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Eliminar usuario
+    // Marcar usuario como inactivo (soft delete)
     await pool.query(
-      'DELETE FROM t_usuarios WHERE id = $1',
+      'UPDATE t_usuarios SET activo = false WHERE id = $1',
       [id]
     );
 
-    res.json({ mensaje: 'Usuario eliminado exitosamente' });
+    res.json({ mensaje: 'Usuario marcado como inactivo exitosamente' });
   } catch (error) {
     console.error('Error al eliminar usuario:', error);
     res.status(500).json({ error: 'Error al eliminar usuario' });
