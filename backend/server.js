@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import pool from './config/database.js';
 import authRoutes from './routes/auth.js';
+import excelRoutes from './routes/excel.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rutas
 app.use('/api/auth', authRoutes);
+app.use('/api/excel', excelRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

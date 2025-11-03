@@ -106,6 +106,48 @@ const inicializarBD = async () => {
     `);
     console.log('✓ Tabla t_informe_antropometrico creada\n');
 
+    // Crear tabla t_planteles (teams/squads)
+    console.log('Creando tabla t_planteles...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS t_planteles (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(255) NOT NULL UNIQUE,
+        activo BOOLEAN DEFAULT true,
+        fecha_creacion TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    console.log('✓ Tabla t_planteles creada\n');
+
+    // Crear tabla t_sesion_mediciones (measurement sessions)
+    console.log('Creando tabla t_sesion_mediciones...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS t_sesion_mediciones (
+        id SERIAL PRIMARY KEY,
+        plantel_id INTEGER NOT NULL,
+        nutricionista_id INTEGER NOT NULL,
+        fecha_sesion DATE NOT NULL,
+        fecha_carga TIMESTAMP DEFAULT NOW(),
+        nombre_archivo VARCHAR(255),
+        hash_archivo VARCHAR(64),
+        cantidad_registros INTEGER,
+        activo BOOLEAN DEFAULT true,
+        FOREIGN KEY (plantel_id) REFERENCES t_planteles(id) ON DELETE CASCADE,
+        FOREIGN KEY (nutricionista_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
+        UNIQUE(plantel_id, fecha_sesion, hash_archivo)
+      );
+    `);
+    console.log('✓ Tabla t_sesion_mediciones creada\n');
+
+    // Modificar tabla t_informe_antropometrico para agregar sesion_id
+    console.log('Modificando tabla t_informe_antropometrico...');
+    await pool.query(`
+      ALTER TABLE t_informe_antropometrico
+      ADD COLUMN IF NOT EXISTS sesion_id INTEGER,
+      ADD COLUMN IF NOT EXISTS nombre_paciente VARCHAR(255),
+      ADD CONSTRAINT fk_sesion_mediciones FOREIGN KEY (sesion_id) REFERENCES t_sesion_mediciones(id) ON DELETE SET NULL;
+    `);
+    console.log('✓ Tabla t_informe_antropometrico modificada\n');
+
     // Crear tabla t_excel_uploads
     console.log('Creando tabla t_excel_uploads...');
     await pool.query(`
