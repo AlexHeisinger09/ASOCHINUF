@@ -220,25 +220,72 @@ const GestionUsuariosSection = ({ containerVariants }) => {
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Nombre *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ingrese el nombre"
+                  value={formData.nombre}
+                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                  required
+                  className={`w-full px-4 py-2 rounded-lg border transition-all ${
+                    isDarkMode
+                      ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500'
+                      : 'bg-white border-purple-200 text-gray-900 placeholder-gray-400'
+                  } focus:outline-none focus:border-[#8c5cff]`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Apellido *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ingrese el apellido"
+                  value={formData.apellido}
+                  onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
+                  required
+                  className={`w-full px-4 py-2 rounded-lg border transition-all ${
+                    isDarkMode
+                      ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500'
+                      : 'bg-white border-purple-200 text-gray-900 placeholder-gray-400'
+                  } focus:outline-none focus:border-[#8c5cff]`}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Email {editingId && '(no editable)'} *
+              </label>
               <input
-                type="text"
-                placeholder="Nombre"
-                value={formData.nombre}
-                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                type="email"
+                placeholder="Ingrese el email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className={`px-4 py-2 rounded-lg border transition-all ${
+                disabled={!!editingId}
+                className={`w-full px-4 py-2 rounded-lg border transition-all ${
                   isDarkMode
-                    ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500'
-                    : 'bg-white border-purple-200 text-gray-900 placeholder-gray-400'
+                    ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500 disabled:opacity-50'
+                    : 'bg-white border-purple-200 text-gray-900 placeholder-gray-400 disabled:opacity-50'
                 } focus:outline-none focus:border-[#8c5cff]`}
               />
+            </div>
+
+            <div>
+              <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Contraseña {editingId && '(dejar en blanco para no cambiar)'} {!editingId && '*'}
+              </label>
               <input
-                type="text"
-                placeholder="Apellido"
-                value={formData.apellido}
-                onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
-                required
-                className={`px-4 py-2 rounded-lg border transition-all ${
+                type="password"
+                placeholder={editingId ? 'Ingrese nueva contraseña' : 'Ingrese la contraseña'}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required={!editingId}
+                className={`w-full px-4 py-2 rounded-lg border transition-all ${
                   isDarkMode
                     ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500'
                     : 'bg-white border-purple-200 text-gray-900 placeholder-gray-400'
@@ -246,46 +293,24 @@ const GestionUsuariosSection = ({ containerVariants }) => {
               />
             </div>
 
-            <input
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              disabled={!!editingId}
-              className={`w-full px-4 py-2 rounded-lg border transition-all ${
-                isDarkMode
-                  ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500 disabled:opacity-50'
-                  : 'bg-white border-purple-200 text-gray-900 placeholder-gray-400 disabled:opacity-50'
-              } focus:outline-none focus:border-[#8c5cff]`}
-            />
-
-            <input
-              type="password"
-              placeholder={editingId ? 'Dejar en blanco para no cambiar' : 'Contraseña'}
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required={!editingId}
-              className={`w-full px-4 py-2 rounded-lg border transition-all ${
-                isDarkMode
-                  ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500'
-                  : 'bg-white border-purple-200 text-gray-900 placeholder-gray-400'
-              } focus:outline-none focus:border-[#8c5cff]`}
-            />
-
-            <select
-              value={formData.tipo_perfil}
-              onChange={(e) => setFormData({ ...formData, tipo_perfil: e.target.value })}
-              className={`w-full px-4 py-2 rounded-lg border transition-all ${
-                isDarkMode
-                  ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white'
-                  : 'bg-white border-purple-200 text-gray-900'
-              } focus:outline-none focus:border-[#8c5cff]`}
-            >
-              <option value="cliente">Cliente</option>
-              <option value="nutricionista">Nutricionista</option>
-              <option value="admin">Administrador</option>
-            </select>
+            <div>
+              <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Tipo de Perfil *
+              </label>
+              <select
+                value={formData.tipo_perfil}
+                onChange={(e) => setFormData({ ...formData, tipo_perfil: e.target.value })}
+                className={`w-full px-4 py-2 rounded-lg border transition-all ${
+                  isDarkMode
+                    ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white'
+                    : 'bg-white border-purple-200 text-gray-900'
+                } focus:outline-none focus:border-[#8c5cff]`}
+              >
+                <option value="cliente">Cliente</option>
+                <option value="nutricionista">Nutricionista</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </div>
 
             <div className="flex gap-3 pt-2">
               <motion.button
