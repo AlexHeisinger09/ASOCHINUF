@@ -65,6 +65,18 @@ const LoginModal = ({ isOpen, onClose }) => {
     },
   };
 
+  // Bloquear scroll del body cuando el modal está abierto
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -79,8 +91,8 @@ const LoginModal = ({ isOpen, onClose }) => {
             onClick={onClose}
           />
 
-          {/* Modal principal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Modal principal con scroll */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.85, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -170,14 +182,16 @@ const LoginModal = ({ isOpen, onClose }) => {
                           className="relative"
                           animate={focusedField === 'email' ? { scale: 1.02 } : { scale: 1 }}
                         >
-                          <Mail
-                            className={`absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${
-                              focusedField === 'email'
-                                ? 'text-[#8c5cff] scale-110'
-                                : 'text-gray-500'
-                            }`}
-                            size={20}
-                          />
+                          <div className="absolute left-3 sm:left-4 top-0 h-12 flex items-center pointer-events-none">
+                            <Mail
+                              className={`transition-all duration-300 flex-shrink-0 ${
+                                focusedField === 'email'
+                                  ? 'text-[#8c5cff] scale-110'
+                                  : 'text-gray-500'
+                              }`}
+                              size={18}
+                            />
+                          </div>
                           <Input
                             id="email"
                             name="email"
@@ -189,7 +203,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                             onBlur={() => setFocusedField(null)}
                             required
                             disabled={isSubmitting}
-                            className="pl-12 pr-4 py-3 bg-[#0f1117]/80 border border-[#8c5cff]/20 text-white placeholder:text-gray-600 focus:border-[#8c5cff] focus:ring-2 focus:ring-[#8c5cff]/30 transition-all duration-300 rounded-xl font-medium"
+                            className="h-12 pl-10 sm:pl-12 pr-4 bg-[#0f1117]/80 border border-[#8c5cff]/20 text-white placeholder:text-gray-600 focus:border-[#8c5cff] focus:ring-2 focus:ring-[#8c5cff]/30 transition-all duration-300 rounded-xl font-medium text-sm sm:text-base"
                           />
                         </motion.div>
                       </motion.div>
@@ -206,14 +220,16 @@ const LoginModal = ({ isOpen, onClose }) => {
                           className="relative"
                           animate={focusedField === 'password' ? { scale: 1.02 } : { scale: 1 }}
                         >
-                          <Lock
-                            className={`absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${
-                              focusedField === 'password'
-                                ? 'text-[#8c5cff] scale-110'
-                                : 'text-gray-500'
-                            }`}
-                            size={20}
-                          />
+                          <div className="absolute left-3 sm:left-4 top-0 h-12 flex items-center pointer-events-none">
+                            <Lock
+                              className={`transition-all duration-300 flex-shrink-0 ${
+                                focusedField === 'password'
+                                  ? 'text-[#8c5cff] scale-110'
+                                  : 'text-gray-500'
+                              }`}
+                              size={18}
+                            />
+                          </div>
                           <Input
                             id="password"
                             name="password"
@@ -225,17 +241,19 @@ const LoginModal = ({ isOpen, onClose }) => {
                             onBlur={() => setFocusedField(null)}
                             required
                             disabled={isSubmitting}
-                            className="pl-12 pr-12 py-3 bg-[#0f1117]/80 border border-[#8c5cff]/20 text-white placeholder:text-gray-600 focus:border-[#8c5cff] focus:ring-2 focus:ring-[#8c5cff]/30 transition-all duration-300 rounded-xl font-medium"
+                            className="h-12 pl-10 sm:pl-12 pr-10 sm:pr-12 bg-[#0f1117]/80 border border-[#8c5cff]/20 text-white placeholder:text-gray-600 focus:border-[#8c5cff] focus:ring-2 focus:ring-[#8c5cff]/30 transition-all duration-300 rounded-xl font-medium text-sm sm:text-base"
                           />
-                          <motion.button
-                            type="button"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#8c5cff] transition-colors duration-200 p-1"
-                          >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                          </motion.button>
+                          <div className="absolute right-3 sm:right-4 top-0 h-12 flex items-center z-10">
+                            <motion.button
+                              type="button"
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="text-gray-500 hover:text-[#8c5cff] transition-colors duration-200 p-1 flex-shrink-0"
+                            >
+                              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </motion.button>
+                          </div>
                         </motion.div>
                       </motion.div>
 

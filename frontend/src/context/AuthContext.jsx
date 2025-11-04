@@ -144,6 +144,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const actualizarUsuario = (datosActualizados) => {
+    const usuarioActualizado = { ...usuario, ...datosActualizados };
+    setUsuario(usuarioActualizado);
+    localStorage.setItem('asochinuf_usuario', JSON.stringify(usuarioActualizado));
+  };
+
   const value = {
     usuario,
     token,
@@ -155,6 +161,7 @@ export const AuthProvider = ({ children }) => {
     registro,
     logout,
     obtenerPerfil,
+    actualizarUsuario,
     isAuthenticated: !!token,
   };
 

@@ -7,6 +7,7 @@ import DatosSection from '../pages/DatosSection/DatosSection';
 import ExcelSection from '../pages/ExcelSection/ExcelSection';
 import ConfiguracionSection from '../pages/ConfiguracionSection/ConfiguracionSection';
 import GestionUsuariosSection from '../pages/GestionUsuariosSection/GestionUsuariosSection';
+import MiPerfil from '../pages/PerfilSection/MiPerfil';
 
 const MainContent = ({ activeTab }) => {
   const { isDarkMode } = useAuth();
@@ -37,6 +38,7 @@ const MainContent = ({ activeTab }) => {
         {activeTab === 'cursos' && <CursosSection containerVariants={containerVariants} />}
         {activeTab === 'datos' && <DatosSection containerVariants={containerVariants} />}
         {activeTab === 'excel' && <ExcelSection containerVariants={containerVariants} />}
+        {activeTab === 'perfil' && <MiPerfil />}
         {activeTab === 'configuracion' && <ConfiguracionSection containerVariants={containerVariants} />}
         {activeTab === 'gestion' && <GestionUsuariosSection containerVariants={containerVariants} />}
       </AnimatePresence>

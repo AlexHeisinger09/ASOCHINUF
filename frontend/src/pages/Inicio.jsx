@@ -9,9 +9,17 @@ import BottomNav from '../components/BottomNav';
 const Inicio = () => {
   const { usuario, logout, isDarkMode } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('inicio');
+  const [activeTab, setActiveTab] = useState(() => {
+    // Recuperar activeTab de sessionStorage si existe
+    return sessionStorage.getItem('asochinuf_activeTab') || 'inicio';
+  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+
+  // Guardar activeTab en sessionStorage cuando cambie
+  React.useEffect(() => {
+    sessionStorage.setItem('asochinuf_activeTab', activeTab);
+  }, [activeTab]);
 
   const handleLogout = () => {
     logout();

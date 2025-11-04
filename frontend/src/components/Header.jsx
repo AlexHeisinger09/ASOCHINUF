@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, Settings, ChevronDown, Moon, Sun } from 'lucide-react';
+import { LogOut, Settings, ChevronDown, Moon, Sun, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLogout }) => {
@@ -26,8 +26,16 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
         } border-b backdrop-blur-xl sticky top-0 z-40 px-4 py-3 flex items-center justify-between relative`}
       >
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-xs font-bold">
-            {usuario?.nombre[0]}
+          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-xs font-bold overflow-hidden">
+            {usuario?.foto ? (
+              <img
+                src={`/foto_perfil/${usuario.foto}?t=${Date.now()}`}
+                alt="Foto de perfil"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              usuario?.nombre[0]
+            )}
           </div>
           <p className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{usuario?.nombre}</p>
         </div>
@@ -54,6 +62,23 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
                 isDarkMode ? 'bg-[#1a1c22] border-[#8c5cff]/20' : 'bg-white border-purple-200'
               } border rounded-lg shadow-lg overflow-hidden z-50 min-w-max`}
             >
+              {/* Mi Perfil */}
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(140, 92, 255, 0.1)' }}
+                onClick={() => {
+                  setActiveTab('perfil');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors border-b ${
+                  isDarkMode
+                    ? 'text-gray-300 hover:text-white border-[#8c5cff]/10'
+                    : 'text-gray-700 hover:text-gray-900 border-purple-100'
+                }`}
+              >
+                <User size={16} className="text-[#8c5cff]" />
+                <span>Mi Perfil</span>
+              </motion.button>
+
               {/* Configuración */}
               <motion.button
                 whileHover={{ backgroundColor: 'rgba(140, 92, 255, 0.1)' }}
@@ -126,8 +151,16 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
       } border backdrop-blur-xl sticky top-4 z-40 px-6 py-4 items-center justify-end gap-6 mx-4 rounded-2xl shadow-lg`}
     >
       <div className="flex items-center gap-3 relative">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-sm font-bold">
-          {usuario?.nombre[0]}
+        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-sm font-bold overflow-hidden">
+          {usuario?.foto ? (
+            <img
+              src={`/foto_perfil/${usuario.foto}?t=${Date.now()}`}
+              alt="Foto de perfil"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            usuario?.nombre[0]
+          )}
         </div>
         <div className="hidden sm:block">
           <p className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{usuario?.nombre} {usuario?.apellido}</p>
@@ -162,6 +195,23 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
                 isDarkMode ? 'bg-[#1a1c22] border-[#8c5cff]/20' : 'bg-white border-purple-200'
               } border rounded-lg shadow-lg overflow-hidden z-50 min-w-max`}
             >
+              {/* Mi Perfil */}
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(140, 92, 255, 0.1)' }}
+                onClick={() => {
+                  setActiveTab('perfil');
+                  setSettingsMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors border-b ${
+                  isDarkMode
+                    ? 'text-gray-300 hover:text-white border-[#8c5cff]/10'
+                    : 'text-gray-700 hover:text-gray-900 border-purple-100'
+                }`}
+              >
+                <User size={16} className="text-[#8c5cff]" />
+                <span>Mi Perfil</span>
+              </motion.button>
+
               {/* Configuración */}
               <motion.button
                 whileHover={{ backgroundColor: 'rgba(140, 92, 255, 0.1)' }}

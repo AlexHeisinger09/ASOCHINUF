@@ -56,7 +56,7 @@ export const registro = async (req, res) => {
 
     // Crear usuario (por defecto cliente)
     const resultado = await pool.query(
-      'INSERT INTO t_usuarios (email, password_hash, nombre, apellido, tipo_perfil, activo, fecha_registro) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING id, email, nombre, apellido, tipo_perfil',
+      'INSERT INTO t_usuarios (email, password_hash, nombre, apellido, tipo_perfil, activo, fecha_registro) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING id, email, nombre, apellido, tipo_perfil, foto',
       [email, passwordHash, nombre, apellido, 'cliente', true]
     );
 
@@ -72,6 +72,7 @@ export const registro = async (req, res) => {
         nombre: usuario.nombre,
         apellido: usuario.apellido,
         tipo_perfil: usuario.tipo_perfil,
+        foto: usuario.foto,
       },
     });
   } catch (error) {
@@ -120,6 +121,7 @@ export const login = async (req, res) => {
         nombre: usuario.nombre,
         apellido: usuario.apellido,
         tipo_perfil: usuario.tipo_perfil,
+        foto: usuario.foto,
       },
     });
   } catch (error) {
@@ -133,7 +135,7 @@ export const obtenerPerfil = async (req, res) => {
     const { id } = req.usuario;
 
     const resultado = await pool.query(
-      'SELECT id, email, nombre, apellido, tipo_perfil, fecha_registro FROM t_usuarios WHERE id = $1',
+      'SELECT id, email, nombre, apellido, tipo_perfil, fecha_registro, foto FROM t_usuarios WHERE id = $1',
       [id]
     );
 
@@ -449,5 +451,122 @@ export const eliminarUsuario = async (req, res) => {
   } catch (error) {
     console.error('Error al eliminar usuario:', error);
     res.status(500).json({ error: 'Error al eliminar usuario' });
+  }
+};
+
+// Cambiar contraseña
+export const cambiarContrasena = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const usuarioId = req.usuario.id;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Contraseña actual y nueva son requeridas' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' });
+    }
+
+    // Obtener usuario
+    const resultado = await pool.query(
+      'SELECT password_hash FROM t_usuarios WHERE id = $1',
+      [usuarioId]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Verificar contraseña actual
+    const esValida = await bcryptjs.compare(currentPassword, resultado.rows[0].password_hash);
+    if (!esValida) {
+      return res.status(400).json({ error: 'La contraseña actual es incorrecta' });
+    }
+
+    // Hash de la nueva contraseña
+    const salt = await bcryptjs.genSalt(10);
+    const hashNueva = await bcryptjs.hash(newPassword, salt);
+
+    // Actualizar contraseña
+    await pool.query(
+      'UPDATE t_usuarios SET password_hash = $1 WHERE id = $2',
+      [hashNueva, usuarioId]
+    );
+
+    res.json({ mensaje: 'Contraseña actualizada exitosamente' });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ error: 'Error al cambiar contraseña' });
+  }
+};
+
+// Actualizar foto de perfil
+export const actualizarFoto = async (req, res) => {
+  try {
+    console.log('📸 actualizarFoto llamado');
+    console.log('👤 Usuario ID:', req.usuario?.id);
+    console.log('📁 req.file:', req.file);
+
+    const usuarioId = req.usuario.id;
+
+    if (!req.file) {
+      console.log('❌ No se recibió archivo');
+      return res.status(400).json({ error: 'No se proporcionó ninguna imagen' });
+    }
+
+    console.log('✅ Archivo recibido:', req.file.filename, 'Tamaño:', req.file.size);
+
+    // El nombre del archivo guardado por multer
+    const nombreArchivo = req.file.filename;
+
+    // Obtener foto anterior del usuario
+    const resultado = await pool.query(
+      'SELECT foto FROM t_usuarios WHERE id = $1',
+      [usuarioId]
+    );
+
+    const fotoAnterior = resultado.rows[0]?.foto;
+    console.log('🗑️ Foto anterior en BD:', fotoAnterior);
+    console.log('📝 Nuevo archivo:', nombreArchivo);
+
+    // Si existe una foto anterior Y es diferente a la nueva, eliminarla del sistema de archivos
+    // (Si es el mismo nombre, Multer ya sobrescribió el archivo, no hacemos nada)
+    if (fotoAnterior && fotoAnterior !== nombreArchivo) {
+      const fs = await import('fs');
+      const path = await import('path');
+      const { fileURLToPath } = await import('url');
+
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+      const rutaFotoAnterior = path.join(__dirname, '../../frontend/public/foto_perfil', fotoAnterior);
+
+      console.log('🗑️ Eliminando foto antigua diferente:', rutaFotoAnterior);
+      // Eliminar archivo si existe
+      if (fs.existsSync(rutaFotoAnterior)) {
+        fs.unlinkSync(rutaFotoAnterior);
+        console.log('✅ Foto anterior eliminada');
+      }
+    } else if (fotoAnterior === nombreArchivo) {
+      console.log('ℹ️ Mismo archivo (Multer sobrescribió), no se elimina');
+    }
+
+    console.log('💾 Guardando en BD:', nombreArchivo);
+
+    // Actualizar en la base de datos
+    await pool.query(
+      'UPDATE t_usuarios SET foto = $1 WHERE id = $2',
+      [nombreArchivo, usuarioId]
+    );
+
+    console.log('✅ Foto actualizada exitosamente');
+
+    res.json({
+      mensaje: 'Foto de perfil actualizada exitosamente',
+      foto: nombreArchivo
+    });
+  } catch (error) {
+    console.error('❌ Error al actualizar foto:', error);
+    res.status(500).json({ error: 'Error al actualizar foto de perfil' });
   }
 };

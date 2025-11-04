@@ -11,7 +11,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
     { id: 'cursos', label: 'Cursos', icon: BookOpen },
     { id: 'datos', label: 'Inf. Antropométrico', icon: User },
     { id: 'excel', label: 'Cargar Excel', icon: Upload },
-    { id: 'configuracion', label: 'Configuración', icon: Settings },
   ];
 
   // Agregar opción de gestión de usuarios solo para admins

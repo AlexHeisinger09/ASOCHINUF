@@ -10,9 +10,12 @@ import {
   obtenerUsuarios,
   crearUsuario,
   actualizarUsuario,
-  eliminarUsuario
+  eliminarUsuario,
+  cambiarContrasena,
+  actualizarFoto
 } from '../controllers/authController.js';
 import { verificarToken, verificarAdmin } from '../middleware/auth.js';
+import uploadFoto from '../middleware/uploadFoto.js';
 
 const router = express.Router();
 
@@ -32,5 +35,9 @@ router.get('/usuarios', verificarAdmin, obtenerUsuarios);
 router.post('/usuarios', verificarAdmin, crearUsuario);
 router.put('/usuarios/:id', verificarAdmin, actualizarUsuario);
 router.delete('/usuarios/:id', verificarAdmin, eliminarUsuario);
+
+// Perfil de usuario
+router.post('/cambiar-contrasena', verificarToken, cambiarContrasena);
+router.post('/actualizar-foto', verificarToken, uploadFoto.single('foto'), actualizarFoto);
 
 export default router;
