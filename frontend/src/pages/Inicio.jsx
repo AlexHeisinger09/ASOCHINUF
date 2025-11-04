@@ -27,8 +27,8 @@ const Inicio = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-black text-white' : 'bg-gradient-to-b from-[#fafafa] to-[#f5f5f7] text-gray-900'} flex`}>
-      {/* Sidebar - Desktop only */}
+    <div className={`h-screen ${isDarkMode ? 'bg-black text-white' : 'bg-gradient-to-b from-[#fafafa] to-[#f5f5f7] text-gray-900'} flex`}>
+      {/* Sidebar - Desktop only (Fixed) */}
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -37,9 +37,9 @@ const Inicio = () => {
         handleLogout={handleLogout}
       />
 
-      {/* Header + Main Content Container */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
+      {/* Main container with fixed header */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header - Fixed at top */}
         <Header
           setActiveTab={setActiveTab}
           setSettingsMenuOpen={setSettingsMenuOpen}
@@ -47,11 +47,11 @@ const Inicio = () => {
           handleLogout={handleLogout}
         />
 
-        {/* Main Content */}
+        {/* Main Content - Scrollable only this section */}
         <MainContent activeTab={activeTab} />
       </div>
 
-      {/* Bottom Navigation Bar - Mobile only */}
+      {/* Bottom Navigation Bar - Mobile only (Fixed) */}
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );

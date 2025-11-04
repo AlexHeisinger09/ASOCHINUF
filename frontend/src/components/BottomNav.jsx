@@ -10,14 +10,21 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
     { id: 'inicio', label: 'Inicio', icon: Home },
     { id: 'cursos', label: 'Cursos', icon: BookOpen },
     { id: 'datos', label: 'Informe', icon: User },
-    { id: 'excel', label: 'Excel', icon: Upload },
-    { id: 'configuracion', label: 'Config', icon: Settings },
   ];
 
-  // Agregar opción de gestión de usuarios solo para admins
-  const menuItems = usuario?.tipo_perfil === 'admin'
-    ? [...baseMenuItems, { id: 'gestion', label: 'Usuarios', icon: Users }]
-    : baseMenuItems;
+  // Excel solo para nutricionistas y admins
+  const excelItem = usuario?.tipo_perfil !== 'cliente'
+    ? [{ id: 'excel', label: 'Excel', icon: Upload }]
+    : [];
+
+  const configItem = [{ id: 'configuracion', label: 'Config', icon: Settings }];
+
+  // Gestión solo para admins
+  const gestionItem = usuario?.tipo_perfil === 'admin'
+    ? [{ id: 'gestion', label: 'Usuarios', icon: Users }]
+    : [];
+
+  const menuItems = [...baseMenuItems, ...excelItem, ...configItem, ...gestionItem];
 
   return (
     <motion.nav

@@ -36,7 +36,20 @@
       "Bash(dir:*)",
       "Bash(if [ ! -d \"C:/Proyectos React/ASOCHINUF/frontend/public/foto_perfil\" ])",
       "Bash(then mkdir -p \"C:/Proyectos React/ASOCHINUF/frontend/public/foto_perfil\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(pkill:*)",
+      "Bash(npm run start)",
+      "Bash(npm uninstall:*)",
+      "Bash(timeout 5 sleep:*)",
+      "Bash(git checkout:*)",
+      "Bash(start-sleep -Seconds 3)",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(Write-Host \"Servers should be starting...\")",
+      "Bash(timeout 15 bash:*)",
+      "Bash(timeout 15 node:*)",
+      "Bash(test:*)",
+      "Bash(Test-Path \"c:\\MisProyectosReact\\ASOCHINUF\\frontend\\public\\foto_curso\")",
+      "Bash(start-sleep -Seconds 5)"
     ],
     "deny": [],
     "ask": []

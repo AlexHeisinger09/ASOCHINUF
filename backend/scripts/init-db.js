@@ -18,6 +18,7 @@ const inicializarBD = async () => {
         apellido VARCHAR(100) NOT NULL,
         tipo_perfil VARCHAR(50) NOT NULL CHECK (tipo_perfil IN ('admin', 'nutricionista', 'cliente')),
         activo BOOLEAN DEFAULT true,
+        foto VARCHAR(255),
         fecha_registro TIMESTAMP DEFAULT NOW(),
         CONSTRAINT email_unique UNIQUE(email)
       );
@@ -274,9 +275,10 @@ const inicializarBD = async () => {
         id SERIAL PRIMARY KEY,
         usuario_id INTEGER NOT NULL,
         token VARCHAR(255) NOT NULL UNIQUE,
-        activo BOOLEAN DEFAULT true,
         fecha_creacion TIMESTAMP DEFAULT NOW(),
         fecha_expiracion TIMESTAMP NOT NULL,
+        usado BOOLEAN DEFAULT false,
+        fecha_uso TIMESTAMP,
         FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE
       );
     `);

@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { API_ENDPOINTS } from '../config/apiConfig';
 
 const AuthContext = createContext();
 
@@ -33,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
+      const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -65,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/registro', {
+      const response = await fetch(API_ENDPOINTS.AUTH.REGISTRO, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, nombre, apellido }),
@@ -119,7 +120,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/me', {
+      const response = await fetch(API_ENDPOINTS.AUTH.ME, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

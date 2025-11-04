@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/apiConfig';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -25,7 +26,7 @@ const ResetPassword = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:5001/api/auth/verificar-token/${token}`);
+        const response = await fetch(API_ENDPOINTS.AUTH.VERIFICAR_TOKEN(token));
         if (response.ok) {
           setTokenValid(true);
         } else {
@@ -64,7 +65,7 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/restablecer-contrasena', {
+      const response = await fetch(API_ENDPOINTS.AUTH.RESTABLECER_CONTRASENA, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

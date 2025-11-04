@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { API_ENDPOINTS } from '../config/apiConfig';
 
 const AuthModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ const AuthModal = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/solicitar-recuperacion', {
+      const response = await fetch(API_ENDPOINTS.AUTH.SOLICITAR_RECUPERACION, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email }),

@@ -3,18 +3,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, File, CheckCircle, AlertCircle, X, Loader } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../config/apiConfig';
 
 const ExcelSection = ({ containerVariants }) => {
   const { isDarkMode, token, usuario } = useAuth();
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResult, setUploadResult] = useState(null);
   const [error, setError] = useState('');
   const [uploadHistory, setUploadHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedPlantel, setSelectedPlantel] = useState('todos');
 
-  const API_URL = 'http://localhost:5001/api/excel';
 
   // Cargar historial de cargas
   useEffect(() => {
@@ -25,7 +27,7 @@ const ExcelSection = ({ containerVariants }) => {
     try {
       setLoadingHistory(true);
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.get(`${API_URL}/history`, config);
+      const response = await axios.get(API_ENDPOINTS.EXCEL.HISTORY, config);
       setUploadHistory(response.data);
     } catch (err) {
       console.error('Error al cargar historial:', err);
@@ -118,40 +120,104 @@ const ExcelSection = ({ containerVariants }) => {
       return;
     }
 
-    try {
+    return new Promise((resolve) => {
       setIsUploading(true);
       setError('');
       setUploadResult(null);
+      setUploadProgress(1); // Iniciar en 1% inmediatamente
 
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          // axios maneja automáticamente Content-Type y boundary para FormData
-        },
-      };
+      const xhr = new XMLHttpRequest();
 
-      const response = await axios.post(`${API_URL}/upload`, formData, config);
+      // Simular progreso mientras se procesa en el servidor
+      // Incrementa de forma gradual pero realista
+      let simulatedProgress = 1;
+      const simulationInterval = setInterval(() => {
+        if (simulatedProgress < 95) {
+          // Incremento decreciente: más rápido al inicio, más lento después
+          const increment = Math.random() * (95 - simulatedProgress) * 0.1;
+          simulatedProgress = Math.min(simulatedProgress + increment, 95);
+          setUploadProgress(Math.round(simulatedProgress));
+        }
+      }, 300);
 
-      setUploadResult(response.data);
-      setSelectedFile(null);
+      // Evento de progreso de carga del archivo
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const uploadPercent = (e.loaded / e.total) * 0.3; // 0-30% para upload
+          const totalPercent = 1 + uploadPercent; // Comienza desde 1%
+          setUploadProgress(Math.round(totalPercent));
+          simulatedProgress = totalPercent;
+        }
+      });
 
-      // Recargar historial
-      await cargarHistorial();
+      // Evento de carga completada
+      xhr.addEventListener('load', async () => {
+        clearInterval(simulationInterval);
 
-      // Limpiar resultado después de 5 segundos
-      setTimeout(() => {
-        setUploadResult(null);
-      }, 5000);
-    } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Error al cargar el archivo';
-      setError(errorMessage);
-      console.error('Error en upload:', err);
-    } finally {
-      setIsUploading(false);
-    }
+        if (xhr.status === 201 || xhr.status === 200) {
+          try {
+            // Llegar a 95% antes de procesar respuesta
+            setUploadProgress(95);
+
+            const response = JSON.parse(xhr.responseText);
+            setUploadResult(response);
+            setSelectedFile(null);
+
+            // Llegar a 100% al terminar
+            setUploadProgress(100);
+
+            // Recargar historial
+            await cargarHistorial();
+
+            // Limpiar resultado después de 5 segundos
+            setTimeout(() => {
+              setUploadResult(null);
+              setUploadProgress(0);
+            }, 5000);
+          } catch (err) {
+            setError('Error al procesar la respuesta del servidor');
+            console.error('Error parsing response:', err);
+            setUploadProgress(0);
+          }
+        } else {
+          try {
+            const errorData = JSON.parse(xhr.responseText);
+            setError(errorData.error || 'Error al cargar el archivo');
+          } catch {
+            setError('Error al cargar el archivo');
+          }
+          setUploadProgress(0);
+        }
+
+        setIsUploading(false);
+        resolve();
+      });
+
+      // Evento de error
+      xhr.addEventListener('error', () => {
+        clearInterval(simulationInterval);
+        setError('Error de conexión al cargar el archivo');
+        setUploadProgress(0);
+        setIsUploading(false);
+        resolve();
+      });
+
+      // Evento de cancelación
+      xhr.addEventListener('abort', () => {
+        clearInterval(simulationInterval);
+        setError('Carga cancelada');
+        setUploadProgress(0);
+        setIsUploading(false);
+        resolve();
+      });
+
+      xhr.open('POST', API_ENDPOINTS.EXCEL.UPLOAD);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.send(formData);
+    });
   };
 
   return (
@@ -324,11 +390,83 @@ const ExcelSection = ({ containerVariants }) => {
         </motion.button>
       )}
 
-      {/* Upload History */}
+      {/* Upload Progress Bar */}
+      <AnimatePresence>
+        {isUploading && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`space-y-2 p-4 rounded-lg ${
+              isDarkMode
+                ? 'bg-[#1a1c22]/50 border border-[#8c5cff]/20'
+                : 'bg-purple-50 border border-purple-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                Progreso de carga
+              </span>
+              <span className={`text-sm font-bold ${isDarkMode ? 'text-[#8c5cff]' : 'text-purple-600'}`}>
+                {uploadProgress}%
+              </span>
+            </div>
+            {/* Barra de progreso personalizada */}
+            <div
+              className={`h-2 w-full rounded-full overflow-hidden ${
+                isDarkMode ? 'bg-[#8c5cff]/20' : 'bg-purple-200'
+              }`}
+            >
+              <motion.div
+                initial={{ width: '0%' }}
+                animate={{ width: `${uploadProgress}%` }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className={`h-full rounded-full ${
+                  isDarkMode
+                    ? 'bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf]'
+                    : 'bg-gradient-to-r from-purple-500 to-purple-600'
+                }`}
+              />
+            </div>
+            <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              {uploadProgress < 100 ? 'Subiendo archivo...' : 'Procesando datos...'}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Upload History Table */}
       <div>
-        <h3 className={`text-xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Historial de Cargas
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Historial de Cargas
+          </h3>
+        </div>
+
+        {/* Filter by Plantel */}
+        {uploadHistory.length > 0 && (
+          <div className="mb-4 flex items-center gap-3">
+            <label className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Filtrar por plantel:
+            </label>
+            <select
+              value={selectedPlantel}
+              onChange={(e) => setSelectedPlantel(e.target.value)}
+              className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                isDarkMode
+                  ? 'bg-[#1a1c22] border-[#8c5cff]/20 text-white hover:border-[#8c5cff]/50'
+                  : 'bg-white border-purple-200 text-gray-900 hover:border-purple-400'
+              }`}
+            >
+              <option value="todos">Todos los planteles</option>
+              {Array.from(new Set(uploadHistory.map((item) => item.plantel))).sort().map((plantel) => (
+                <option key={plantel} value={plantel}>
+                  {plantel}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {loadingHistory ? (
           <div
@@ -349,40 +487,66 @@ const ExcelSection = ({ containerVariants }) => {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {uploadHistory.map((item) => (
-              <motion.div
-                key={item.id}
-                whileHover={{ y: -2 }}
-                className={`p-4 rounded-lg border transition-all ${
-                  isDarkMode
-                    ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20 hover:border-[#8c5cff]/40'
-                    : 'bg-white/50 border-purple-200 hover:border-purple-400'
-                }`}
-              >
-                <div className="flex items-start justify-between flex-wrap gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h4 className={`font-bold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      {item.plantel}
-                    </h4>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {item.nombre_archivo}
-                    </p>
-                    <div className="flex flex-wrap gap-4 mt-2 text-xs">
-                      <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-                        📅 {new Date(item.fecha_sesion).toLocaleDateString('es-CL')}
-                      </span>
-                      <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-                        📊 {item.cantidad_registros} registros
-                      </span>
-                      <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-                        👤 {item.nutricionista_nombre}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+          <div className={`overflow-x-auto rounded-lg border ${isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'}`}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr
+                  className={`${
+                    isDarkMode
+                      ? 'bg-[#1a1c22]/50 border-b border-[#8c5cff]/20'
+                      : 'bg-purple-50 border-b border-purple-200'
+                  }`}
+                >
+                  <th className={`px-4 py-3 text-left font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Plantel
+                  </th>
+                  <th className={`px-4 py-3 text-left font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Archivo
+                  </th>
+                  <th className={`px-4 py-3 text-left font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Fecha
+                  </th>
+                  <th className={`px-4 py-3 text-center font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Registros
+                  </th>
+                  <th className={`px-4 py-3 text-left font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Nutricionista
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {uploadHistory
+                  .filter((item) => selectedPlantel === 'todos' || item.plantel === selectedPlantel)
+                  .map((item) => (
+                    <motion.tr
+                      key={item.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className={`border-b transition-colors ${
+                        isDarkMode
+                          ? 'border-[#8c5cff]/10 hover:bg-[#1a1c22]/30'
+                          : 'border-purple-100 hover:bg-purple-50/50'
+                      }`}
+                    >
+                      <td className={`px-4 py-3 font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {item.plantel}
+                      </td>
+                      <td className={`px-4 py-3 text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {item.nombre_archivo}
+                      </td>
+                      <td className={`px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {new Date(item.fecha_sesion).toLocaleDateString('es-CL')}
+                      </td>
+                      <td className={`px-4 py-3 text-center font-semibold ${isDarkMode ? 'text-[#8c5cff]' : 'text-purple-600'}`}>
+                        {item.cantidad_registros}
+                      </td>
+                      <td className={`px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {item.nutricionista_nombre}
+                      </td>
+                    </motion.tr>
+                  ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

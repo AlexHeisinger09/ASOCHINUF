@@ -10,13 +10,24 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
     { id: 'inicio', label: 'Inicio', icon: Home },
     { id: 'cursos', label: 'Cursos', icon: BookOpen },
     { id: 'datos', label: 'Inf. Antropométrico', icon: User },
-    { id: 'excel', label: 'Cargar Excel', icon: Upload },
   ];
 
-  // Agregar opción de gestión de usuarios solo para admins
-  const menuItems = usuario?.tipo_perfil === 'admin'
-    ? [...baseMenuItems, { id: 'gestion', label: 'Gestión Usuarios', icon: Users }]
-    : baseMenuItems;
+  // Excel solo para nutricionistas y admins
+  const excelItem = usuario?.tipo_perfil !== 'cliente'
+    ? [{ id: 'excel', label: 'Cargar Excel', icon: Upload }]
+    : [];
+
+  // Gestión Cursos solo para admins
+  const gestionCursosItem = usuario?.tipo_perfil === 'admin'
+    ? [{ id: 'gestioncursos', label: 'Gestión Cursos', icon: BookOpen }]
+    : [];
+
+  // Gestión Usuarios solo para admins
+  const gestionUsuariosItem = usuario?.tipo_perfil === 'admin'
+    ? [{ id: 'gestion', label: 'Gestión Usuarios', icon: Users }]
+    : [];
+
+  const menuItems = [...baseMenuItems, ...excelItem, ...gestionCursosItem, ...gestionUsuariosItem];
 
   return (
     <motion.aside

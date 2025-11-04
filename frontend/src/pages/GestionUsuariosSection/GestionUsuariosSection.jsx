@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import UsuarioModal from './UsuarioModal';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import { API_ENDPOINTS } from '../../config/apiConfig';
 
 const GestionUsuariosSection = ({ containerVariants }) => {
   const { isDarkMode, token } = useAuth();
@@ -24,14 +25,14 @@ const GestionUsuariosSection = ({ containerVariants }) => {
     tipo_perfil: 'cliente',
   });
 
-  const API_URL = 'http://localhost:5001/api/auth';
+  const API_BASE = API_ENDPOINTS.AUTH.LOGIN.substring(0, API_ENDPOINTS.AUTH.LOGIN.lastIndexOf('/'));
 
   // Obtener usuarios
   const obtenerUsuarios = async () => {
     try {
       setLoading(true);
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.get(`${API_URL}/usuarios`, config);
+      const response = await axios.get(`${API_BASE}/usuarios`, config);
       setUsuarios(response.data);
       setError('');
     } catch (err) {
@@ -51,7 +52,7 @@ const GestionUsuariosSection = ({ containerVariants }) => {
     e.preventDefault();
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.post(`${API_URL}/usuarios`, formData, config);
+      const response = await axios.post(`${API_BASE}/usuarios`, formData, config);
       setUsuarios([response.data.usuario, ...usuarios]);
       setFormData({
         nombre: '',
@@ -76,7 +77,7 @@ const GestionUsuariosSection = ({ containerVariants }) => {
       if (!dataToSend.password) delete dataToSend.password;
 
       const response = await axios.put(
-        `${API_URL}/usuarios/${editingId}`,
+        `${API_BASE}/usuarios/${editingId}`,
         dataToSend,
         config
       );
@@ -111,7 +112,7 @@ const GestionUsuariosSection = ({ containerVariants }) => {
 
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`${API_URL}/usuarios/${usuarioAEliminar.id}`, config);
+      await axios.delete(`${API_BASE}/usuarios/${usuarioAEliminar.id}`, config);
       setUsuarios(usuarios.filter((u) => u.id !== usuarioAEliminar.id));
       setShowConfirmDialog(false);
       setUsuarioAEliminar(null);

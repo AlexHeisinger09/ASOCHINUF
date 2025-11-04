@@ -4,6 +4,7 @@ import { User, Mail, Lock, Camera, Save, X, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import ImageCropModal from '../../components/ImageCropModal';
+import { API_ENDPOINTS } from '../../config/apiConfig';
 
 const MiPerfil = () => {
   const { usuario, isDarkMode, actualizarUsuario } = useAuth();
@@ -37,7 +38,7 @@ const MiPerfil = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/cambiar-contrasena', {
+      const response = await fetch(API_ENDPOINTS.AUTH.CAMBIAR_CONTRASENA, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +111,7 @@ const MiPerfil = () => {
     console.log('📤 Enviando FormData...');
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/actualizar-foto', {
+      const response = await fetch(API_ENDPOINTS.AUTH.ACTUALIZAR_FOTO, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('asochinuf_token')}`,
