@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import '../../styles/datepicker.css';
 import {
   Plus,
   Edit2,
@@ -323,6 +326,16 @@ const GestionCursosSection = ({ containerVariants }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDateChange = (fieldName, date) => {
+    if (date) {
+      // Convertir Date a formato YYYY-MM-DD para el backend
+      const dateString = date.toISOString().split('T')[0];
+      setFormData(prev => ({ ...prev, [fieldName]: dateString }));
+    } else {
+      setFormData(prev => ({ ...prev, [fieldName]: '' }));
+    }
   };
 
   const handleImagenChange = (e) => {
@@ -712,7 +725,7 @@ const GestionCursosSection = ({ containerVariants }) => {
                 </div>
 
                 {/* Form */}
-                <form onSubmit={editingId ? handleActualizarCurso : handleCrearCurso} className="p-6 space-y-4 max-h-[85vh] overflow-y-auto">
+                <form onSubmit={editingId ? handleActualizarCurso : handleCrearCurso} className="p-6 space-y-4 max-h-[85vh] overflow-y-auto overflow-x-visible">
                   {/* Error en Modal */}
                   {error && (
                     <div className="bg-red-500/20 border border-red-500 text-red-400 p-3 rounded-lg text-sm">
@@ -847,17 +860,22 @@ const GestionCursosSection = ({ containerVariants }) => {
                     <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                       Fecha de Inicio
                     </label>
-                    <input
-                      type="date"
-                      name="fecha_inicio"
-                      value={formData.fecha_inicio}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-2 rounded-lg border transition-all ${
-                        isDarkMode
-                          ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white'
-                          : 'bg-white border-purple-200 text-gray-900'
-                      } focus:outline-none focus:border-[#8c5cff]`}
-                    />
+                    <div className="relative">
+                      <DatePicker
+                        selected={formData.fecha_inicio ? new Date(formData.fecha_inicio) : null}
+                        onChange={(date) => handleDateChange('fecha_inicio', date)}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="Seleccionar fecha..."
+                        isClearable
+                        popperPlacement="top-start"
+                        className={`w-full px-4 py-2 rounded-lg border transition-all ${
+                          isDarkMode
+                            ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500'
+                            : 'bg-white border-purple-200 text-gray-900 placeholder-gray-400'
+                        } focus:outline-none focus:border-[#8c5cff]`}
+                      />
+                      <Calendar size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
+                    </div>
                   </div>
 
                   {/* Fecha de Fin */}
@@ -865,17 +883,23 @@ const GestionCursosSection = ({ containerVariants }) => {
                     <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                       Fecha de Fin
                     </label>
-                    <input
-                      type="date"
-                      name="fecha_fin"
-                      value={formData.fecha_fin}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-2 rounded-lg border transition-all ${
-                        isDarkMode
-                          ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white'
-                          : 'bg-white border-purple-200 text-gray-900'
-                      } focus:outline-none focus:border-[#8c5cff]`}
-                    />
+                    <div className="relative">
+                      <DatePicker
+                        selected={formData.fecha_fin ? new Date(formData.fecha_fin) : null}
+                        onChange={(date) => handleDateChange('fecha_fin', date)}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="Seleccionar fecha..."
+                        isClearable
+                        minDate={formData.fecha_inicio ? new Date(formData.fecha_inicio) : undefined}
+                        popperPlacement="top-start"
+                        className={`w-full px-4 py-2 rounded-lg border transition-all ${
+                          isDarkMode
+                            ? 'bg-[#0f1117] border-[#8c5cff]/20 text-white placeholder-gray-500'
+                            : 'bg-white border-purple-200 text-gray-900 placeholder-gray-400'
+                        } focus:outline-none focus:border-[#8c5cff]`}
+                      />
+                      <Calendar size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
+                    </div>
                   </div>
 
                   {/* Precio */}

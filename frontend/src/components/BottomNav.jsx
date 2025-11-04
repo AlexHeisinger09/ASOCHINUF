@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Home, BookOpen, User, Upload, Settings, Users } from 'lucide-react';
+import { Home, BookOpen, User, Upload, Users, ClipboardList } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const BottomNav = ({ activeTab, setActiveTab }) => {
@@ -17,14 +17,17 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
     ? [{ id: 'excel', label: 'Excel', icon: Upload }]
     : [];
 
-  const configItem = [{ id: 'configuracion', label: 'Config', icon: Settings }];
+  // Gestión de Cursos solo para admins
+  const gestionCursosItem = usuario?.tipo_perfil === 'admin'
+    ? [{ id: 'gestioncursos', label: 'Gestión', icon: ClipboardList }]
+    : [];
 
-  // Gestión solo para admins
-  const gestionItem = usuario?.tipo_perfil === 'admin'
+  // Gestión de Usuarios solo para admins
+  const gestionUsuariosItem = usuario?.tipo_perfil === 'admin'
     ? [{ id: 'gestion', label: 'Usuarios', icon: Users }]
     : [];
 
-  const menuItems = [...baseMenuItems, ...excelItem, ...configItem, ...gestionItem];
+  const menuItems = [...baseMenuItems, ...excelItem, ...gestionCursosItem, ...gestionUsuariosItem];
 
   return (
     <motion.nav

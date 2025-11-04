@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, Settings, ChevronDown, Moon, Sun, User } from 'lucide-react';
+import { LogOut, Settings, User, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLogout }) => {
