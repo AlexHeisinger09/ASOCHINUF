@@ -84,39 +84,44 @@ const PaymentModal = ({ isOpen, onClose, cuota, onSuccess }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-50"
+            className="fixed inset-0 bg-black/50 z-40"
           />
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md max-h-[90vh] z-50 flex flex-col ${
-              isDarkMode ? 'bg-[#1a1c22]' : 'bg-white'
-            } rounded-2xl shadow-2xl border ${isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'}`}
-          >
-            {/* Header */}
-            <div className={`flex items-center justify-between p-6 border-b ${
-              isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'
-            }`}>
-              <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                {paymentStep === 'success' ? 'Pago Realizado' : 'Realizar Pago'}
-              </h2>
-              {paymentStep !== 'processing' && (
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={onClose}
-                  className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-[#8c5cff]/20' : 'hover:bg-purple-100'}`}
-                >
-                  <X size={20} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
-                </motion.button>
-              )}
-            </div>
+          {/* Container centrado - ESTRUCTURA CORRECTA */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+            {/* Modal Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className={`w-full max-w-md rounded-2xl shadow-2xl border ${
+                isDarkMode
+                  ? 'bg-[#1a1c22] border-[#8c5cff]/20'
+                  : 'bg-white border-purple-200'
+              }`}
+            >
+              {/* Header */}
+              <div className={`flex items-center justify-between p-6 border-b ${
+                isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'
+              }`}>
+                <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {paymentStep === 'success' ? 'Pago Realizado' : 'Realizar Pago'}
+                </h2>
+                {paymentStep !== 'processing' && (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={onClose}
+                    type="button"
+                    className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-[#8c5cff]/20' : 'hover:bg-purple-100'}`}
+                  >
+                    <X size={20} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+                  </motion.button>
+                )}
+              </div>
 
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {/* Body */}
+              <div className="p-6 space-y-4 max-h-[calc(85vh-120px)] overflow-y-auto">
               {/* Resumen de Cuota */}
               <motion.div
                 className={`p-4 rounded-lg border ${
@@ -346,8 +351,9 @@ const PaymentModal = ({ isOpen, onClose, cuota, onSuccess }) => {
                   </div>
                 </motion.form>
               )}
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

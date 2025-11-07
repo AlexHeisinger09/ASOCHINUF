@@ -83,37 +83,42 @@ const EditCuotaModal = ({ isOpen, cuota, onClose, onSuccess }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-50"
+            className="fixed inset-0 bg-black/50 z-40"
           />
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md max-h-[90vh] z-50 flex flex-col ${
-              isDarkMode ? 'bg-[#1a1c22]' : 'bg-white'
-            } rounded-2xl shadow-2xl border ${isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'}`}
-          >
-            {/* Header */}
-            <div className={`flex items-center justify-between p-6 border-b ${
-              isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'
-            }`}>
-              <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Editar Cuota
-              </h2>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={onClose}
-                className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-[#8c5cff]/20' : 'hover:bg-purple-100'}`}
-              >
-                <X size={20} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
-              </motion.button>
-            </div>
+          {/* Container centrado - ESTRUCTURA CORRECTA */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+            {/* Modal Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className={`w-full max-w-md rounded-2xl shadow-2xl border ${
+                isDarkMode
+                  ? 'bg-[#1a1c22] border-[#8c5cff]/20'
+                  : 'bg-white border-purple-200'
+              }`}
+            >
+              {/* Header */}
+              <div className={`flex items-center justify-between p-6 border-b ${
+                isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'
+              }`}>
+                <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  Editar Cuota
+                </h2>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={onClose}
+                  type="button"
+                  className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-[#8c5cff]/20' : 'hover:bg-purple-100'}`}
+                >
+                  <X size={20} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+                </motion.button>
+              </div>
 
-            {/* Body */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+              {/* Body */}
+              <form onSubmit={handleSubmit} className="p-6 space-y-4">
               {error && (
                 <div className={`p-4 rounded-lg border-l-4 border-red-500 flex gap-3 ${
                   isDarkMode ? 'bg-red-500/10' : 'bg-red-50'
@@ -275,7 +280,8 @@ const EditCuotaModal = ({ isOpen, cuota, onClose, onSuccess }) => {
                 </motion.button>
               </div>
             </form>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
