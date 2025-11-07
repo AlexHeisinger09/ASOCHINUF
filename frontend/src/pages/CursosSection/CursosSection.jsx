@@ -17,7 +17,7 @@ import {
   X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { API_ENDPOINTS } from '../../config/apiConfig';
+import { API_ENDPOINTS, BASE as API_URL } from '../../config/apiConfig';
 import axios from 'axios';
 
 const CursosSection = ({ containerVariants }) => {
@@ -320,7 +320,7 @@ const CursosSection = ({ containerVariants }) => {
                 <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[#8c5cff] via-[#6a3dcf] to-[#4e2d9a]">
                   {curso.imagen_portada ? (
                     <img
-                      src={curso.imagen_portada.startsWith('http') ? curso.imagen_portada : `http://localhost:5000${curso.imagen_portada}`}
+                      src={curso.imagen_portada.startsWith('http') ? curso.imagen_portada : `${API_URL}${curso.imagen_portada}`}
                       alt={curso.nombre}
                       loading="lazy"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"

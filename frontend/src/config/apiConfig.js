@@ -1,5 +1,5 @@
 // Configuración centralizada de la API
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 export const API_ENDPOINTS = {
   // Auth
@@ -29,6 +29,21 @@ export const API_ENDPOINTS = {
     BY_NIVEL: (nivel) => `${API_URL}/api/cursos/nivel/${nivel}`,
     BY_CATEGORIA: (categoriaId) => `${API_URL}/api/cursos/categoria/${categoriaId}`,
     SEARCH: (query) => `${API_URL}/api/cursos/search?q=${query}`,
+  },
+  // Planteles
+  PLANTELES: {
+    GET_ALL: `${API_URL}/api/planteles`,
+    GET_ACTIVOS: `${API_URL}/api/planteles/activos`,
+    GET_ONE: (id) => `${API_URL}/api/planteles/${id}`,
+    CREATE: `${API_URL}/api/planteles`,
+    UPDATE: (id) => `${API_URL}/api/planteles/${id}`,
+    DELETE: (id) => `${API_URL}/api/planteles/${id}`,
+  },
+  // Categorías
+  CATEGORIAS: {
+    GET_ALL: `${API_URL}/api/categorias`,
+    GET_ACTIVAS: `${API_URL}/api/categorias/activas`,
+    GET_ONE: (id) => `${API_URL}/api/categorias/${id}`,
   },
 };
 

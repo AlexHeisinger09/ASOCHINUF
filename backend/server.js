@@ -7,6 +7,8 @@ import pool from './config/database.js';
 import authRoutes from './routes/auth.js';
 import excelRoutes from './routes/excel.js';
 import cursosRoutes from './routes/cursos.js';
+import plantelesRoutes from './routes/planteles.js';
+import categoriasRoutes from './routes/categorias.js';
 
 dotenv.config();
 
@@ -16,7 +18,10 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    'http://localhost:3001'
+  ],
   credentials: true,
 }));
 app.use(express.json());
@@ -29,6 +34,8 @@ app.use('/foto_curso', express.static(path.join(__dirname, '..', 'frontend', 'pu
 app.use('/api/auth', authRoutes);
 app.use('/api/excel', excelRoutes);
 app.use('/api/cursos', cursosRoutes);
+app.use('/api/planteles', plantelesRoutes);
+app.use('/api/categorias', categoriasRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -61,3 +68,4 @@ const iniciarServidor = async () => {
 iniciarServidor();
 
 export default app;
+// trigger

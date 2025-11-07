@@ -38,7 +38,7 @@ node scripts/create-test-user.js     # Create test user
 
 ### Frontend Stack
 - **Framework:** React 19.0.0 with React Router 7.5.1
-- **Build:** Create React App with Craco 7.1.0
+- **Build:** Vite 5.0.11 (NOT Create React App)
 - **Styling:** Tailwind CSS 3.4.17 with Shadcn/ui components (46+ components, New York style)
 - **Forms:** React Hook Form + Zod validation
 - **Animations:** Framer Motion with scroll-based parallax effects
@@ -87,7 +87,7 @@ backend/
 │   └── auth.js                   # JWT authentication (verificarToken)
 ├── controllers/
 │   ├── authController.js         # Authentication logic
-│   └── excelController.js        # Excel upload and processing (~325 lines)
+│   └── excelController.js        # Excel upload and processing (~324 lines)
 ├── routes/
 │   ├── auth.js                   # Auth endpoints
 │   └── excel.js                  # Excel upload endpoints with Multer
@@ -165,8 +165,8 @@ backend/
 1. Nutritionist/admin uploads Excel file via `/api/excel/upload` (max 10MB, .xlsx/.xls)
 2. Multer stores file in memory buffer
 3. `excelParser.js` validates structure and extracts:
-   - Metadata: Plantel name (cell B1), session date (cell B2)
-   - Patient data: Name, cedula, birth date from rows
+   - Metadata: Plantel name (cell B2), session date (cell D3)
+   - Patient data: Name, cedula, birth date from rows (starting row 6)
    - Anthropometric measurements: 30+ columns
 4. File hash generated (SHA-256) to detect duplicate uploads
 5. Transaction creates/updates:
@@ -185,15 +185,15 @@ Path alias `@/*` maps to `src/*` for cleaner imports (e.g., `@/components`, `@/h
 ### components.json
 Shadcn/ui configuration with New York style, JSX (not TSX), Lucide icons.
 
-### craco.config.js
+### vite.config.js
 - Path alias resolution (`@/*` → `src/*`)
-- Hot reload toggle via `DISABLE_HOT_RELOAD` env var
-- Visual editing plugin support (optional)
-- Watch mode optimization (ignores node_modules, .git, build, dist)
+- Dev server on port 3000 with hot reload
+- Build output to `dist/` directory
+- Code splitting for vendor libraries (React, React Router)
 
 ### netlify.toml
 - Build: `cd frontend && yarn install && yarn build`
-- Publish: `frontend/build`
+- Publish: `frontend/build` (Note: Vite outputs to `dist/` by default, this may need updating)
 - Node 20
 - SPA redirect: `/* → /index.html` (client-side routing)
 
@@ -225,7 +225,7 @@ SMTP_USER=your_email@gmail.com
 SMTP_PASS=your_app_password
 ```
 
-**Important:** Backend runs on port **5001** by default. AuthContext hardcodes `http://localhost:5001` for API calls.
+**Important:** Backend runs on port **5001** by default. Frontend API config references this port.
 
 ## Frontend Routes
 
@@ -255,21 +255,21 @@ Landing page content consumed by Home.jsx:
 - 3 professional testimonials with photos
 - Organizational structure (2025-2027) with team member bios
 
-To update landing page content, edit [mock.js](frontend/src/mock.js).
+To update landing page content, edit `src/mock.js`.
 
 ## Common Development Workflows
 
 ### Add a New Frontend Route
 1. Create component in `frontend/src/pages/` or `frontend/src/components/`
-2. Add route to [App.js](frontend/src/App.js) in the `<Routes>` component
+2. Add route to `App.js` in the `<Routes>` component
 3. If protected, wrap with `<ProtectedRoute>` component
 4. AuthContext provides token and user data via context
 
 ### Add a New API Endpoint
-1. Create controller function in appropriate controller (e.g., [authController.js](backend/controllers/authController.js))
-2. Add route to appropriate route file (e.g., [auth.js](backend/routes/auth.js))
-3. Import and register in [server.js](backend/server.js) with `app.use('/api/endpoint', routeModule)`
-4. Protected routes use `verificarToken` middleware from [auth.js](backend/middleware/auth.js)
+1. Create controller function in appropriate controller (e.g., `authController.js`)
+2. Add route to appropriate route file (e.g., `auth.js`)
+3. Import and register in `server.js` with `app.use('/api/endpoint', routeModule)`
+4. Protected routes use `verificarToken` middleware from `middleware/auth.js`
 
 ### Add a New UI Component from Shadcn
 ```bash
@@ -300,8 +300,8 @@ Imported components are placed in `src/components/ui/`
 6. View upload history and session details in Excel section
 
 ### Add New Anthropometric Measurement Column
-1. Update database schema in [init-db.js](backend/scripts/init-db.js) - add column to `t_informe_antropometrico`
-2. Update [excelParser.js](backend/utils/excelParser.js) - add column mapping in `columnMap`
+1. Update database schema in `scripts/init-db.js` - add column to `t_informe_antropometrico`
+2. Update `utils/excelParser.js` - add column mapping in `columnMap`
 3. Update frontend Excel section to display new field
 4. Run `npm run db:init` to apply schema changes
 
@@ -309,7 +309,7 @@ Imported components are placed in `src/components/ui/`
 
 **Frontend Authentication (AuthContext.jsx):**
 - Stores token and user data in localStorage (`asochinuf_token`, `asochinuf_usuario`)
-- Provides `login()`, `logout()`, `register()` functions via context
+- Provides `login()`, `logout()`, `registro()` functions via context
 - Theme management with `isDarkMode` state and localStorage (`asochinuf_theme`)
 - ProtectedRoute checks token before rendering
 
@@ -318,10 +318,11 @@ Imported components are placed in `src/components/ui/`
 - Attaches decoded user data to `req.usuario` (includes id, email, tipo_perfil)
 - Returns 401 if token missing/invalid
 - Middleware name: `verificarToken`
+- Additional middleware: `verificarAdmin`, `verificarNutricionista`
 
 **Excel Parser (utils/excelParser.js):**
 - Reads Excel file using XLSX library
-- Validates structure: checks Plantel (B1), Fecha (B2), Headers (row 4)
+- Validates structure: checks Plantel (B2), Fecha (D3), Headers (row 5)
 - Extracts metadata and patient rows
 - Maps 30+ anthropometric measurement columns
 - Generates SHA-256 file hash for duplicate detection

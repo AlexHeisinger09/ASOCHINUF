@@ -8,6 +8,7 @@ import ExcelSection from '../pages/ExcelSection/ExcelSection';
 import ConfiguracionSection from '../pages/ConfiguracionSection/ConfiguracionSection';
 import GestionUsuariosSection from '../pages/GestionUsuariosSection/GestionUsuariosSection';
 import GestionCursosSection from '../pages/GestionCursosSection/GestionCursosSection';
+import GestionPlantelesSection from '../pages/GestionPlantelesSection/GestionPlantelesSection';
 import MiPerfil from '../pages/PerfilSection/MiPerfil';
 
 const MainContent = ({ activeTab }) => {
@@ -41,6 +42,7 @@ const MainContent = ({ activeTab }) => {
         {activeTab === 'excel' && <ExcelSection containerVariants={containerVariants} />}
         {activeTab === 'perfil' && <MiPerfil />}
         {activeTab === 'configuracion' && <ConfiguracionSection containerVariants={containerVariants} />}
+        {activeTab === 'gestionplanteles' && <GestionPlantelesSection containerVariants={containerVariants} />}
         {activeTab === 'gestion' && <GestionUsuariosSection containerVariants={containerVariants} />}
         {activeTab === 'gestioncursos' && <GestionCursosSection containerVariants={containerVariants} />}
       </AnimatePresence>

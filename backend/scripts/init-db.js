@@ -131,14 +131,60 @@ const inicializarBD = async () => {
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_inscripciones_curso_id ON t_inscripciones(curso_id);`);
     console.log('✓ Índices en t_inscripciones creados\\n');
 
+    // ========== TABLA t_categorias ==========
+    console.log('Creando tabla t_categorias...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS t_categorias (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(50) NOT NULL UNIQUE,
+        descripcion VARCHAR(255),
+        orden INTEGER,
+        activo BOOLEAN DEFAULT true,
+        fecha_creacion TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    console.log('✓ Tabla t_categorias creada');
+
+    // Insertar categorías predefinidas
+    const categorias = [
+      { nombre: 'Sub-12', descripcion: 'Categoría Sub-12', orden: 1 },
+      { nombre: 'Sub-13', descripcion: 'Categoría Sub-13', orden: 2 },
+      { nombre: 'Sub-14', descripcion: 'Categoría Sub-14', orden: 3 },
+      { nombre: 'Sub-15', descripcion: 'Categoría Sub-15', orden: 4 },
+      { nombre: 'Sub-16', descripcion: 'Categoría Sub-16', orden: 5 },
+      { nombre: 'Sub-17', descripcion: 'Categoría Sub-17', orden: 6 },
+      { nombre: 'Sub-18', descripcion: 'Categoría Sub-18', orden: 7 },
+      { nombre: 'Sub-19', descripcion: 'Categoría Sub-19', orden: 8 },
+      { nombre: 'Sub-20', descripcion: 'Categoría Sub-20', orden: 9 },
+      { nombre: 'Sub-21', descripcion: 'Categoría Sub-21', orden: 10 },
+      { nombre: 'Sub-23', descripcion: 'Categoría Sub-23', orden: 11 },
+      { nombre: 'Adulta', descripcion: 'Categoría Adulta', orden: 12 }
+    ];
+
+    for (const cat of categorias) {
+      await pool.query(
+        `INSERT INTO t_categorias (nombre, descripcion, orden)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (nombre) DO NOTHING`,
+        [cat.nombre, cat.descripcion, cat.orden]
+      );
+    }
+
+    // Índices para t_categorias
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_categorias_orden ON t_categorias(orden);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_categorias_activo ON t_categorias(activo);`);
+    console.log('✓ Índices en t_categorias creados\\n');
+
     // ========== TABLA t_planteles ==========
     console.log('Creando tabla t_planteles...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_planteles (
         id SERIAL PRIMARY KEY,
         nombre VARCHAR(255) NOT NULL UNIQUE,
+        division VARCHAR(50) NOT NULL CHECK (division IN ('Primera División', 'Segunda División', 'Tercera División', 'Amateur')),
         activo BOOLEAN DEFAULT true,
-        fecha_creacion TIMESTAMP DEFAULT NOW()
+        fecha_creacion TIMESTAMP DEFAULT NOW(),
+        usuario_creacion INTEGER REFERENCES t_usuarios(id) ON DELETE SET NULL
       );
     `);
     console.log('✓ Tabla t_planteles creada');
@@ -153,25 +199,23 @@ const inicializarBD = async () => {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS t_sesion_mediciones (
         id SERIAL PRIMARY KEY,
-        plantel_id INTEGER NOT NULL,
-        nutricionista_id INTEGER NOT NULL,
+        plantel_id INTEGER REFERENCES t_planteles(id) ON DELETE RESTRICT,
+        categoria_id INTEGER REFERENCES t_categorias(id) ON DELETE RESTRICT,
         fecha_sesion DATE NOT NULL,
+        nutricionista_id INTEGER REFERENCES t_usuarios(id) ON DELETE SET NULL,
+        archivo_hash VARCHAR(64) NOT NULL,
+        cantidad_registros INTEGER NOT NULL,
         fecha_carga TIMESTAMP DEFAULT NOW(),
-        nombre_archivo VARCHAR(255),
-        hash_archivo VARCHAR(64),
-        cantidad_registros INTEGER DEFAULT 0,
-        activo BOOLEAN DEFAULT true,
-        FOREIGN KEY (plantel_id) REFERENCES t_planteles(id) ON DELETE CASCADE,
-        FOREIGN KEY (nutricionista_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
-        UNIQUE(plantel_id, fecha_sesion, hash_archivo)
+        UNIQUE(plantel_id, categoria_id, fecha_sesion, archivo_hash)
       );
     `);
     console.log('✓ Tabla t_sesion_mediciones creada');
 
     // Índices para t_sesion_mediciones
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_mediciones_plantel_id ON t_sesion_mediciones(plantel_id);`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_mediciones_nutricionista_id ON t_sesion_mediciones(nutricionista_id);`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_mediciones_fecha ON t_sesion_mediciones(fecha_sesion);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_plantel ON t_sesion_mediciones(plantel_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_categoria ON t_sesion_mediciones(categoria_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_fecha ON t_sesion_mediciones(fecha_sesion);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_sesion_nutricionista ON t_sesion_mediciones(nutricionista_id);`);
     console.log('✓ Índices en t_sesion_mediciones creados\\n');
 
     // ========== TABLA t_informe_antropometrico ==========

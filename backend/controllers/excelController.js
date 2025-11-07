@@ -16,11 +16,50 @@ export const uploadExcelFile = async (req, res) => {
 
     const usuarioId = req.usuario.id;
     const tipoPerf = req.usuario.tipo_perfil;
+    const { plantel_id, categoria_id } = req.body;
 
     // Verificar que sea nutricionista o admin
     if (tipoPerf !== 'nutricionista' && tipoPerf !== 'admin') {
       return res.status(403).json({ error: 'No tienes permiso para cargar archivos Excel' });
     }
+
+    // Verificar que se hayan seleccionado plantel y categoría
+    if (!plantel_id) {
+      return res.status(400).json({ error: 'Debe seleccionar un plantel antes de cargar el archivo' });
+    }
+
+    if (!categoria_id) {
+      return res.status(400).json({ error: 'Debe seleccionar una categoría antes de cargar el archivo' });
+    }
+
+    // Verificar que el plantel existe y está activo
+    const plantelResult = await pool.query(
+      `SELECT p.id, p.nombre, p.division
+       FROM t_planteles p
+       WHERE p.id = $1 AND p.activo = true`,
+      [plantel_id]
+    );
+
+    if (plantelResult.rows.length === 0) {
+      return res.status(400).json({ error: 'El plantel seleccionado no existe o está inactivo' });
+    }
+
+    // Verificar que la categoría existe y está activa
+    const categoriaResult = await pool.query(
+      `SELECT c.id, c.nombre
+       FROM t_categorias c
+       WHERE c.id = $1 AND c.activo = true`,
+      [categoria_id]
+    );
+
+    if (categoriaResult.rows.length === 0) {
+      return res.status(400).json({ error: 'La categoría seleccionada no existe o está inactiva' });
+    }
+
+    const plantelId = plantelResult.rows[0].id;
+    const plantelNombre = plantelResult.rows[0].nombre;
+    const categoriaId = categoriaResult.rows[0].id;
+    const categoriaNombre = categoriaResult.rows[0].nombre;
 
     // Generar hash del archivo para detectar duplicados
     const fileHash = generateFileHash(req.file.buffer);
@@ -41,34 +80,17 @@ export const uploadExcelFile = async (req, res) => {
     // Validar estructura del Excel
     validateExcelStructure(parsedData);
 
-    const { plantel, fecha_sesion, measurements, cantidad_registros } = parsedData;
-
-    // 1. Verificar si el plantel existe, si no crearlo
-    let plantelResult = await pool.query(
-      'SELECT id FROM t_planteles WHERE nombre = $1',
-      [plantel]
-    );
-
-    let plantelId;
-    if (plantelResult.rows.length === 0) {
-      const createPlantelResult = await pool.query(
-        'INSERT INTO t_planteles (nombre) VALUES ($1) RETURNING id',
-        [plantel]
-      );
-      plantelId = createPlantelResult.rows[0].id;
-    } else {
-      plantelId = plantelResult.rows[0].id;
-    }
+    const { fecha_sesion, measurements, cantidad_registros } = parsedData;
 
     // 2. Verificar si la sesión ya existe (detectar duplicados)
     const existingSessionResult = await pool.query(
-      'SELECT id FROM t_sesion_mediciones WHERE plantel_id = $1 AND fecha_sesion = $2 AND hash_archivo = $3',
-      [plantelId, fecha_sesion, fileHash]
+      'SELECT id FROM t_sesion_mediciones WHERE plantel_id = $1 AND categoria_id = $2 AND fecha_sesion = $3 AND archivo_hash = $4',
+      [plantelId, categoriaId, fecha_sesion, fileHash]
     );
 
     if (existingSessionResult.rows.length > 0) {
       return res.status(409).json({
-        error: 'Este archivo ya ha sido cargado previamente para este plantel en esta fecha',
+        error: 'Este archivo ya ha sido cargado previamente para este plantel y categoría en esta fecha',
         sesionId: existingSessionResult.rows[0].id,
       });
     }
@@ -76,10 +98,10 @@ export const uploadExcelFile = async (req, res) => {
     // 3. Crear sesión de mediciones
     const sessionResult = await pool.query(
       `INSERT INTO t_sesion_mediciones
-       (plantel_id, nutricionista_id, fecha_sesion, nombre_archivo, hash_archivo, cantidad_registros)
+       (plantel_id, categoria_id, fecha_sesion, nutricionista_id, archivo_hash, cantidad_registros)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
-      [plantelId, usuarioId, fecha_sesion, req.file.originalname, fileHash, cantidad_registros]
+      [plantelId, categoriaId, fecha_sesion, usuarioId, fileHash, cantidad_registros]
     );
 
     const sesionId = sessionResult.rows[0].id;
@@ -196,7 +218,8 @@ export const uploadExcelFile = async (req, res) => {
       success: true,
       message: 'Archivo cargado exitosamente',
       sesionId,
-      plantel,
+      plantel: plantelNombre,
+      categoria: categoriaNombre,
       fecha_sesion,
       registrosInsertados,
       registrosDuplicados,
@@ -229,7 +252,6 @@ export const getUploadHistory = async (req, res) => {
     let query = `
       SELECT
         sm.id,
-        sm.nombre_archivo,
         sm.fecha_sesion,
         sm.fecha_carga,
         sm.cantidad_registros,
@@ -271,7 +293,6 @@ export const getSessionDetails = async (req, res) => {
     const sessionResult = await pool.query(
       `SELECT
         sm.id,
-        sm.nombre_archivo,
         sm.fecha_sesion,
         sm.fecha_carga,
         sm.cantidad_registros,

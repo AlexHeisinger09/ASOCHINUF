@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Home, BookOpen, User, Upload, Users, ClipboardList } from 'lucide-react';
+import { Home, BookOpen, User, Upload, Users, ClipboardList, Trophy } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const BottomNav = ({ activeTab, setActiveTab }) => {
@@ -22,12 +22,17 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
     ? [{ id: 'gestioncursos', label: 'Gestión', icon: ClipboardList }]
     : [];
 
+  // Gestión de Planteles solo para admins
+  const gestionPlantelesItem = usuario?.tipo_perfil === 'admin'
+    ? [{ id: 'gestionplanteles', label: 'Planteles', icon: Trophy }]
+    : [];
+
   // Gestión de Usuarios solo para admins
   const gestionUsuariosItem = usuario?.tipo_perfil === 'admin'
     ? [{ id: 'gestion', label: 'Usuarios', icon: Users }]
     : [];
 
-  const menuItems = [...baseMenuItems, ...excelItem, ...gestionCursosItem, ...gestionUsuariosItem];
+  const menuItems = [...baseMenuItems, ...excelItem, ...gestionPlantelesItem, ...gestionCursosItem, ...gestionUsuariosItem];
 
   return (
     <motion.nav

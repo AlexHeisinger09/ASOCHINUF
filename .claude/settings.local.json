@@ -49,7 +49,11 @@
       "Bash(timeout 15 node:*)",
       "Bash(test:*)",
       "Bash(Test-Path \"c:\\MisProyectosReact\\ASOCHINUF\\frontend\\public\\foto_curso\")",
-      "Bash(start-sleep -Seconds 5)"
+      "Bash(start-sleep -Seconds 5)",
+      "Bash(yarn install)",
+      "Bash(cmd /c \"taskkill /PID 22792 /F && taskkill /PID 19092 /F\")",
+      "Bash(timeout:*)",
+      "Bash(cmd /c \"taskkill /PID 15344 /F\")"
     ],
     "deny": [],
     "ask": []

@@ -3,8 +3,8 @@ import crypto from 'crypto';
 
 /**
  * Parsea un archivo Excel y extrae los datos antropométricos
+ * NOTA: El plantel y categoría ahora se seleccionan en la UI, NO se extraen del Excel
  * Estructura del Excel (con historial longitudinal):
- * - B2: Nombre del plantel (ej: "Plantel USF 2025")
  * - D3: Fecha del reporte (ej: "Fecha: 29/10/2025")
  * - Row 5: Headers (A5: PACIENTES, B5: Informes, C5: Edad cronológica, D5: M. corporal, etc.)
  * - Row 6+: Datos de pacientes
@@ -16,10 +16,6 @@ export const parseExcelFile = (filePath) => {
   try {
     const workbook = XLSX.readFile(filePath);
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    // Extraer nombre del plantel de B2
-    const plantelCell = worksheet['B2'];
-    const plantel = plantelCell ? plantelCell.v : '';
 
     // Extraer fecha del reporte de D3
     const fechaCell = worksheet['D3'];
@@ -193,7 +189,6 @@ export const parseExcelFile = (filePath) => {
     );
 
     return {
-      plantel: plantel.trim(),
       fecha_sesion: fechaReporte,
       measurements: measurementsFiltered,
       cantidad_registros: measurementsFiltered.length,
@@ -215,11 +210,7 @@ export const generateFileHash = (buffer) => {
  * Valida que el archivo tenga la estructura esperada
  */
 export const validateExcelStructure = (parsedData) => {
-  const { plantel, fecha_sesion, measurements } = parsedData;
-
-  if (!plantel || plantel.length === 0) {
-    throw new Error('El archivo no contiene nombre de plantel en la celda B2');
-  }
+  const { fecha_sesion, measurements } = parsedData;
 
   if (!fecha_sesion) {
     throw new Error('El archivo no contiene fecha de reporte válida en la celda D3');

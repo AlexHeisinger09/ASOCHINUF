@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, File, CheckCircle, AlertCircle, X, Loader } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -15,15 +15,17 @@ const ExcelSection = ({ containerVariants }) => {
   const [uploadHistory, setUploadHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedPlantelId, setSelectedPlantelId] = useState('');
+  const [selectedCategoriaId, setSelectedCategoriaId] = useState('');
+  const [planteles, setPlanteles] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [loadingPlanteles, setLoadingPlanteles] = useState(false);
+  const [loadingCategorias, setLoadingCategorias] = useState(false);
   const [selectedPlantel, setSelectedPlantel] = useState('todos');
 
-
-  // Cargar historial de cargas
-  useEffect(() => {
-    cargarHistorial();
-  }, []);
-
-  const cargarHistorial = async () => {
+  // Funciones memoizadas para cargar datos
+  const cargarHistorial = useCallback(async () => {
+    if (!token) return;
     try {
       setLoadingHistory(true);
       const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -31,11 +33,51 @@ const ExcelSection = ({ containerVariants }) => {
       setUploadHistory(response.data);
     } catch (err) {
       console.error('Error al cargar historial:', err);
-      setError('No se pudo cargar el historial de cargas');
+      // No mostrar error para el historial, es secundario
     } finally {
       setLoadingHistory(false);
     }
-  };
+  }, [token]);
+
+  const cargarPlanteles = useCallback(async () => {
+    if (!token) return;
+    try {
+      setLoadingPlanteles(true);
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const response = await axios.get(API_ENDPOINTS.PLANTELES.GET_ACTIVOS, config);
+      setPlanteles(response.data);
+    } catch (err) {
+      console.error('Error al cargar planteles:', err);
+      // No mostrar error si simplemente no hay planteles
+      setPlanteles([]);
+    } finally {
+      setLoadingPlanteles(false);
+    }
+  }, [token]);
+
+  const cargarCategorias = useCallback(async () => {
+    if (!token) return;
+    try {
+      setLoadingCategorias(true);
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const response = await axios.get(API_ENDPOINTS.CATEGORIAS.GET_ACTIVAS, config);
+      setCategorias(response.data);
+    } catch (err) {
+      console.error('Error al cargar categorías:', err);
+      setCategorias([]);
+    } finally {
+      setLoadingCategorias(false);
+    }
+  }, [token]);
+
+  // Cargar historial de cargas, planteles y categorías
+  useEffect(() => {
+    if (token) {
+      cargarHistorial();
+      cargarPlanteles();
+      cargarCategorias();
+    }
+  }, [token, cargarHistorial, cargarPlanteles, cargarCategorias]);
 
   // Validar que sea nutricionista o admin
   if (usuario?.tipo_perfil !== 'nutricionista' && usuario?.tipo_perfil !== 'admin') {
@@ -120,6 +162,16 @@ const ExcelSection = ({ containerVariants }) => {
       return;
     }
 
+    if (!selectedPlantelId) {
+      setError('Selecciona un plantel antes de cargar el archivo');
+      return;
+    }
+
+    if (!selectedCategoriaId) {
+      setError('Selecciona una categoría antes de cargar el archivo');
+      return;
+    }
+
     return new Promise((resolve) => {
       setIsUploading(true);
       setError('');
@@ -128,6 +180,8 @@ const ExcelSection = ({ containerVariants }) => {
 
       const formData = new FormData();
       formData.append('file', selectedFile);
+      formData.append('plantel_id', selectedPlantelId);
+      formData.append('categoria_id', selectedCategoriaId);
 
       const xhr = new XMLHttpRequest();
 
@@ -288,23 +342,106 @@ const ExcelSection = ({ containerVariants }) => {
         )}
       </AnimatePresence>
 
+      {/* Selector de Plantel y Categoría */}
+      <div className={`p-6 rounded-2xl ${isDarkMode ? 'bg-[#1a1c22]/50 border border-[#8c5cff]/20' : 'bg-white/50 border border-purple-200'} mb-6`}>
+        <label className={`block text-sm font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          1. Selecciona el Plantel y Categoría *
+        </label>
+
+        {/* Selector de Plantel */}
+        <div className="mb-4">
+          <label className={`block text-xs font-medium mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Plantel
+          </label>
+          {loadingPlanteles ? (
+            <div className="flex items-center gap-2 text-gray-400">
+              <Loader className="animate-spin" size={20} />
+              <span className="text-sm">Cargando planteles...</span>
+            </div>
+          ) : planteles.length === 0 ? (
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-yellow-50 border border-yellow-200'}`}>
+              <p className={`text-sm ${isDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>
+                No hay planteles disponibles. Un administrador debe crear planteles primero.
+              </p>
+            </div>
+          ) : (
+            <select
+              value={selectedPlantelId}
+              onChange={(e) => setSelectedPlantelId(e.target.value)}
+              className={`w-full px-4 py-3 rounded-lg border ${
+                isDarkMode
+                  ? 'bg-[#1a1c22] border-[#8c5cff]/30 text-white'
+                  : 'bg-white border-purple-300 text-gray-900'
+              } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
+            >
+              <option value="">Seleccionar plantel...</option>
+              {planteles.map((plantel) => (
+                <option key={plantel.id} value={plantel.id}>
+                  {plantel.nombre} ({plantel.division})
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        {/* Selector de Categoría */}
+        <div>
+          <label className={`block text-xs font-medium mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Categoría
+          </label>
+          {loadingCategorias ? (
+            <div className="flex items-center gap-2 text-gray-400">
+              <Loader className="animate-spin" size={20} />
+              <span className="text-sm">Cargando categorías...</span>
+            </div>
+          ) : categorias.length === 0 ? (
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-yellow-50 border border-yellow-200'}`}>
+              <p className={`text-sm ${isDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>
+                No hay categorías disponibles.
+              </p>
+            </div>
+          ) : (
+            <select
+              value={selectedCategoriaId}
+              onChange={(e) => setSelectedCategoriaId(e.target.value)}
+              className={`w-full px-4 py-3 rounded-lg border ${
+                isDarkMode
+                  ? 'bg-[#1a1c22] border-[#8c5cff]/30 text-white'
+                  : 'bg-white border-purple-300 text-gray-900'
+              } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
+            >
+              <option value="">Seleccionar categoría...</option>
+              {categorias.map((categoria) => (
+                <option key={categoria.id} value={categoria.id}>
+                  {categoria.nombre}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+
       {/* Drag & Drop Zone */}
-      <motion.div
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        whileHover={{ scale: 1.01 }}
-        className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
-          isDragging
-            ? isDarkMode
-              ? 'border-[#8c5cff]/60 bg-[#8c5cff]/10'
-              : 'border-purple-500 bg-purple-50'
-            : isDarkMode
-            ? 'border-[#8c5cff]/20 bg-[#1a1c22]/50'
-            : 'border-purple-200 bg-white/50'
-        }`}
-      >
+      <div className={`p-6 rounded-2xl ${isDarkMode ? 'bg-[#1a1c22]/50 border border-[#8c5cff]/20' : 'bg-white/50 border border-purple-200'} mb-6`}>
+        <label className={`block text-sm font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          2. Carga el Archivo Excel
+        </label>
+        <motion.div
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          whileHover={{ scale: 1.01 }}
+          className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
+            isDragging
+              ? isDarkMode
+                ? 'border-[#8c5cff]/60 bg-[#8c5cff]/10'
+                : 'border-purple-500 bg-purple-50'
+              : isDarkMode
+              ? 'border-[#8c5cff]/20 bg-[#1a1c22]/50'
+              : 'border-purple-200 bg-white/50'
+          }`}
+        >
         <Upload
           size={48}
           className={`mx-auto mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}
@@ -357,10 +494,11 @@ const ExcelSection = ({ containerVariants }) => {
             </button>
           </motion.div>
         )}
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Upload Button */}
-      {selectedFile && (
+      {selectedFile && selectedPlantelId && selectedCategoriaId && (
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
