@@ -1,0 +1,310 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { DollarSign, AlertCircle, CheckCircle, Clock, Loader } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+import { API_ENDPOINTS } from '../../config/apiConfig';
+import AdminCuotasTable from './AdminCuotasTable';
+import MyQuotasSection from './MyQuotasSection';
+
+const CuotasSection = ({ containerVariants }) => {
+  const { isDarkMode, token, usuario } = useAuth();
+  const [cuotas, setCuotas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [estadisticas, setEstadisticas] = useState(null);
+  const [resumen, setResumen] = useState(null);
+  const [activeTab, setActiveTab] = useState('mis-cuotas'); // 'mis-cuotas' o 'mantenedor' (solo para admin)
+
+  // Cargar cuotas
+  const cargarCuotas = async () => {
+    if (!token) return;
+    try {
+      setLoading(true);
+      setError('');
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const response = await axios.get(API_ENDPOINTS.CUOTAS.GET_ALL, config);
+      setCuotas(response.data);
+    } catch (err) {
+      console.error('Error al cargar cuotas:', err);
+      setError('Error al cargar las cuotas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar resumen (notificaciones)
+  const cargarResumen = async () => {
+    if (!token) return;
+    try {
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const response = await axios.get(API_ENDPOINTS.CUOTAS.GET_RESUMEN, config);
+      setResumen(response.data);
+    } catch (err) {
+      console.error('Error al cargar resumen:', err);
+    }
+  };
+
+  // Cargar estadísticas (solo admin)
+  const cargarEstadisticas = async () => {
+    if (!token || usuario?.tipo_perfil !== 'admin') return;
+    try {
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const response = await axios.get(API_ENDPOINTS.CUOTAS.ESTADISTICAS, config);
+      setEstadisticas(response.data);
+    } catch (err) {
+      console.error('Error al cargar estadísticas:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      cargarCuotas();
+      cargarResumen();
+      cargarEstadisticas();
+    }
+  }, [token, usuario?.tipo_perfil]);
+
+  const isAdmin = usuario?.tipo_perfil === 'admin';
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={containerVariants}
+      className="space-y-6"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <DollarSign size={32} className="text-[#8c5cff]" />
+        <div>
+          <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            {isAdmin ? 'Gestión de Cuotas' : 'Mis Cuotas'}
+          </h1>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            {isAdmin ? 'Gestiona las cuotas mensuales de nutricionistas y administradores' : 'Administra tus cuotas mensuales y realiza pagos'}
+          </p>
+        </div>
+      </div>
+
+      {/* Resumen para nutricionista */}
+      {!isAdmin && resumen && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className={`p-6 rounded-xl border ${
+              isDarkMode
+                ? 'bg-gradient-to-br from-[#1a1c22] to-[#0f1117] border-[#8c5cff]/20'
+                : 'bg-white border-purple-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Cuotas Pendientes</p>
+                <p className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {resumen.totalPendientes}
+                </p>
+              </div>
+              <Clock size={32} className={resumen.totalPendientes > 0 ? 'text-yellow-500' : 'text-green-500'} />
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className={`p-6 rounded-xl border ${
+              isDarkMode
+                ? 'bg-gradient-to-br from-[#1a1c22] to-[#0f1117] border-[#8c5cff]/20'
+                : 'bg-white border-purple-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Cuotas Vencidas</p>
+                <p className={`text-2xl font-bold ${resumen.totalVencidas > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                  {resumen.totalVencidas}
+                </p>
+              </div>
+              {resumen.totalVencidas > 0 ? (
+                <AlertCircle size={32} className="text-red-500" />
+              ) : (
+                <CheckCircle size={32} className="text-green-500" />
+              )}
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className={`p-6 rounded-xl border ${
+              isDarkMode
+                ? 'bg-gradient-to-br from-[#1a1c22] to-[#0f1117] border-[#8c5cff]/20'
+                : 'bg-white border-purple-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Estado</p>
+                <p className={`text-sm font-semibold ${
+                  resumen.esMoroso ? 'text-red-500' : 'text-green-500'
+                }`}>
+                  {resumen.esMoroso ? 'Moroso' : 'Al día'}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Alerta de morosidad */}
+      {!isAdmin && resumen?.esMoroso && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-4 rounded-lg border-l-4 border-red-500 ${
+            isDarkMode ? 'bg-red-500/10' : 'bg-red-50'
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
+            <div>
+              <p className={`font-semibold ${isDarkMode ? 'text-red-400' : 'text-red-700'}`}>
+                Tienes cuotas vencidas
+              </p>
+              <p className={`text-sm mt-1 ${isDarkMode ? 'text-red-300/80' : 'text-red-600/80'}`}>
+                Por favor, realiza el pago lo antes posible para evitar problemas administrativos.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className={`p-4 rounded-lg ${
+            isDarkMode ? 'bg-red-500/10 text-red-400' : 'bg-red-50 text-red-700'
+          }`}
+        >
+          {error}
+        </motion.div>
+      )}
+
+      {/* Loading */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader className="animate-spin text-[#8c5cff]" size={32} />
+        </div>
+      ) : (
+        <>
+          {/* Tabs para Admin */}
+          {isAdmin && (
+            <div className="flex gap-2 border-b border-[#8c5cff]/20">
+              <button
+                onClick={() => setActiveTab('mis-cuotas')}
+                className={`px-4 py-3 font-semibold text-sm border-b-2 transition-colors ${
+                  activeTab === 'mis-cuotas'
+                    ? `border-[#8c5cff] ${isDarkMode ? 'text-white' : 'text-purple-600'}`
+                    : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`
+                }`}
+              >
+                Mis Cuotas
+              </button>
+              <button
+                onClick={() => setActiveTab('mantenedor')}
+                className={`px-4 py-3 font-semibold text-sm border-b-2 transition-colors ${
+                  activeTab === 'mantenedor'
+                    ? `border-[#8c5cff] ${isDarkMode ? 'text-white' : 'text-purple-600'}`
+                    : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`
+                }`}
+              >
+                Mantenedor de Cuotas
+              </button>
+            </div>
+          )}
+
+          {/* Content por Tab */}
+          {isAdmin ? (
+            activeTab === 'mis-cuotas' ? (
+              <MyQuotasSection containerVariants={containerVariants} />
+            ) : (
+              <>
+                {/* Estadísticas Admin */}
+                {estadisticas && (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className={`p-6 rounded-xl border ${
+                        isDarkMode
+                          ? 'bg-gradient-to-br from-[#1a1c22] to-[#0f1117] border-[#8c5cff]/20'
+                          : 'bg-white border-purple-200'
+                      }`}
+                    >
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total de Cuotas</p>
+                      <p className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {estadisticas.totalCuotas?.total || 0}
+                      </p>
+                      <p className={`text-xs mt-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                        CLP ${parseFloat(estadisticas.totalCuotas?.monto_total || 0).toLocaleString('es-CL')}
+                      </p>
+                    </motion.div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className={`p-6 rounded-xl border ${
+                        isDarkMode
+                          ? 'bg-gradient-to-br from-[#1a1c22] to-[#0f1117] border-[#8c5cff]/20'
+                          : 'bg-white border-purple-200'
+                      }`}
+                    >
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Usuarios con Morosidad</p>
+                      <p className={`text-2xl font-bold text-red-500`}>
+                        {estadisticas.usuariosConMorosidad?.length || 0}
+                      </p>
+                    </motion.div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className={`p-6 rounded-xl border ${
+                        isDarkMode
+                          ? 'bg-gradient-to-br from-[#1a1c22] to-[#0f1117] border-[#8c5cff]/20'
+                          : 'bg-white border-purple-200'
+                      }`}
+                    >
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Recaudado</p>
+                      <p className={`text-2xl font-bold text-green-500`}>
+                        CLP ${parseFloat(estadisticas.recaudacion?.total_recaudado || 0).toLocaleString('es-CL')}
+                      </p>
+                    </motion.div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className={`p-6 rounded-xl border ${
+                        isDarkMode
+                          ? 'bg-gradient-to-br from-[#1a1c22] to-[#0f1117] border-[#8c5cff]/20'
+                          : 'bg-white border-purple-200'
+                      }`}
+                    >
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Pagos Completados</p>
+                      <p className={`text-2xl font-bold text-[#8c5cff]`}>
+                        {estadisticas.recaudacion?.pagos_completados || 0}
+                      </p>
+                    </motion.div>
+                  </div>
+                )}
+
+                <AdminCuotasTable cuotas={cuotas} onRefresh={cargarCuotas} containerVariants={containerVariants} />
+              </>
+            )
+          ) : (
+            // Nutritionist View - Always show MyQuotasSection
+            <MyQuotasSection containerVariants={containerVariants} />
+          )}
+        </>
+      )}
+    </motion.div>
+  );
+};
+
+export default CuotasSection;

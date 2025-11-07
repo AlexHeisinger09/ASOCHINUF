@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, ChevronsLeft, Home, BookOpen, User, Upload, Settings, Moon, Sun, Users, Trophy } from 'lucide-react';
+import { LogOut, ChevronsLeft, Home, BookOpen, User, Upload, Settings, Moon, Sun, Users, Trophy, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleLogout }) => {
@@ -15,6 +15,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
   // Excel solo para nutricionistas y admins
   const excelItem = usuario?.tipo_perfil !== 'cliente'
     ? [{ id: 'excel', label: 'Cargar Excel', icon: Upload }]
+    : [];
+
+  // Cuotas para nutricionistas y admins
+  const cuotasItem = usuario?.tipo_perfil !== 'cliente'
+    ? [{ id: 'cuotas', label: 'Cuotas y Pagos', icon: DollarSign }]
     : [];
 
   // Gestión Planteles solo para admins
@@ -32,7 +37,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
     ? [{ id: 'gestion', label: 'Gestión Usuarios', icon: Users }]
     : [];
 
-  const menuItems = [...baseMenuItems, ...excelItem, ...gestionPlantelesItem, ...gestionCursosItem, ...gestionUsuariosItem];
+  const menuItems = [...baseMenuItems, ...excelItem, ...cuotasItem, ...gestionPlantelesItem, ...gestionCursosItem, ...gestionUsuariosItem];
 
   return (
     <motion.aside

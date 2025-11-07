@@ -99,13 +99,18 @@ export const createCurso = async (req, res) => {
       imagenPortadaUrl = `/foto_curso/${req.file.filename}`;
     }
 
+    // Calculate precio_final: precio - (precio * descuento / 100)
+    const precioValue = precio || 0;
+    const descuentoValue = descuento || 0;
+    const precioFinal = precioValue > 0 ? precioValue - (precioValue * (descuentoValue / 100)) : 0;
+
     const result = await pool.query(
       `INSERT INTO t_cursos
        (codigo_curso, nombre, descripcion, categoria_id, nivel, duracion_horas,
-        modalidad, fecha_inicio, fecha_fin, precio, descuento, moneda,
+        modalidad, fecha_inicio, fecha_fin, precio, descuento, precio_final, moneda,
         nombre_instructor, imagen_portada, video_promocional,
         materiales, url_curso, estado)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
        RETURNING *`,
       [
         codigo_curso,
@@ -117,8 +122,9 @@ export const createCurso = async (req, res) => {
         modalidad || null,
         fecha_inicio || null,
         fecha_fin || null,
-        precio || 0,
-        descuento || 0,
+        precioValue,
+        descuentoValue,
+        precioFinal,
         moneda || 'CLP',
         nombre_instructor || null,
         imagenPortadaUrl,
@@ -158,11 +164,30 @@ export const updateCurso = async (req, res) => {
       updates.imagen_portada = `/foto_curso/${req.file.filename}`;
     }
 
+    // If precio or descuento is being updated, recalculate precio_final
+    if (updates.precio !== undefined || updates.descuento !== undefined) {
+      // Get current values from database if not in updates
+      const currentCurso = await pool.query(
+        'SELECT precio, descuento FROM t_cursos WHERE id_curso = $1',
+        [id]
+      );
+
+      if (currentCurso.rows.length === 0) {
+        return res.status(404).json({ error: 'Curso no encontrado' });
+      }
+
+      const precioValue = updates.precio !== undefined ? updates.precio : currentCurso.rows[0].precio;
+      const descuentoValue = updates.descuento !== undefined ? updates.descuento : currentCurso.rows[0].descuento;
+      const precioFinal = precioValue > 0 ? precioValue - (precioValue * (descuentoValue / 100)) : 0;
+
+      updates.precio_final = precioFinal;
+    }
+
     // Construir query dinámicamente
     const allowedFields = [
       'codigo_curso', 'nombre', 'descripcion', 'categoria_id', 'nivel',
       'duracion_horas', 'modalidad', 'fecha_inicio', 'fecha_fin', 'precio',
-      'descuento', 'moneda', 'nombre_instructor',
+      'descuento', 'precio_final', 'moneda', 'nombre_instructor',
       'imagen_portada', 'video_promocional', 'materiales', 'url_curso', 'estado'
     ];
 

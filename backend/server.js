@@ -9,6 +9,8 @@ import excelRoutes from './routes/excel.js';
 import cursosRoutes from './routes/cursos.js';
 import plantelesRoutes from './routes/planteles.js';
 import categoriasRoutes from './routes/categorias.js';
+import cuotasRoutes from './routes/cuotas.js';
+import pagosRoutes from './routes/pagos.js';
 
 dotenv.config();
 
@@ -36,6 +38,8 @@ app.use('/api/excel', excelRoutes);
 app.use('/api/cursos', cursosRoutes);
 app.use('/api/planteles', plantelesRoutes);
 app.use('/api/categorias', categoriasRoutes);
+app.use('/api/cuotas', cuotasRoutes);
+app.use('/api/payments', pagosRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

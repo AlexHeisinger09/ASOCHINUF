@@ -53,7 +53,18 @@
       "Bash(yarn install)",
       "Bash(cmd /c \"taskkill /PID 22792 /F && taskkill /PID 19092 /F\")",
       "Bash(timeout:*)",
-      "Bash(cmd /c \"taskkill /PID 15344 /F\")"
+      "Bash(cmd /c \"taskkill /PID 15344 /F\")",
+      "Bash(npm run db:init:*)",
+      "Bash(npx eslint:*)",
+      "Bash(nul)",
+      "Bash(cmd /c \"taskkill /F /IM node.exe\")",
+      "Bash(cmd /c \"netstat -ano | findstr :5000\")",
+      "Bash(cmd /c \"for /f \"\"tokens=5\"\" %a in (''netstat -ano ^| findstr :5000'') do taskkill /PID %a /F\")",
+      "Bash(ping:*)",
+      "Bash(cmd /c \"taskkill /F /PID 22680 /T\" 2)",
+      "Bash(cmd /c \"taskkill /F /IM node.exe 2>nul\")",
+      "Bash(cmd /c \"for /f \"\"tokens=5\"\" %a in (''netstat -ano ^| findstr :5000'') do (echo %a & taskkill /PID %a /F)\")",
+      "Bash(cmd /c \"taskkill /F /IM node.exe\" 2)"
     ],
     "deny": [],
     "ask": []

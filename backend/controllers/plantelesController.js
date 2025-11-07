@@ -10,6 +10,8 @@ export const obtenerPlanteles = async (req, res) => {
         p.id,
         p.nombre,
         p.division,
+        p.ciudad,
+        p.region,
         p.activo,
         p.fecha_creacion,
         p.usuario_creacion,
@@ -60,6 +62,8 @@ export const obtenerPlantelPorId = async (req, res) => {
         p.id,
         p.nombre,
         p.division,
+        p.ciudad,
+        p.region,
         p.activo,
         p.fecha_creacion,
         p.usuario_creacion,
@@ -85,21 +89,21 @@ export const obtenerPlantelPorId = async (req, res) => {
  */
 export const crearPlantel = async (req, res) => {
   try {
-    const { nombre, division } = req.body;
+    const { nombre, division, ciudad, region } = req.body;
     const usuarioId = req.usuario.id;
 
     // Validaciones
-    if (!nombre || !division) {
+    if (!nombre || !division || !ciudad || !region) {
       return res.status(400).json({
-        error: 'Faltan campos requeridos: nombre, division'
+        error: 'Faltan campos requeridos: nombre, division, ciudad, region'
       });
     }
 
     // Validar división
-    const divisionesValidas = ['Primera División', 'Segunda División', 'Tercera División', 'Amateur'];
+    const divisionesValidas = ['Primera Division', 'Primera B', 'Segunda División', 'Tercera División A'];
     if (!divisionesValidas.includes(division)) {
       return res.status(400).json({
-        error: 'División inválida. Debe ser: Primera División, Segunda División, Tercera División o Amateur'
+        error: 'División inválida. Debe ser: Primera Division, Primera B, Segunda División o Tercera División A'
       });
     }
 
@@ -117,10 +121,10 @@ export const crearPlantel = async (req, res) => {
 
     // Crear plantel
     const { rows } = await pool.query(`
-      INSERT INTO t_planteles (nombre, division, usuario_creacion, fecha_creacion)
-      VALUES ($1, $2, $3, NOW())
-      RETURNING id, nombre, division, activo, fecha_creacion, usuario_creacion
-    `, [nombre, division, usuarioId]);
+      INSERT INTO t_planteles (nombre, division, ciudad, region, usuario_creacion, fecha_creacion)
+      VALUES ($1, $2, $3, $4, $5, NOW())
+      RETURNING id, nombre, division, ciudad, region, activo, fecha_creacion, usuario_creacion
+    `, [nombre, division, ciudad, region, usuarioId]);
 
     // Obtener datos completos con JOIN
     const { rows: plantelCompleto } = await pool.query(`
@@ -128,6 +132,8 @@ export const crearPlantel = async (req, res) => {
         p.id,
         p.nombre,
         p.division,
+        p.ciudad,
+        p.region,
         p.activo,
         p.fecha_creacion,
         p.usuario_creacion,
@@ -153,7 +159,7 @@ export const crearPlantel = async (req, res) => {
 export const actualizarPlantel = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, division, activo } = req.body;
+    const { nombre, division, ciudad, region, activo } = req.body;
 
     // Verificar que el plantel existe
     const { rows: plantelRows } = await pool.query(
@@ -167,10 +173,10 @@ export const actualizarPlantel = async (req, res) => {
 
     // Validar división si se proporciona
     if (division) {
-      const divisionesValidas = ['Primera División', 'Segunda División', 'Tercera División', 'Amateur'];
+      const divisionesValidas = ['Primera Division', 'Primera B', 'Segunda División', 'Tercera División A'];
       if (!divisionesValidas.includes(division)) {
         return res.status(400).json({
-          error: 'División inválida. Debe ser: Primera División, Segunda División, Tercera División o Amateur'
+          error: 'División inválida. Debe ser: Primera Division, Primera B, Segunda División o Tercera División A'
         });
       }
     }
@@ -187,6 +193,14 @@ export const actualizarPlantel = async (req, res) => {
     if (division !== undefined) {
       updates.push(`division = $${paramCount++}`);
       values.push(division);
+    }
+    if (ciudad !== undefined) {
+      updates.push(`ciudad = $${paramCount++}`);
+      values.push(ciudad);
+    }
+    if (region !== undefined) {
+      updates.push(`region = $${paramCount++}`);
+      values.push(region);
     }
     if (activo !== undefined) {
       updates.push(`activo = $${paramCount++}`);
@@ -211,6 +225,8 @@ export const actualizarPlantel = async (req, res) => {
         p.id,
         p.nombre,
         p.division,
+        p.ciudad,
+        p.region,
         p.activo,
         p.fecha_creacion,
         p.usuario_creacion,

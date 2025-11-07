@@ -203,7 +203,7 @@ const GestionUsuariosSection = ({ containerVariants }) => {
             Gestión de Usuarios
           </h2>
           <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-            Crear, editar y eliminar usuarios (nutricionistas y administradores)
+            Total de usuarios: <span className="font-bold">{usuarios.length}</span> • Mostrando: <span className="font-bold">{usuariosFiltrados.length}</span>
           </p>
         </div>
         <motion.button
@@ -274,20 +274,20 @@ const GestionUsuariosSection = ({ containerVariants }) => {
         setError={setError}
       />
 
-      {/* Usuarios List */}
-      <div className="space-y-4">
+      {/* Usuarios Table */}
+      <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'}`}>
         {loading ? (
           <div
-            className={`p-8 text-center rounded-2xl border ${
-              isDarkMode ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20' : 'bg-white/50 border-purple-200'
+            className={`p-8 text-center ${
+              isDarkMode ? 'bg-[#1a1c22]/50' : 'bg-white/50'
             }`}
           >
             <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Cargando usuarios...</p>
           </div>
         ) : usuarios.length === 0 ? (
           <div
-            className={`p-8 text-center rounded-2xl border ${
-              isDarkMode ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20' : 'bg-white/50 border-purple-200'
+            className={`p-8 text-center ${
+              isDarkMode ? 'bg-[#1a1c22]/50' : 'bg-white/50'
             }`}
           >
             <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
@@ -296,8 +296,8 @@ const GestionUsuariosSection = ({ containerVariants }) => {
           </div>
         ) : usuariosFiltrados.length === 0 ? (
           <div
-            className={`p-8 text-center rounded-2xl border ${
-              isDarkMode ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20' : 'bg-white/50 border-purple-200'
+            className={`p-8 text-center ${
+              isDarkMode ? 'bg-[#1a1c22]/50' : 'bg-white/50'
             }`}
           >
             <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
@@ -305,28 +305,51 @@ const GestionUsuariosSection = ({ containerVariants }) => {
             </p>
           </div>
         ) : (
-          <div className="grid gap-3">
-            {usuariosFiltrados.map((usuario) => (
-              <motion.div
-                key={usuario.id}
-                whileHover={{ y: -2 }}
-                className={`p-4 rounded-lg border transition-all ${
-                  isDarkMode
-                    ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20 hover:border-[#8c5cff]/40'
-                    : 'bg-white/50 border-purple-200 hover:border-purple-400'
-                }`}
-              >
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h4 className={`font-bold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr
+                  className={`${
+                    isDarkMode
+                      ? 'bg-[#1a1c22]/50 border-b border-[#8c5cff]/20'
+                      : 'bg-purple-50 border-b border-purple-200'
+                  }`}
+                >
+                  <th className={`px-4 py-3 text-left font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Nombre
+                  </th>
+                  <th className={`px-4 py-3 text-left font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Email
+                  </th>
+                  <th className={`px-4 py-3 text-center font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Tipo
+                  </th>
+                  <th className={`px-4 py-3 text-center font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {usuariosFiltrados.map((usuario) => (
+                  <motion.tr
+                    key={usuario.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className={`border-b transition-colors ${
+                      isDarkMode
+                        ? 'border-[#8c5cff]/10 hover:bg-[#1a1c22]/30'
+                        : 'border-purple-100 hover:bg-purple-50/50'
+                    }`}
+                  >
+                    <td className={`px-4 py-3 font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                       {usuario.nombre} {usuario.apellido}
-                    </h4>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    </td>
+                    <td className={`px-4 py-3 text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                       {usuario.email}
-                    </p>
-                    <div className="flex gap-2 mt-2 flex-wrap">
+                    </td>
+                    <td className={`px-4 py-3 text-center`}>
                       <span
-                        className={`text-xs px-3 py-1 rounded-full font-semibold ${
+                        className={`text-xs px-3 py-1 rounded-full font-semibold inline-block ${
                           usuario.tipo_perfil === 'admin'
                             ? isDarkMode
                               ? 'bg-red-500/20 text-red-400'
@@ -341,41 +364,42 @@ const GestionUsuariosSection = ({ containerVariants }) => {
                         }`}
                       >
                         {usuario.tipo_perfil === 'admin'
-                          ? 'Administrador'
+                          ? 'Admin'
                           : usuario.tipo_perfil === 'nutricionista'
                           ? 'Nutricionista'
                           : 'Cliente'}
                       </span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleEditarUsuario(usuario)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        isDarkMode ? 'text-blue-400 hover:bg-blue-500/20' : 'text-blue-600 hover:bg-blue-100'
-                      }`}
-                      title="Editar usuario"
-                    >
-                      <Edit2 size={20} />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleAbrirConfirmDialog(usuario)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        isDarkMode ? 'text-red-400 hover:bg-red-500/20' : 'text-red-600 hover:bg-red-100'
-                      }`}
-                      title="Eliminar usuario"
-                    >
-                      <Trash2 size={20} />
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                    </td>
+                    <td className={`px-4 py-3 text-center`}>
+                      <div className="flex gap-2 justify-center">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleEditarUsuario(usuario)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            isDarkMode ? 'text-blue-400 hover:bg-blue-500/20' : 'text-blue-600 hover:bg-blue-100'
+                          }`}
+                          title="Editar usuario"
+                        >
+                          <Edit2 size={18} />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleAbrirConfirmDialog(usuario)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            isDarkMode ? 'text-red-400 hover:bg-red-500/20' : 'text-red-600 hover:bg-red-100'
+                          }`}
+                          title="Eliminar usuario"
+                        >
+                          <Trash2 size={18} />
+                        </motion.button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

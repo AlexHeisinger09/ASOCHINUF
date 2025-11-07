@@ -88,13 +88,18 @@ const agregarCursosEjemplo = async () => {
     ];
 
     for (const curso of cursos) {
+      // Calculate precio_final: precio - (precio * descuento / 100)
+      const precioValue = curso.precio || 0;
+      const descuentoValue = curso.descuento || 0;
+      const precioFinal = precioValue > 0 ? precioValue - (precioValue * (descuentoValue / 100)) : 0;
+
       const resultado = await pool.query(
         `INSERT INTO t_cursos
          (codigo_curso, nombre, descripcion, categoria_id, nivel, duracion_horas,
-          modalidad, fecha_inicio, fecha_fin, precio, descuento, moneda,
+          modalidad, fecha_inicio, fecha_fin, precio, descuento, precio_final, moneda,
           nombre_instructor, imagen_portada, video_promocional,
           materiales, url_curso, estado)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
          RETURNING id_curso, nombre`,
         [
           curso.codigo_curso,
@@ -108,6 +113,7 @@ const agregarCursosEjemplo = async () => {
           curso.fecha_fin,
           curso.precio,
           curso.descuento,
+          precioFinal,
           curso.moneda,
           curso.nombre_instructor,
           curso.imagen_portada,
@@ -118,7 +124,7 @@ const agregarCursosEjemplo = async () => {
         ]
       );
 
-      console.log(`✓ Curso creado: ${resultado.rows[0].nombre} (ID: ${resultado.rows[0].id_curso})`);
+      console.log(`✓ Curso creado: ${resultado.rows[0].nombre} (ID: ${resultado.rows[0].id_curso}) - Precio Final: $${precioFinal}`);
     }
 
     console.log('\n✓ Todos los cursos de ejemplo han sido agregados exitosamente');

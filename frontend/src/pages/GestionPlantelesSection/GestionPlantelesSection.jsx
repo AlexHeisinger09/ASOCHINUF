@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
   Edit2,
@@ -12,17 +12,209 @@ import {
   Trophy,
   Users,
   Filter,
-  Power
+  Power,
+  GripVertical
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { API_ENDPOINTS } from '../../config/apiConfig';
 import axios from 'axios';
 import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import {
+  DndContext,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Componente PlantelItem con soporte drag and drop
+const PlantelItem = ({ plantel, isDarkMode, onEdit, onDelete }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+    isOver,
+  } = useSortable({ id: plantel.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition,
+  };
+
+  return (
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      layout
+      className={`p-4 rounded-lg border transition-all ${
+        isDarkMode
+          ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20 hover:border-[#8c5cff]/40'
+          : 'bg-white/50 border-purple-200 hover:border-purple-400'
+      } ${isDragging ? 'opacity-50 shadow-xl ring-2 ring-[#8c5cff]' : 'opacity-100'} ${
+        isOver ? 'ring-2 ring-[#8c5cff]' : ''
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          {...attributes}
+          {...listeners}
+          className={`cursor-grab active:cursor-grabbing p-1 rounded hover:bg-[#8c5cff]/10 transition-colors ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+          }`}
+        >
+          <GripVertical size={20} />
+        </div>
+
+        <div className="flex-1">
+          <h4 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            {plantel.nombre}
+          </h4>
+          <div className="space-y-1 mt-1">
+            {plantel.ciudad && (
+              <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                📍 {plantel.ciudad}
+              </p>
+            )}
+            <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              {plantel.activo ? '✓ Activo' : '✗ Inactivo'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onEdit(plantel)}
+            className={`p-2 rounded-lg transition-colors ${
+              isDarkMode ? 'text-blue-400 hover:bg-blue-500/20' : 'text-blue-600 hover:bg-blue-100'
+            }`}
+            title="Editar"
+          >
+            <Edit2 size={16} />
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onDelete(plantel)}
+            className={`p-2 rounded-lg transition-colors ${
+              isDarkMode ? 'text-red-400 hover:bg-red-500/20' : 'text-red-600 hover:bg-red-100'
+            }`}
+            title="Eliminar"
+          >
+            <Trash2 size={16} />
+          </motion.button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Columna de división
+const DivisionColumn = ({
+  division,
+  planteles,
+  isDarkMode,
+  onEdit,
+  onDelete,
+  getDivisionColor,
+}) => {
+  const getDivisionTitle = (div) => {
+    return div === 'Primera Division'
+      ? '🥇 Primera Division'
+      : div === 'Primera B'
+      ? '🥈 Primera B'
+      : div === 'Segunda División'
+      ? '🥉 Segunda División'
+      : '⚽ Tercera División A';
+  };
+
+  const getDivisionBgColor = (div) => {
+    if (isDarkMode) {
+      return div === 'Primera Division'
+        ? 'bg-yellow-500/10 border-yellow-500/30'
+        : div === 'Primera B'
+        ? 'bg-blue-500/10 border-blue-500/30'
+        : div === 'Segunda División'
+        ? 'bg-green-500/10 border-green-500/30'
+        : 'bg-purple-500/10 border-purple-500/30';
+    }
+    return div === 'Primera Division'
+      ? 'bg-yellow-50 border-yellow-200'
+      : div === 'Primera B'
+      ? 'bg-blue-50 border-blue-200'
+      : div === 'Segunda División'
+      ? 'bg-green-50 border-green-200'
+      : 'bg-purple-50 border-purple-200';
+  };
+
+  // Crear ID único para el droppable de cada división
+  const droppableId = `division-${division.replace(/\s+/g, '-').toLowerCase()}`;
+
+  return (
+    <div
+      className={`flex-1 min-h-[400px] rounded-xl border-2 p-4 ${getDivisionBgColor(division)}`}
+      data-division={division}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          {getDivisionTitle(division)}
+        </h3>
+        <span
+          className={`text-sm font-bold px-3 py-1 rounded-full ${
+            isDarkMode ? 'bg-[#8c5cff]/20 text-[#8c5cff]' : 'bg-purple-100 text-purple-700'
+          }`}
+        >
+          {planteles.length}
+        </span>
+      </div>
+
+      <div className="space-y-2" data-droppable={division} data-droppable-id={droppableId}>
+        {planteles.length === 0 ? (
+          <div
+            className={`p-6 text-center rounded-lg border-2 border-dashed ${
+              isDarkMode
+                ? 'border-gray-600 text-gray-400'
+                : 'border-gray-300 text-gray-500'
+            }`}
+          >
+            <p className="text-sm">Arrastra planteles aquí</p>
+          </div>
+        ) : (
+          planteles.map((plantel) => (
+            <PlantelItem
+              key={plantel.id}
+              plantel={plantel}
+              isDarkMode={isDarkMode}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
 
 const GestionPlantelesSection = ({ containerVariants }) => {
   const { isDarkMode, token, usuario } = useAuth();
   const [planteles, setPlanteles] = useState([]);
+  const [plantelesCambios, setPlantelesCambios] = useState([]); // Estado local para cambios
+  const [haysCambios, setHaysCambios] = useState(false); // Bandera de cambios
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -30,14 +222,26 @@ const GestionPlantelesSection = ({ containerVariants }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [plantelAEliminar, setPlantelAEliminar] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filtroDivision, setFiltroDivision] = useState('todos');
   const [submitting, setSubmitting] = useState(false);
+  const [guardandoCambios, setGuardandoCambios] = useState(false);
+  const [dragOverDivision, setDragOverDivision] = useState(null); // Para tracking de qué división se está sobrevolando
 
   const [formData, setFormData] = useState({
     nombre: '',
-    division: 'Primera División',
+    division: 'Primera Division',
+    ciudad: '',
+    region: '',
     activo: true
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      distance: 8,
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Verificar que el usuario es admin
   const esAdmin = usuario?.tipo_perfil === 'admin';
@@ -102,6 +306,8 @@ const GestionPlantelesSection = ({ containerVariants }) => {
     setFormData({
       nombre: plantel.nombre,
       division: plantel.division,
+      ciudad: plantel.ciudad || '',
+      region: plantel.region || '',
       activo: plantel.activo
     });
     setShowModal(true);
@@ -125,10 +331,159 @@ const GestionPlantelesSection = ({ containerVariants }) => {
     }
   };
 
+  // Rastrear sobre qué división está el cursor durante el drag
+  const handleDragOver = (event) => {
+    const { active, over } = event;
+    if (!over) {
+      setDragOverDivision(null);
+      return;
+    }
+
+    const divisiones = ['Primera Division', 'Primera B', 'Segunda División', 'Tercera División A'];
+
+    // Verificar si over.id es un plantel (y obtener su división)
+    const overPlantel = planteles.find((p) => p.id === over.id);
+    if (overPlantel) {
+      setDragOverDivision(overPlantel.division);
+      return;
+    }
+
+    // Si no es un plantel, buscar qué división contiene el over.id
+    for (const div of divisiones) {
+      const plantelesEnDiv = planteles.filter((p) => p.division === div);
+      if (plantelesEnDiv.some((p) => p.id === over.id)) {
+        setDragOverDivision(div);
+        return;
+      }
+    }
+
+    setDragOverDivision(null);
+  };
+
+  // Manejar drag and drop entre divisiones (solo actualizar estado local)
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    // Limpiar el tracking de división
+    setDragOverDivision(null);
+
+    if (!over) return;
+
+    const plantelId = active.id;
+    const plantel = planteles.find((p) => p.id === plantelId);
+    if (!plantel) return;
+
+    const divisiones = ['Primera Division', 'Primera B', 'Segunda División', 'Tercera División A'];
+
+    // Determinar la división destino
+    let newDivision = null;
+
+    // Caso 1: Si soltamos sobre otro plantel, obtener su división
+    const overPlantel = planteles.find((p) => p.id === over.id);
+    if (overPlantel) {
+      newDivision = overPlantel.division;
+    } else {
+      // Caso 2: Buscar qué división contiene el over.id
+      for (const div of divisiones) {
+        const plantelesEnDiv = planteles.filter((p) => p.division === div);
+        if (plantelesEnDiv.some((p) => p.id === over.id)) {
+          newDivision = div;
+          break;
+        }
+      }
+
+      // Caso 3: Si aún no encontramos, usar dragOverDivision que fue rastreado durante el drag
+      if (!newDivision && dragOverDivision) {
+        newDivision = dragOverDivision;
+      }
+    }
+
+    // Final fallback: mantener la división actual
+    if (!newDivision) {
+      newDivision = plantel.division;
+    }
+
+    // Si la división no cambió, no hacer nada
+    if (plantel.division === newDivision) return;
+
+    // Actualizar estado local SIN hacer llamada a API
+    setPlanteles(
+      planteles.map((p) =>
+        p.id === plantel.id ? { ...p, division: newDivision } : p
+      )
+    );
+
+    // Registrar el cambio en la lista de cambios pendientes
+    const cambioExistente = plantelesCambios.find((c) => c.id === plantelId);
+    if (cambioExistente) {
+      // Actualizar cambio existente
+      setPlantelesCambios(
+        plantelesCambios.map((c) =>
+          c.id === plantelId ? { ...c, division: newDivision } : c
+        )
+      );
+    } else {
+      // Agregar nuevo cambio
+      setPlantelesCambios([...plantelesCambios, { id: plantelId, division: newDivision }]);
+    }
+
+    // Marcar que hay cambios pendientes
+    setHaysCambios(true);
+  };
+
+  // Guardar todos los cambios pendientes
+  const handleGuardarCambios = async () => {
+    if (plantelesCambios.length === 0) return;
+
+    setGuardandoCambios(true);
+
+    try {
+      // Hacer llamadas a la API para cada cambio
+      const promises = plantelesCambios.map((cambio) => {
+        const plantel = planteles.find((p) => p.id === cambio.id);
+        return axios.put(
+          API_ENDPOINTS.PLANTELES.UPDATE(cambio.id),
+          {
+            nombre: plantel.nombre,
+            division: cambio.division,
+            ciudad: plantel.ciudad,
+            region: plantel.region,
+            activo: plantel.activo,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      });
+
+      await Promise.all(promises);
+
+      // Limpiar estado de cambios
+      setPlantelesCambios([]);
+      setHaysCambios(false);
+
+      toast.success(`${plantelesCambios.length} plantel(es) movido(s) exitosamente`);
+    } catch (err) {
+      console.error('Error al guardar cambios:', err);
+      toast.error('Error al guardar los cambios');
+    } finally {
+      setGuardandoCambios(false);
+    }
+  };
+
+  // Descartar cambios pendientes
+  const handleDescartarCambios = async () => {
+    // Recargar planteles desde el servidor
+    await obtenerPlanteles();
+    setPlantelesCambios([]);
+    setHaysCambios(false);
+    toast.info('Cambios descartados');
+  };
+
   const resetForm = () => {
     setFormData({
       nombre: '',
-      division: 'Primera División',
+      division: 'Primera Division',
+      ciudad: '',
+      region: '',
       activo: true
     });
     setEditingId(null);
@@ -139,21 +494,14 @@ const GestionPlantelesSection = ({ containerVariants }) => {
     setShowConfirmDialog(true);
   };
 
-  // Filtrar planteles
-  const plantelesFiltrados = planteles.filter((plantel) => {
-    const matchSearch = plantel.nombre.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchDivision = filtroDivision === 'todos' || plantel.division === filtroDivision;
-    return matchSearch && matchDivision;
-  });
-
   const getDivisionColor = (division) => {
     const colors = {
-      'Primera División': isDarkMode ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-700',
-      'Segunda División': isDarkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700',
-      'Tercera División': isDarkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700',
-      'Amateur': isDarkMode ? 'bg-gray-500/20 text-gray-400' : 'bg-gray-100 text-gray-700'
+      'Primera Division': isDarkMode ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-700',
+      'Primera B': isDarkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700',
+      'Segunda División': isDarkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700',
+      'Tercera División A': isDarkMode ? 'bg-gray-500/20 text-gray-400' : 'bg-gray-100 text-gray-700'
     };
-    return colors[division] || colors['Amateur'];
+    return colors[division] || colors['Tercera División A'];
   };
 
   if (!esAdmin) {
@@ -229,152 +577,141 @@ const GestionPlantelesSection = ({ containerVariants }) => {
         </button>
       </div>
 
-      {/* Filtros y Búsqueda */}
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-wrap gap-4">
-          {/* Búsqueda */}
-          <div className="flex-1 min-w-[250px]">
-            <div className="relative">
-              <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} size={20} />
-              <input
-                type="text"
-                placeholder="Buscar por nombre de plantel..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
-                  isDarkMode
-                    ? 'bg-[#1a1c22] border-[#8c5cff]/20 text-white placeholder-gray-500'
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
-                } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
-              />
-            </div>
-          </div>
-
-          {/* Filtro de División */}
-          <div className="flex items-center gap-2">
-            <Filter size={20} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
-            {['todos', 'Primera División', 'Segunda División', 'Tercera División', 'Amateur'].map((div) => (
-              <button
-                key={div}
-                onClick={() => setFiltroDivision(div)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
-                  filtroDivision === div
-                    ? 'bg-[#8c5cff] text-white shadow-lg shadow-[#8c5cff]/30'
-                    : isDarkMode
-                    ? 'bg-[#1a1c22]/50 text-gray-400 hover:bg-[#1a1c22] border border-[#8c5cff]/20'
-                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                {div === 'todos' ? 'Todos' : div}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Contador */}
-        <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          {plantelesFiltrados.length} plantel{plantelesFiltrados.length !== 1 ? 'es' : ''} encontrado{plantelesFiltrados.length !== 1 ? 's' : ''}
+      {/* Búsqueda */}
+      <div className="mb-6">
+        <div className="relative">
+          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} size={20} />
+          <input
+            type="text"
+            placeholder="Buscar por nombre de plantel..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+              isDarkMode
+                ? 'bg-[#1a1c22] border-[#8c5cff]/20 text-white placeholder-gray-500'
+                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+            } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
+          />
         </div>
       </div>
 
-      {/* Tabla de Planteles */}
-      <div className={`${isDarkMode ? 'bg-[#1a1c22]/50 border-[#8c5cff]/20' : 'bg-white border-gray-200'} border rounded-2xl overflow-hidden`}>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className={isDarkMode ? 'bg-[#1a1c22]' : 'bg-gray-50'}>
-              <tr>
-                <th className={`px-6 py-4 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Plantel
-                </th>
-                <th className={`px-6 py-4 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  División
-                </th>
-                <th className={`px-6 py-4 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Estado
-                </th>
-                <th className={`px-6 py-4 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Creado por
-                </th>
-                <th className={`px-6 py-4 text-right text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {plantelesFiltrados.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center">
-                    <Trophy size={48} className={`mx-auto mb-3 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-                    <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {searchTerm || filtroDivision !== 'todos'
-                        ? 'No se encontraron planteles con los filtros aplicados'
-                        : 'No hay planteles registrados aún'}
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                plantelesFiltrados.map((plantel) => (
-                  <tr
-                    key={plantel.id}
-                    className={`${isDarkMode ? 'hover:bg-[#1a1c22]/50' : 'hover:bg-gray-50'} transition-colors`}
-                  >
-                    <td className={`px-6 py-4 ${isDarkMode ? 'text-white' : 'text-gray-900'} font-medium`}>
-                      {plantel.nombre}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getDivisionColor(plantel.division)}`}>
-                        {plantel.division}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {plantel.activo ? (
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${isDarkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700'}`}>
-                          <CheckCircle size={14} />
-                          Activo
-                        </span>
-                      ) : (
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${isDarkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-700'}`}>
-                          <Power size={14} />
-                          Inactivo
-                        </span>
-                      )}
-                    </td>
-                    <td className={`px-6 py-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {plantel.creador_nombre || 'Sistema'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEdit(plantel)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            isDarkMode
-                              ? 'hover:bg-[#8c5cff]/20 text-[#8c5cff]'
-                              : 'hover:bg-purple-50 text-purple-600'
-                          }`}
-                          title="Editar"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => confirmarEliminar(plantel)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            isDarkMode
-                              ? 'hover:bg-red-500/20 text-red-400'
-                              : 'hover:bg-red-50 text-red-600'
-                          }`}
-                          title="Eliminar"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+      {/* Indicador de Cambios Pendientes y Botones de Guardar/Descartar */}
+      {haysCambios && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`mb-6 p-4 rounded-lg border ${
+            isDarkMode
+              ? 'bg-blue-500/10 border-blue-500/30'
+              : 'bg-blue-50 border-blue-200'
+          } flex items-center justify-between gap-4`}
+        >
+          <div className="flex items-center gap-3">
+            <AlertCircle
+              size={20}
+              className={isDarkMode ? 'text-blue-400' : 'text-blue-600'}
+            />
+            <span className={`font-semibold ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>
+              Tienes {plantelesCambios.length} cambio{plantelesCambios.length !== 1 ? 's' : ''} pendiente{plantelesCambios.length !== 1 ? 's' : ''} de guardar
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleGuardarCambios}
+              disabled={guardandoCambios}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CheckCircle size={18} />
+              {guardandoCambios ? 'Guardando...' : 'Guardar Cambios'}
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleDescartarCambios}
+              disabled={guardandoCambios}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                isDarkMode
+                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                  : 'bg-red-100 text-red-700 hover:bg-red-200'
+              }`}
+            >
+              <X size={18} />
+              Descartar
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Columnas de Divisiones con Drag and Drop */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+      >
+        <SortableContext
+          items={planteles.map((p) => p.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+            <DivisionColumn
+              division="Primera Division"
+              planteles={planteles.filter(
+                (p) =>
+                  p.division === 'Primera Division' &&
+                  (searchTerm === '' || p.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              isDarkMode={isDarkMode}
+              onEdit={handleEdit}
+              onDelete={confirmarEliminar}
+              getDivisionColor={getDivisionColor}
+            />
+
+            <DivisionColumn
+              division="Primera B"
+              planteles={planteles.filter(
+                (p) =>
+                  p.division === 'Primera B' &&
+                  (searchTerm === '' || p.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
+              )}
+              isDarkMode={isDarkMode}
+              onEdit={handleEdit}
+              onDelete={confirmarEliminar}
+              getDivisionColor={getDivisionColor}
+            />
+
+            <DivisionColumn
+              division="Segunda División"
+              planteles={planteles.filter(
+                (p) =>
+                  p.division === 'Segunda División' &&
+                  (searchTerm === '' || p.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
+              )}
+              isDarkMode={isDarkMode}
+              onEdit={handleEdit}
+              onDelete={confirmarEliminar}
+              getDivisionColor={getDivisionColor}
+            />
+
+            <DivisionColumn
+              division="Tercera División A"
+              planteles={planteles.filter(
+                (p) =>
+                  p.division === 'Tercera División A' &&
+                  (searchTerm === '' || p.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
+              )}
+              isDarkMode={isDarkMode}
+              onEdit={handleEdit}
+              onDelete={confirmarEliminar}
+              getDivisionColor={getDivisionColor}
+            />
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Modal de Crear/Editar */}
       {showModal && (
@@ -431,11 +768,68 @@ const GestionPlantelesSection = ({ containerVariants }) => {
                       : 'bg-white border-gray-300 text-gray-900'
                   } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
                 >
-                  <option value="Primera División">Primera División</option>
+                  <option value="Primera Division">Primera Division</option>
+                  <option value="Primera B">Primera B</option>
                   <option value="Segunda División">Segunda División</option>
-                  <option value="Tercera División">Tercera División</option>
-                  <option value="Amateur">Amateur</option>
+                  <option value="Tercera División A">Tercera División A</option>
                 </select>
+              </div>
+
+              {/* Ciudad y Región (2 columnas) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Ciudad */}
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Ciudad *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.ciudad}
+                    onChange={(e) => setFormData({ ...formData, ciudad: e.target.value })}
+                    placeholder="Ej: Santiago"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      isDarkMode
+                        ? 'bg-[#1a1c22] border-[#8c5cff]/20 text-white'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
+                  />
+                </div>
+
+                {/* Región */}
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Región *
+                  </label>
+                  <select
+                    required
+                    value={formData.region}
+                    onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      isDarkMode
+                        ? 'bg-[#1a1c22] border-[#8c5cff]/20 text-white'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
+                  >
+                    <option value="">Seleccionar región...</option>
+                    <option value="Región de Arica y Parinacota">Región de Arica y Parinacota</option>
+                    <option value="Región de Tarapacá">Región de Tarapacá</option>
+                    <option value="Región de Antofagasta">Región de Antofagasta</option>
+                    <option value="Región de Atacama">Región de Atacama</option>
+                    <option value="Región de Coquimbo">Región de Coquimbo</option>
+                    <option value="Región de Valparaíso">Región de Valparaíso</option>
+                    <option value="Región Metropolitana">Región Metropolitana</option>
+                    <option value="Región del Libertador General Bernardo O'Higgins">Región del Libertador General Bernardo O'Higgins</option>
+                    <option value="Región del Maule">Región del Maule</option>
+                    <option value="Región de Ñuble">Región de Ñuble</option>
+                    <option value="Región del Biobío">Región del Biobío</option>
+                    <option value="Región de La Araucanía">Región de La Araucanía</option>
+                    <option value="Región de Los Ríos">Región de Los Ríos</option>
+                    <option value="Región de Los Lagos">Región de Los Lagos</option>
+                    <option value="Región de Aysén del General Carlos Ibáñez del Campo">Región de Aysén del General Carlos Ibáñez del Campo</option>
+                    <option value="Región de Magallanes y de la Antártica Chilena">Región de Magallanes y de la Antártica Chilena</option>
+                  </select>
+                </div>
               </div>
 
               {/* Estado */}

@@ -94,47 +94,76 @@ const inicializarBD = async () => {
 
     // ========== TABLA t_cursos ==========
     console.log('Creando tabla t_cursos...');
+
+    // Eliminar tabla existente si existe
+    await pool.query(`DROP TABLE IF EXISTS t_cursos CASCADE;`);
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_cursos (
-        id SERIAL PRIMARY KEY,
+      CREATE TABLE t_cursos (
+        id_curso SERIAL PRIMARY KEY,
+        codigo_curso VARCHAR(100) NOT NULL UNIQUE,
         nombre VARCHAR(255) NOT NULL,
         descripcion TEXT,
-        duracion INTEGER,
-        activo BOOLEAN DEFAULT true,
+        categoria_id INTEGER,
+        nivel VARCHAR(50),
+        duracion_horas INTEGER,
+        modalidad VARCHAR(50),
+        fecha_inicio DATE,
+        fecha_fin DATE,
+        precio DECIMAL(10, 2) DEFAULT 0,
+        descuento DECIMAL(5, 2) DEFAULT 0,
+        precio_final DECIMAL(10, 2),
+        moneda VARCHAR(10) DEFAULT 'CLP',
+        nombre_instructor VARCHAR(255),
+        imagen_portada VARCHAR(255),
+        video_promocional VARCHAR(255),
+        materiales TEXT,
+        url_curso VARCHAR(255),
+        estado VARCHAR(50) DEFAULT 'activo',
         fecha_creacion TIMESTAMP DEFAULT NOW()
       );
     `);
     console.log('✓ Tabla t_cursos creada');
 
     // Índices para t_cursos
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cursos_activo ON t_cursos(activo);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cursos_codigo ON t_cursos(codigo_curso);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cursos_estado ON t_cursos(estado);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cursos_categoria_id ON t_cursos(categoria_id);`);
     console.log('✓ Índices en t_cursos creados\\n');
 
     // ========== TABLA t_inscripciones ==========
     console.log('Creando tabla t_inscripciones...');
+
+    // Eliminar tabla existente si existe
+    await pool.query(`DROP TABLE IF EXISTS t_inscripciones CASCADE;`);
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_inscripciones (
+      CREATE TABLE t_inscripciones (
         id SERIAL PRIMARY KEY,
         usuario_id INTEGER NOT NULL,
-        curso_id INTEGER NOT NULL,
+        id_curso INTEGER NOT NULL,
         fecha_inscripcion TIMESTAMP DEFAULT NOW(),
         estado VARCHAR(50) DEFAULT 'activa',
         FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
-        FOREIGN KEY (curso_id) REFERENCES t_cursos(id) ON DELETE CASCADE,
-        UNIQUE(usuario_id, curso_id)
+        FOREIGN KEY (id_curso) REFERENCES t_cursos(id_curso) ON DELETE CASCADE,
+        UNIQUE(usuario_id, id_curso)
       );
     `);
     console.log('✓ Tabla t_inscripciones creada');
 
     // Índices para t_inscripciones
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_inscripciones_usuario_id ON t_inscripciones(usuario_id);`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_inscripciones_curso_id ON t_inscripciones(curso_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_inscripciones_curso ON t_inscripciones(id_curso);`);
     console.log('✓ Índices en t_inscripciones creados\\n');
 
     // ========== TABLA t_categorias ==========
     console.log('Creando tabla t_categorias...');
+
+    // Eliminar tabla existente si existe
+    await pool.query(`DROP TABLE IF EXISTS t_categorias CASCADE;`);
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_categorias (
+      CREATE TABLE t_categorias (
         id SERIAL PRIMARY KEY,
         nombre VARCHAR(50) NOT NULL UNIQUE,
         descripcion VARCHAR(255),
@@ -177,27 +206,125 @@ const inicializarBD = async () => {
 
     // ========== TABLA t_planteles ==========
     console.log('Creando tabla t_planteles...');
+
+    // Eliminar tabla existente si existe
+    await pool.query(`DROP TABLE IF EXISTS t_planteles CASCADE;`);
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_planteles (
+      CREATE TABLE t_planteles (
         id SERIAL PRIMARY KEY,
         nombre VARCHAR(255) NOT NULL UNIQUE,
-        division VARCHAR(50) NOT NULL CHECK (division IN ('Primera División', 'Segunda División', 'Tercera División', 'Amateur')),
+        division VARCHAR(50) NOT NULL CHECK (division IN ('Primera Division', 'Primera B', 'Segunda División', 'Tercera División A')),
+        ciudad VARCHAR(100) NOT NULL,
+        region VARCHAR(100) NOT NULL,
         activo BOOLEAN DEFAULT true,
         fecha_creacion TIMESTAMP DEFAULT NOW(),
         usuario_creacion INTEGER REFERENCES t_usuarios(id) ON DELETE SET NULL
       );
     `);
-    console.log('✓ Tabla t_planteles creada');
+    console.log('✓ Tabla t_planteles creada con campos ciudad y región');
 
     // Índices para t_planteles
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_planteles_nombre ON t_planteles(nombre);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_planteles_activo ON t_planteles(activo);`);
-    console.log('✓ Índices en t_planteles creados\\n');
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_planteles_division ON t_planteles(division);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_planteles_region ON t_planteles(region);`);
+    console.log('✓ Índices en t_planteles creados');
+
+    // Insertar datos de Primera Division
+    const primeraDivision = [
+      { nombre: 'Audax Italiano', ciudad: 'Santiago (La Florida)', region: 'Región Metropolitana' },
+      { nombre: 'Cobresal', ciudad: 'El Salvador', region: 'Región de Atacama' },
+      { nombre: 'Colo-Colo', ciudad: 'Santiago (Macul)', region: 'Región Metropolitana' },
+      { nombre: 'Coquimbo Unido', ciudad: 'Coquimbo', region: 'Región de Coquimbo' },
+      { nombre: 'Cobreloa', ciudad: 'Calama', region: 'Región de Antofagasta' },
+      { nombre: 'Deportes Copiapó', ciudad: 'Copiapó', region: 'Región de Atacama' },
+      { nombre: 'Everton', ciudad: 'Viña del Mar', region: 'Región de Valparaíso' },
+      { nombre: 'Huachipato', ciudad: 'Talcahuano', region: 'Región del Biobío' },
+      { nombre: 'Ñublense', ciudad: 'Chillán', region: 'Región de Ñuble' },
+      { nombre: 'O\'Higgins', ciudad: 'Rancagua', region: 'Región de O\'Higgins' },
+      { nombre: 'Palestino', ciudad: 'Santiago (La Cisterna)', region: 'Región Metropolitana' },
+      { nombre: 'Unión Española', ciudad: 'Santiago (Independencia)', region: 'Región Metropolitana' },
+      { nombre: 'Unión La Calera', ciudad: 'La Calera', region: 'Región de Valparaíso' },
+      { nombre: 'Universidad Católica', ciudad: 'Santiago (Las Condes)', region: 'Región Metropolitana' },
+      { nombre: 'Universidad de Chile', ciudad: 'Santiago (Ñuñoa)', region: 'Región Metropolitana' },
+      { nombre: 'Deportes Iquique', ciudad: 'Iquique', region: 'Región de Tarapacá' }
+    ];
+
+    for (const equipo of primeraDivision) {
+      await pool.query(
+        `INSERT INTO t_planteles (nombre, division, ciudad, region)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (nombre) DO NOTHING`,
+        [equipo.nombre, 'Primera Division', equipo.ciudad, equipo.region]
+      );
+    }
+    console.log('✓ Insertados 16 equipos de Primera Division');
+
+    // Insertar datos de Primera B
+    const primeraB = [
+      { nombre: 'Barnechea', ciudad: 'Santiago', region: 'Región Metropolitana' },
+      { nombre: 'Universidad de Concepción', ciudad: 'Concepción', region: 'Región del Biobío' },
+      { nombre: 'San Marcos de Arica', ciudad: 'Arica', region: 'Región de Arica y Parinacota' },
+      { nombre: 'Deportes Antofagasta', ciudad: 'Antofagasta', region: 'Región de Antofagasta' },
+      { nombre: 'Rangers de Talca', ciudad: 'Talca', region: 'Región del Maule' },
+      { nombre: 'Santiago Wanderers', ciudad: 'Valparaíso', region: 'Región de Valparaíso' },
+      { nombre: 'San Luis de Quillota', ciudad: 'Quillota', region: 'Región de Valparaíso' },
+      { nombre: 'Deportes Recoleta', ciudad: 'Santiago (Recoleta)', region: 'Región Metropolitana' },
+      { nombre: 'Club de Deportes Magallanes', ciudad: 'San Bernardo (Santiago)', region: 'Región Metropolitana' },
+      { nombre: 'Curicó Unido', ciudad: 'Curicó', region: 'Región del Maule' },
+      { nombre: 'Deportes Santa Cruz', ciudad: 'Santa Cruz', region: 'Región del Libertador General Bernardo O\'Higgins' },
+      { nombre: 'Unión San Felipe', ciudad: 'San Felipe', region: 'Región de Valparaíso' },
+      { nombre: 'Deportes Temuco', ciudad: 'Temuco', region: 'Región de La Araucanía' },
+      { nombre: 'Santiago Morning', ciudad: 'Santiago (La Pintana)', region: 'Región Metropolitana' }
+    ];
+
+    for (const equipo of primeraB) {
+      await pool.query(
+        `INSERT INTO t_planteles (nombre, division, ciudad, region)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (nombre) DO NOTHING`,
+        [equipo.nombre, 'Primera B', equipo.ciudad, equipo.region]
+      );
+    }
+    console.log('✓ Insertados 14 equipos de Primera B');
+
+    // Insertar datos de Segunda División
+    const segundaDivision = [
+      { nombre: 'Deportes Puerto Montt', ciudad: 'Puerto Montt', region: 'Región de Los Lagos' },
+      { nombre: 'Provincial Ovalle', ciudad: 'Ovalle', region: 'Región de Coquimbo' },
+      { nombre: 'Provincial Osorno', ciudad: 'Osorno', region: 'Región de Los Lagos' },
+      { nombre: 'General Velásquez', ciudad: 'San Vicente de Tagua Tagua', region: 'Región de O\'Higgins' },
+      { nombre: 'Deportes Linares', ciudad: 'Linares', region: 'Región del Maule' },
+      { nombre: 'Deportes Rengo', ciudad: 'Rengo', region: 'Región de O\'Higgins' },
+      { nombre: 'Deportes Concepción', ciudad: 'Concepción', region: 'Región del Biobío' },
+      { nombre: 'San Antonio Unido', ciudad: 'San Antonio', region: 'Región de Valparaíso' },
+      { nombre: 'Real San Joaquín', ciudad: 'Santiago', region: 'Región Metropolitana' },
+      { nombre: 'Trasandino', ciudad: 'Los Andes', region: 'Región de Valparaíso' },
+      { nombre: 'Concón National', ciudad: 'Concón', region: 'Región de Valparaíso' },
+      { nombre: 'Brujas de Salamanca', ciudad: 'Salamanca', region: 'Región de Coquimbo' },
+      { nombre: 'Deportes Melipilla', ciudad: 'Melipilla', region: 'Región Metropolitana' },
+      { nombre: 'Santiago City', ciudad: 'Santiago', region: 'Región Metropolitana' }
+    ];
+
+    for (const equipo of segundaDivision) {
+      await pool.query(
+        `INSERT INTO t_planteles (nombre, division, ciudad, region)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (nombre) DO NOTHING`,
+        [equipo.nombre, 'Segunda División', equipo.ciudad, equipo.region]
+      );
+    }
+    console.log('✓ Insertados 14 equipos de Segunda División\\n');
 
     // ========== TABLA t_sesion_mediciones ==========
     console.log('Creando tabla t_sesion_mediciones...');
+
+    // Eliminar tabla existente si existe (depende de t_planteles y t_categorias)
+    await pool.query(`DROP TABLE IF EXISTS t_sesion_mediciones CASCADE;`);
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_sesion_mediciones (
+      CREATE TABLE t_sesion_mediciones (
         id SERIAL PRIMARY KEY,
         plantel_id INTEGER REFERENCES t_planteles(id) ON DELETE RESTRICT,
         categoria_id INTEGER REFERENCES t_categorias(id) ON DELETE RESTRICT,
@@ -220,10 +347,15 @@ const inicializarBD = async () => {
 
     // ========== TABLA t_informe_antropometrico ==========
     console.log('Creando tabla t_informe_antropometrico...');
+
+    // Eliminar tabla existente si existe (depende de t_sesion_mediciones)
+    await pool.query(`DROP TABLE IF EXISTS t_informe_antropometrico CASCADE;`);
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_informe_antropometrico (
+      CREATE TABLE t_informe_antropometrico (
         id SERIAL PRIMARY KEY,
         paciente_id INTEGER NOT NULL,
+        fecha_medicion DATE NOT NULL,
         sesion_id INTEGER NOT NULL,
         nutricionista_id INTEGER NOT NULL,
         fecha_registro TIMESTAMP DEFAULT NOW(),
@@ -286,13 +418,18 @@ const inicializarBD = async () => {
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_sesion_id ON t_informe_antropometrico(sesion_id);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_nutricionista_id ON t_informe_antropometrico(nutricionista_id);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_paciente_sesion ON t_informe_antropometrico(paciente_id, sesion_id);`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_fecha ON t_informe_antropometrico(fecha_registro);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_fecha_medicion ON t_informe_antropometrico(fecha_medicion);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_informe_fecha_registro ON t_informe_antropometrico(fecha_registro);`);
     console.log('✓ Índices en t_informe_antropometrico creados\\n');
 
     // ========== TABLA t_excel_uploads ==========
     console.log('Creando tabla t_excel_uploads...');
+
+    // Eliminar tabla existente si existe (depende de t_sesion_mediciones)
+    await pool.query(`DROP TABLE IF EXISTS t_excel_uploads CASCADE;`);
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_excel_uploads (
+      CREATE TABLE t_excel_uploads (
         id SERIAL PRIMARY KEY,
         sesion_id INTEGER NOT NULL,
         nutricionista_id INTEGER NOT NULL,
@@ -333,6 +470,62 @@ const inicializarBD = async () => {
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_recovery_tokens_token ON t_recovery_tokens(token);`);
     console.log('✓ Índices en t_recovery_tokens creados\\n');
 
+    // ========== TABLA t_cuotas_mensuales ==========
+    console.log('Creando tabla t_cuotas_mensuales...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS t_cuotas_mensuales (
+        id SERIAL PRIMARY KEY,
+        usuario_id INTEGER NOT NULL,
+        mes INTEGER NOT NULL CHECK (mes >= 1 AND mes <= 12),
+        ano INTEGER NOT NULL,
+        monto DECIMAL(10, 2) NOT NULL,
+        estado VARCHAR(50) DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'pagado', 'vencido', 'cancelado')),
+        fecha_vencimiento DATE NOT NULL,
+        descripcion TEXT,
+        fecha_creacion TIMESTAMP DEFAULT NOW(),
+        FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
+        UNIQUE(usuario_id, mes, ano)
+      );
+    `);
+    console.log('✓ Tabla t_cuotas_mensuales creada');
+
+    // Índices para t_cuotas_mensuales
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_usuario_id ON t_cuotas_mensuales(usuario_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_estado ON t_cuotas_mensuales(estado);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_mes_ano ON t_cuotas_mensuales(mes, ano);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_fecha_vencimiento ON t_cuotas_mensuales(fecha_vencimiento);`);
+    console.log('✓ Índices en t_cuotas_mensuales creados\\n');
+
+    // ========== TABLA t_pagos_cuotas ==========
+    console.log('Creando tabla t_pagos_cuotas...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS t_pagos_cuotas (
+        id SERIAL PRIMARY KEY,
+        cuota_id INTEGER NOT NULL,
+        usuario_id INTEGER NOT NULL,
+        monto_pagado DECIMAL(10, 2) NOT NULL,
+        metodo_pago VARCHAR(50) DEFAULT 'mercado_pago' CHECK (metodo_pago IN ('mercado_pago', 'transferencia', 'efectivo')),
+        referencia_pago VARCHAR(255) UNIQUE,
+        estado_pago VARCHAR(50) DEFAULT 'pendiente' CHECK (estado_pago IN ('pendiente', 'completado', 'rechazado', 'cancelado')),
+        id_mercado_pago VARCHAR(255),
+        estado_mercado_pago VARCHAR(50),
+        fecha_pago TIMESTAMP,
+        fecha_creacion TIMESTAMP DEFAULT NOW(),
+        notas TEXT,
+        FOREIGN KEY (cuota_id) REFERENCES t_cuotas_mensuales(id) ON DELETE CASCADE,
+        FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE
+      );
+    `);
+    console.log('✓ Tabla t_pagos_cuotas creada');
+
+    // Índices para t_pagos_cuotas
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_cuota_id ON t_pagos_cuotas(cuota_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_usuario_id ON t_pagos_cuotas(usuario_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_estado ON t_pagos_cuotas(estado_pago);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_id_mercado_pago ON t_pagos_cuotas(id_mercado_pago);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_fecha_pago ON t_pagos_cuotas(fecha_pago);`);
+    console.log('✓ Índices en t_pagos_cuotas creados\\n');
+
     console.log('\\n========================================');
     console.log('✓ BASE DE DATOS INICIALIZADA CORRECTAMENTE');
     console.log('========================================\\n');
@@ -347,7 +540,9 @@ const inicializarBD = async () => {
     console.log('  • t_sesion_mediciones (sesiones de mediciones)');
     console.log('  • t_informe_antropometrico (mediciones detalladas)');
     console.log('  • t_excel_uploads (control de cargas Excel)');
-    console.log('  • t_recovery_tokens (tokens de recuperación)\\n');
+    console.log('  • t_recovery_tokens (tokens de recuperación)');
+    console.log('  • t_cuotas_mensuales (cuotas mensuales)');
+    console.log('  • t_pagos_cuotas (registro de pagos de cuotas)\\n');
     console.log('Índices creados para optimizar consultas frecuentes.\\n');
 
     process.exit(0);

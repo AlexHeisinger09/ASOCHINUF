@@ -214,6 +214,13 @@ export const uploadExcelFile = async (req, res) => {
       [registrosInsertados, sesionId]
     );
 
+    // Insertar registro en t_excel_uploads con el nombre del archivo
+    await pool.query(
+      `INSERT INTO t_excel_uploads (sesion_id, nutricionista_id, nombre_archivo, hash_archivo, cantidad_registros)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [sesionId, usuarioId, req.file.originalname, fileHash, registrosInsertados]
+    );
+
     res.status(201).json({
       success: true,
       message: 'Archivo cargado exitosamente',
@@ -252,14 +259,15 @@ export const getUploadHistory = async (req, res) => {
     let query = `
       SELECT
         sm.id,
-        sm.fecha_sesion,
-        sm.fecha_carga,
+        sm.fecha_carga as fecha_carga_excel,
         sm.cantidad_registros,
+        eu.nombre_archivo,
         p.nombre as plantel,
-        u.nombre as nutricionista_nombre
+        u.nombre || ' ' || u.apellido as nutricionista_nombre
       FROM t_sesion_mediciones sm
       JOIN t_planteles p ON sm.plantel_id = p.id
       JOIN t_usuarios u ON sm.nutricionista_id = u.id
+      LEFT JOIN t_excel_uploads eu ON sm.id = eu.sesion_id
     `;
 
     const params = [];

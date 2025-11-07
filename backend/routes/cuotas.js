@@ -1,0 +1,47 @@
+import express from 'express';
+import { verificarToken } from '../middleware/auth.js';
+import {
+  obtenerCuotas,
+  crearCuota,
+  editarCuota,
+  eliminarCuota,
+  obtenerResumenCuotas,
+  obtenerCuotaById,
+  registrarPagoCuota,
+  obtenerPagosCuota,
+  obtenerEstadisticas
+} from '../controllers/cuotasController.js';
+
+const router = express.Router();
+
+// Todas las rutas requieren autenticación
+router.use(verificarToken);
+
+// Obtener cuotas del usuario actual (o todas si es admin)
+router.get('/', obtenerCuotas);
+
+// Obtener resumen de cuotas para notificaciones
+router.get('/resumen', obtenerResumenCuotas);
+
+// Obtener estadísticas generales (admin)
+router.get('/estadisticas/general', obtenerEstadisticas);
+
+// Obtener una cuota por ID
+router.get('/:id', obtenerCuotaById);
+
+// Crear/actualizar cuota (admin)
+router.post('/', crearCuota);
+
+// Editar cuota (admin)
+router.put('/:id', editarCuota);
+
+// Eliminar cuota (admin)
+router.delete('/:id', eliminarCuota);
+
+// Registrar pago de cuota
+router.post('/:cuotaId/pagos', registrarPagoCuota);
+
+// Obtener historial de pagos de una cuota
+router.get('/:cuotaId/pagos', obtenerPagosCuota);
+
+export default router;

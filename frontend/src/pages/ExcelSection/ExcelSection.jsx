@@ -230,6 +230,9 @@ const ExcelSection = ({ containerVariants }) => {
             setTimeout(() => {
               setUploadResult(null);
               setUploadProgress(0);
+              // Limpiar los selects después de una carga exitosa
+              setSelectedPlantelId('');
+              setSelectedCategoriaId('');
             }, 5000);
           } catch (err) {
             setError('Error al procesar la respuesta del servidor');
@@ -344,141 +347,152 @@ const ExcelSection = ({ containerVariants }) => {
 
       {/* Selector de Plantel y Categoría */}
       <div className={`p-6 rounded-2xl ${isDarkMode ? 'bg-[#1a1c22]/50 border border-[#8c5cff]/20' : 'bg-white/50 border border-purple-200'} mb-6`}>
-        <label className={`block text-sm font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        <label className={`block text-sm font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           1. Selecciona el Plantel y Categoría *
         </label>
 
-        {/* Selector de Plantel */}
-        <div className="mb-4">
-          <label className={`block text-xs font-medium mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Plantel
-          </label>
-          {loadingPlanteles ? (
-            <div className="flex items-center gap-2 text-gray-400">
-              <Loader className="animate-spin" size={20} />
-              <span className="text-sm">Cargando planteles...</span>
-            </div>
-          ) : planteles.length === 0 ? (
-            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-yellow-50 border border-yellow-200'}`}>
-              <p className={`text-sm ${isDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>
-                No hay planteles disponibles. Un administrador debe crear planteles primero.
-              </p>
-            </div>
-          ) : (
-            <select
-              value={selectedPlantelId}
-              onChange={(e) => setSelectedPlantelId(e.target.value)}
-              className={`w-full px-4 py-3 rounded-lg border ${
-                isDarkMode
-                  ? 'bg-[#1a1c22] border-[#8c5cff]/30 text-white'
-                  : 'bg-white border-purple-300 text-gray-900'
-              } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
-            >
-              <option value="">Seleccionar plantel...</option>
-              {planteles.map((plantel) => (
-                <option key={plantel.id} value={plantel.id}>
-                  {plantel.nombre} ({plantel.division})
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Selector de Plantel */}
+          <div>
+            <label className={`block text-xs font-medium mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Plantel
+            </label>
+            {loadingPlanteles ? (
+              <div className="flex items-center gap-2 text-gray-400">
+                <Loader className="animate-spin" size={20} />
+                <span className="text-sm">Cargando planteles...</span>
+              </div>
+            ) : planteles.length === 0 ? (
+              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-yellow-50 border border-yellow-200'}`}>
+                <p className={`text-sm ${isDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>
+                  No hay planteles disponibles. Un administrador debe crear planteles primero.
+                </p>
+              </div>
+            ) : (
+              <select
+                value={selectedPlantelId}
+                onChange={(e) => setSelectedPlantelId(e.target.value)}
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  isDarkMode
+                    ? 'bg-[#1a1c22] border-[#8c5cff]/30 text-white'
+                    : 'bg-white border-purple-300 text-gray-900'
+                } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
+              >
+                <option value="">Seleccionar plantel...</option>
+                {planteles.map((plantel) => (
+                  <option key={plantel.id} value={plantel.id}>
+                    {plantel.nombre} ({plantel.division})
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
 
-        {/* Selector de Categoría */}
-        <div>
-          <label className={`block text-xs font-medium mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Categoría
-          </label>
-          {loadingCategorias ? (
-            <div className="flex items-center gap-2 text-gray-400">
-              <Loader className="animate-spin" size={20} />
-              <span className="text-sm">Cargando categorías...</span>
-            </div>
-          ) : categorias.length === 0 ? (
-            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-yellow-50 border border-yellow-200'}`}>
-              <p className={`text-sm ${isDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>
-                No hay categorías disponibles.
-              </p>
-            </div>
-          ) : (
-            <select
-              value={selectedCategoriaId}
-              onChange={(e) => setSelectedCategoriaId(e.target.value)}
-              className={`w-full px-4 py-3 rounded-lg border ${
-                isDarkMode
-                  ? 'bg-[#1a1c22] border-[#8c5cff]/30 text-white'
-                  : 'bg-white border-purple-300 text-gray-900'
-              } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
-            >
-              <option value="">Seleccionar categoría...</option>
-              {categorias.map((categoria) => (
-                <option key={categoria.id} value={categoria.id}>
-                  {categoria.nombre}
-                </option>
-              ))}
-            </select>
-          )}
+          {/* Selector de Categoría */}
+          <div>
+            <label className={`block text-xs font-medium mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Categoría
+            </label>
+            {loadingCategorias ? (
+              <div className="flex items-center gap-2 text-gray-400">
+                <Loader className="animate-spin" size={20} />
+                <span className="text-sm">Cargando categorías...</span>
+              </div>
+            ) : categorias.length === 0 ? (
+              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-yellow-50 border border-yellow-200'}`}>
+                <p className={`text-sm ${isDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>
+                  No hay categorías disponibles.
+                </p>
+              </div>
+            ) : (
+              <select
+                value={selectedCategoriaId}
+                onChange={(e) => setSelectedCategoriaId(e.target.value)}
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  isDarkMode
+                    ? 'bg-[#1a1c22] border-[#8c5cff]/30 text-white'
+                    : 'bg-white border-purple-300 text-gray-900'
+                } focus:outline-none focus:ring-2 focus:ring-[#8c5cff]`}
+              >
+                <option value="">Seleccionar categoría...</option>
+                {categorias.map((categoria) => (
+                  <option key={categoria.id} value={categoria.id}>
+                    {categoria.nombre}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Drag & Drop Zone */}
-      <div className={`p-6 rounded-2xl ${isDarkMode ? 'bg-[#1a1c22]/50 border border-[#8c5cff]/20' : 'bg-white/50 border border-purple-200'} mb-6`}>
-        <label className={`block text-sm font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          2. Carga el Archivo Excel
-        </label>
-        <motion.div
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          whileHover={{ scale: 1.01 }}
-          className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
-            isDragging
-              ? isDarkMode
-                ? 'border-[#8c5cff]/60 bg-[#8c5cff]/10'
-                : 'border-purple-500 bg-purple-50'
-              : isDarkMode
-              ? 'border-[#8c5cff]/20 bg-[#1a1c22]/50'
-              : 'border-purple-200 bg-white/50'
-          }`}
-        >
-        <Upload
-          size={48}
-          className={`mx-auto mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}
-        />
-        <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Arrastra tu archivo aquí
-        </h3>
-        <p className={`mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          o haz clic para seleccionar un archivo
-        </p>
+      {/* Drag & Drop Zone - Solo mostrar si no hay archivo seleccionado */}
+      {!selectedFile && (
+        <div className={`p-6 rounded-2xl ${isDarkMode ? 'bg-[#1a1c22]/50 border border-[#8c5cff]/20' : 'bg-white/50 border border-purple-200'} mb-6`}>
+          <label className={`block text-sm font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            2. Carga el Archivo Excel
+          </label>
+          <motion.div
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            whileHover={{ scale: 1.01 }}
+            className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
+              isDragging
+                ? isDarkMode
+                  ? 'border-[#8c5cff]/60 bg-[#8c5cff]/10'
+                  : 'border-purple-500 bg-purple-50'
+                : isDarkMode
+                ? 'border-[#8c5cff]/20 bg-[#1a1c22]/50'
+                : 'border-purple-200 bg-white/50'
+            }`}
+          >
+            <Upload
+              size={48}
+              className={`mx-auto mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}
+            />
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              Arrastra tu archivo aquí
+            </h3>
+            <p className={`mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              o haz clic para seleccionar un archivo
+            </p>
 
-        <label
-          className={`inline-block px-6 py-2 rounded-lg font-semibold transition-all cursor-pointer ${
-            isDarkMode
-              ? 'bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] text-white hover:shadow-lg hover:shadow-[#8c5cff]/50'
-              : 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:shadow-lg'
-          }`}
-        >
-          Seleccionar Archivo
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-        </label>
+            <label
+              className={`inline-block px-6 py-2 rounded-lg font-semibold transition-all cursor-pointer ${
+                isDarkMode
+                  ? 'bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] text-white hover:shadow-lg hover:shadow-[#8c5cff]/50'
+                  : 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:shadow-lg'
+              }`}
+            >
+              Seleccionar Archivo
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </label>
+          </motion.div>
+        </div>
+      )}
 
-        {selectedFile && (
+      {/* Archivo Seleccionado - Mostrar si hay archivo */}
+      {selectedFile && (
+        <div className={`p-6 rounded-2xl ${isDarkMode ? 'bg-[#1a1c22]/50 border border-[#8c5cff]/20' : 'bg-white/50 border border-purple-200'} mb-6`}>
+          <label className={`block text-sm font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            2. Archivo Seleccionado
+          </label>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`mt-4 p-3 rounded-lg flex items-center gap-2 ${
-              isDarkMode ? 'bg-[#8c5cff]/20' : 'bg-purple-100'
+            className={`p-4 rounded-lg flex items-center gap-3 ${
+              isDarkMode ? 'bg-[#8c5cff]/20 border border-[#8c5cff]/30' : 'bg-purple-100 border border-purple-300'
             }`}
           >
-            <File size={20} className="text-[#8c5cff]" />
-            <div className="flex-1 text-left">
+            <File size={24} className="text-[#8c5cff] flex-shrink-0" />
+            <div className="flex-1">
               <p className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {selectedFile.name}
               </p>
@@ -488,14 +502,20 @@ const ExcelSection = ({ containerVariants }) => {
             </div>
             <button
               onClick={() => setSelectedFile(null)}
-              className={`p-1 rounded hover:bg-red-500/20 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}
+              disabled={isUploading}
+              className={`p-1 rounded transition-colors ${
+                isUploading
+                  ? 'cursor-not-allowed opacity-50'
+                  : isDarkMode
+                  ? 'text-red-400 hover:bg-red-500/20'
+                  : 'text-red-600 hover:bg-red-100'
+              }`}
             >
               <X size={20} />
             </button>
           </motion.div>
-        )}
-        </motion.div>
-      </div>
+        </div>
+      )}
 
       {/* Upload Button */}
       {selectedFile && selectedPlantelId && selectedCategoriaId && (
@@ -642,7 +662,7 @@ const ExcelSection = ({ containerVariants }) => {
                     Archivo
                   </th>
                   <th className={`px-4 py-3 text-left font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    Fecha
+                    Fecha de Carga
                   </th>
                   <th className={`px-4 py-3 text-center font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     Registros
@@ -673,7 +693,7 @@ const ExcelSection = ({ containerVariants }) => {
                         {item.nombre_archivo}
                       </td>
                       <td className={`px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {new Date(item.fecha_sesion).toLocaleDateString('es-CL')}
+                        {new Date(item.fecha_carga_excel).toLocaleDateString('es-CL')}
                       </td>
                       <td className={`px-4 py-3 text-center font-semibold ${isDarkMode ? 'text-[#8c5cff]' : 'text-purple-600'}`}>
                         {item.cantidad_registros}

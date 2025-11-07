@@ -45,6 +45,22 @@ export const API_ENDPOINTS = {
     GET_ACTIVAS: `${API_URL}/api/categorias/activas`,
     GET_ONE: (id) => `${API_URL}/api/categorias/${id}`,
   },
+  // Cuotas
+  CUOTAS: {
+    GET_ALL: `${API_URL}/api/cuotas`,
+    GET_RESUMEN: `${API_URL}/api/cuotas/resumen`,
+    GET_ONE: (id) => `${API_URL}/api/cuotas/${id}`,
+    GET_PAGOS: (cuotaId) => `${API_URL}/api/cuotas/${cuotaId}/pagos`,
+    CREATE: `${API_URL}/api/cuotas`,
+    REGISTRAR_PAGO: (cuotaId) => `${API_URL}/api/cuotas/${cuotaId}/pagos`,
+    ESTADISTICAS: `${API_URL}/api/cuotas/estadisticas/general`,
+  },
+  // Pagos Mercado Pago
+  PAYMENTS: {
+    INICIAR_PAGO: `${API_URL}/api/payments/iniciar`,
+    ESTADO_PAGO: (cuotaId) => `${API_URL}/api/payments/estado/${cuotaId}`,
+    WEBHOOK: `${API_URL}/api/payments/webhook`,
+  },
 };
 
 export const BASE = API_URL;

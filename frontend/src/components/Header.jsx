@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Settings, User, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import CuotasNotification from './CuotasNotification';
 
 const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLogout }) => {
   const { usuario, isDarkMode, toggleTheme } = useAuth();
@@ -40,15 +41,19 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
           <p className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{usuario?.nombre}</p>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 hover:bg-[#8c5cff]/20 rounded-lg transition-colors duration-300"
-          title="Opciones"
-        >
-          <Settings size={18} className="text-[#8c5cff]" />
-        </motion.button>
+        <div className="flex items-center gap-2">
+          <CuotasNotification isDarkMode={isDarkMode} setActiveTab={setActiveTab} />
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 hover:bg-[#8c5cff]/20 rounded-lg transition-colors duration-300"
+            title="Opciones"
+          >
+            <Settings size={18} className="text-[#8c5cff]" />
+          </motion.button>
+        </div>
 
         {/* Mobile Menu Dropdown */}
         <AnimatePresence>
@@ -150,25 +155,29 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
           : 'bg-gradient-to-r from-white to-[#f5f5f7] border-purple-200'
       } border backdrop-blur-xl z-40 px-6 py-4 items-center justify-end gap-6 mx-4 rounded-2xl shadow-lg flex-shrink-0 mt-2`}
     >
-      <div className="flex items-center gap-3 relative">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-sm font-bold overflow-hidden">
-          {usuario?.foto ? (
-            <img
-              src={`/foto_perfil/${usuario.foto}?t=${Date.now()}`}
-              alt="Foto de perfil"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            usuario?.nombre[0]
-          )}
-        </div>
-        <div className="hidden sm:block">
-          <p className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{usuario?.nombre} {usuario?.apellido}</p>
-          <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} capitalize`}>{usuario?.tipo_perfil}</p>
-        </div>
+      <div className="flex items-center gap-4">
+        {/* Notificación de Cuotas */}
+        <CuotasNotification isDarkMode={isDarkMode} setActiveTab={setActiveTab} />
 
-        {/* Settings Dropdown */}
-        <motion.button
+        <div className="flex items-center gap-3 relative">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#8c5cff] to-[#6a3dcf] flex items-center justify-center text-sm font-bold overflow-hidden">
+            {usuario?.foto ? (
+              <img
+                src={`/foto_perfil/${usuario.foto}?t=${Date.now()}`}
+                alt="Foto de perfil"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              usuario?.nombre[0]
+            )}
+          </div>
+          <div className="hidden sm:block">
+            <p className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{usuario?.nombre} {usuario?.apellido}</p>
+            <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} capitalize`}>{usuario?.tipo_perfil}</p>
+          </div>
+
+          {/* Settings Dropdown */}
+          <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setSettingsMenuOpen(!settingsMenuOpen)}
@@ -248,6 +257,7 @@ const Header = ({ setActiveTab, setSettingsMenuOpen, settingsMenuOpen, handleLog
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
       </div>
     </motion.header>
   );

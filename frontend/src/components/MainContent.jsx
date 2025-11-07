@@ -10,6 +10,7 @@ import GestionUsuariosSection from '../pages/GestionUsuariosSection/GestionUsuar
 import GestionCursosSection from '../pages/GestionCursosSection/GestionCursosSection';
 import GestionPlantelesSection from '../pages/GestionPlantelesSection/GestionPlantelesSection';
 import MiPerfil from '../pages/PerfilSection/MiPerfil';
+import CuotasSection from '../pages/CuotasSection/CuotasSection';
 
 const MainContent = ({ activeTab }) => {
   const { isDarkMode } = useAuth();
@@ -34,12 +35,13 @@ const MainContent = ({ activeTab }) => {
   };
 
   return (
-    <main className={`flex-1 overflow-y-auto p-4 md:p-10 pb-24 md:pb-0 ${isDarkMode ? '' : 'bg-gradient-to-b from-[#fafafa] to-[#f5f5f7]'}`}>
+    <main className={`flex-1 overflow-y-auto p-4 md:p-10 pt-6 md:pt-12 pb-32 md:pb-12 ${isDarkMode ? '' : 'bg-gradient-to-b from-[#fafafa] to-[#f5f5f7]'}`}>
       <AnimatePresence mode="wait">
         {activeTab === 'inicio' && <DashboardSection containerVariants={containerVariants} itemVariants={itemVariants} />}
         {activeTab === 'cursos' && <CursosSection containerVariants={containerVariants} />}
         {activeTab === 'datos' && <DatosSection containerVariants={containerVariants} />}
         {activeTab === 'excel' && <ExcelSection containerVariants={containerVariants} />}
+        {activeTab === 'cuotas' && <CuotasSection containerVariants={containerVariants} />}
         {activeTab === 'perfil' && <MiPerfil />}
         {activeTab === 'configuracion' && <ConfiguracionSection containerVariants={containerVariants} />}
         {activeTab === 'gestionplanteles' && <GestionPlantelesSection containerVariants={containerVariants} />}
