@@ -328,6 +328,31 @@ export const crearUsuario = async (req, res) => {
 
     const usuario = resultado.rows[0];
 
+    // Si es nutricionista o admin, asignar todas las cuotas globales existentes
+    if (tipo_perfil === 'nutricionista' || tipo_perfil === 'admin') {
+      try {
+        // Obtener todas las cuotas globales
+        const cuotasResult = await pool.query(
+          'SELECT id FROM t_cuotas_mensuales ORDER BY ano DESC, mes DESC'
+        );
+
+        // Asignar cada cuota al nuevo usuario
+        for (const cuota of cuotasResult.rows) {
+          await pool.query(
+            `INSERT INTO t_cuotas_usuario (usuario_id, cuota_id, estado)
+             VALUES ($1, $2, 'pendiente')
+             ON CONFLICT (usuario_id, cuota_id) DO NOTHING`,
+            [usuario.id, cuota.id]
+          );
+        }
+
+        console.log(`✅ Asignadas ${cuotasResult.rows.length} cuotas al nuevo usuario ${usuario.id}`);
+      } catch (error) {
+        console.error('⚠️ Error asignando cuotas al nuevo usuario:', error);
+        // No fallar la creación del usuario si hay error en cuotas
+      }
+    }
+
     res.status(201).json({
       mensaje: 'Usuario creado exitosamente',
       usuario,

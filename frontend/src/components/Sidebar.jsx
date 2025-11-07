@@ -9,7 +9,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
   const baseMenuItems = [
     { id: 'inicio', label: 'Inicio', icon: Home },
     { id: 'cursos', label: 'Cursos', icon: BookOpen },
-    { id: 'datos', label: 'Inf. Antropométrico', icon: User },
+    // { id: 'datos', label: 'Inf. Antropométrico', icon: User },
   ];
 
   // Excel solo para nutricionistas y admins
@@ -200,7 +200,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
           </AnimatePresence>
         </motion.button>
 
-        {/* Logout Button */}
+        {/* Logout Button - DISABLED */}
+        {/*
         <motion.button
           whileHover={{ scale: 1.02, x: sidebarOpen ? 5 : 0 }}
           whileTap={{ scale: 0.98 }}
@@ -229,6 +230,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
             )}
           </AnimatePresence>
         </motion.button>
+        */}
       </div>
     </motion.aside>
   );

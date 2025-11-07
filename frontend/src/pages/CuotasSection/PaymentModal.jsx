@@ -16,6 +16,17 @@ const PaymentModal = ({ isOpen, onClose, cuota, onSuccess }) => {
   const [metodoPago, setMetodoPago] = useState('mercado_pago');
   const [referencia, setReferencia] = useState('');
 
+  // Resetear el estado cuando el modal se abre o cierra
+  useEffect(() => {
+    if (isOpen) {
+      setPaymentStep('method');
+      setError('');
+      setSuccess(false);
+      setReferencia('');
+      setMetodoPago('mercado_pago');
+    }
+  }, [isOpen]);
+
   const handleInitiateMercadoPago = async () => {
     try {
       setSubmitting(true);
@@ -23,7 +34,9 @@ const PaymentModal = ({ isOpen, onClose, cuota, onSuccess }) => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       const response = await axios.post(API_ENDPOINTS.PAYMENTS.INICIAR_PAGO, {
-        cuotaId: cuota.id
+        cuotaUsuarioId: cuota.cuota_usuario_id,
+        montoPagado: cuota.monto,
+        metodoPago: 'mercado_pago'
       }, config);
 
       // Aquí se redirigiría a Mercado Pago
@@ -50,7 +63,9 @@ const PaymentModal = ({ isOpen, onClose, cuota, onSuccess }) => {
       setSubmitting(true);
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      await axios.post(API_ENDPOINTS.CUOTAS.REGISTRAR_PAGO(cuota.id), {
+      // Usar cuota_usuario_id para registrar el pago
+      await axios.post(`${API_ENDPOINTS.CUOTAS.GET_ALL}/${cuota.cuota_usuario_id}/pagos`, {
+        cuotaUsuarioId: cuota.cuota_usuario_id,
         montoPagado: cuota.monto,
         metodoPago: metodoPago,
         referenciaPago: referencia

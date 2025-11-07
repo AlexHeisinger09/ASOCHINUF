@@ -14,7 +14,7 @@ const AdminCuotasTable = ({ cuotas, onRefresh, containerVariants }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [cuotaEditando, setCuotaEditando] = useState(null);
   const [filtroMes, setFiltroMes] = useState('');
-  const [filtroAno, setFiltroAno] = useState(new Date().getFullYear());
+  const [filtroAno, setFiltroAno] = useState('');
   const [filtroPago, setFiltroPago] = useState('');
 
   // Filtrar cuotas
@@ -52,12 +52,10 @@ const AdminCuotasTable = ({ cuotas, onRefresh, containerVariants }) => {
 
   const getEstadoBadge = (estado) => {
     const badges = {
-      pendiente: { bg: 'bg-yellow-500/20', text: 'text-yellow-600', label: 'Pendiente' },
-      pagado: { bg: 'bg-green-500/20', text: 'text-green-600', label: 'Pagado' },
-      vencido: { bg: 'bg-red-500/20', text: 'text-red-600', label: 'Vencido' },
-      cancelado: { bg: 'bg-gray-500/20', text: 'text-gray-600', label: 'Cancelado' }
+      activo: { bg: 'bg-green-500/20', text: 'text-green-600', label: 'Activo' },
+      vencido: { bg: 'bg-red-500/20', text: 'text-red-600', label: 'Vencido' }
     };
-    return badges[estado] || badges.pendiente;
+    return badges[estado] || { bg: 'bg-gray-500/20', text: 'text-gray-600', label: 'Desconocido' };
   };
 
   const getStatusIcon = (estado) => {
@@ -139,8 +137,7 @@ const AdminCuotasTable = ({ cuotas, onRefresh, containerVariants }) => {
           }`}
         >
           <option value="">Todos los estados</option>
-          <option value="pendiente">Pendiente</option>
-          <option value="pagado">Pagado</option>
+          <option value="activo">Activo</option>
           <option value="vencido">Vencido</option>
         </select>
       </div>

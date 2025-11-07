@@ -39,8 +39,8 @@ const CreateCuotaModal = ({ isOpen, onClose, onSuccess }) => {
     try {
       setSubmitting(true);
       const config = { headers: { Authorization: `Bearer ${token}` } };
+      // Cuota global - se asigna automáticamente a todos los usuarios
       await axios.post(API_ENDPOINTS.CUOTAS.CREATE, {
-        usuarioId: usuario.id, // Usa el usuario actual
         mes: parseInt(formData.mes),
         ano: parseInt(formData.ano),
         monto: parseFloat(formData.monto),
@@ -48,7 +48,7 @@ const CreateCuotaModal = ({ isOpen, onClose, onSuccess }) => {
         descripcion: formData.descripcion
       }, config);
 
-      toast.success('Cuota creada exitosamente');
+      toast.success('Cuota creada y asignada a todos los usuarios exitosamente');
       onSuccess();
       // Reset form
       setFormData({

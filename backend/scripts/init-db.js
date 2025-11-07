@@ -470,57 +470,77 @@ const inicializarBD = async () => {
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_recovery_tokens_token ON t_recovery_tokens(token);`);
     console.log('✓ Índices en t_recovery_tokens creados\\n');
 
-    // ========== TABLA t_cuotas_mensuales ==========
-    console.log('Creando tabla t_cuotas_mensuales...');
+    // ========== TABLA t_cuotas_mensuales (GLOBAL) ==========
+    console.log('Creando tabla t_cuotas_mensuales (Cuotas Globales)...');
+    // Eliminar tablas antiguas si existen (en orden de dependencias)
+    await pool.query(`DROP TABLE IF EXISTS t_pagos_cuotas CASCADE;`);
+    await pool.query(`DROP TABLE IF EXISTS t_cuotas_usuario CASCADE;`);
+    await pool.query(`DROP TABLE IF EXISTS t_cuotas_mensuales CASCADE;`);
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_cuotas_mensuales (
+      CREATE TABLE t_cuotas_mensuales (
         id SERIAL PRIMARY KEY,
-        usuario_id INTEGER NOT NULL,
         mes INTEGER NOT NULL CHECK (mes >= 1 AND mes <= 12),
         ano INTEGER NOT NULL,
         monto DECIMAL(10, 2) NOT NULL,
-        estado VARCHAR(50) DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'pagado', 'vencido', 'cancelado')),
         fecha_vencimiento DATE NOT NULL,
         descripcion TEXT,
         fecha_creacion TIMESTAMP DEFAULT NOW(),
-        FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
-        UNIQUE(usuario_id, mes, ano)
+        UNIQUE(mes, ano)
       );
     `);
-    console.log('✓ Tabla t_cuotas_mensuales creada');
+    console.log('✓ Tabla t_cuotas_mensuales creada (Cuotas Globales)');
 
     // Índices para t_cuotas_mensuales
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_usuario_id ON t_cuotas_mensuales(usuario_id);`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_estado ON t_cuotas_mensuales(estado);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_mes_ano ON t_cuotas_mensuales(mes, ano);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_fecha_vencimiento ON t_cuotas_mensuales(fecha_vencimiento);`);
     console.log('✓ Índices en t_cuotas_mensuales creados\\n');
 
+    // ========== TABLA t_cuotas_usuario ==========
+    console.log('Creando tabla t_cuotas_usuario...');
+    await pool.query(`
+      CREATE TABLE t_cuotas_usuario (
+        id SERIAL PRIMARY KEY,
+        usuario_id INTEGER NOT NULL,
+        cuota_id INTEGER NOT NULL,
+        estado VARCHAR(50) DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'pagado', 'vencido', 'cancelado')),
+        fecha_creacion TIMESTAMP DEFAULT NOW(),
+        FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE,
+        FOREIGN KEY (cuota_id) REFERENCES t_cuotas_mensuales(id) ON DELETE CASCADE,
+        UNIQUE(usuario_id, cuota_id)
+      );
+    `);
+    console.log('✓ Tabla t_cuotas_usuario creada');
+
+    // Índices para t_cuotas_usuario
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_usuario_id ON t_cuotas_usuario(usuario_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_usuario_cuota_id ON t_cuotas_usuario(cuota_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_cuotas_usuario_estado ON t_cuotas_usuario(estado);`);
+    console.log('✓ Índices en t_cuotas_usuario creados\\n');
+
     // ========== TABLA t_pagos_cuotas ==========
     console.log('Creando tabla t_pagos_cuotas...');
+    // Eliminar tabla antigua si existe
+    await pool.query(`DROP TABLE IF EXISTS t_pagos_cuotas CASCADE;`);
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS t_pagos_cuotas (
+      CREATE TABLE t_pagos_cuotas (
         id SERIAL PRIMARY KEY,
-        cuota_id INTEGER NOT NULL,
-        usuario_id INTEGER NOT NULL,
+        cuota_usuario_id INTEGER NOT NULL,
         monto_pagado DECIMAL(10, 2) NOT NULL,
         metodo_pago VARCHAR(50) DEFAULT 'mercado_pago' CHECK (metodo_pago IN ('mercado_pago', 'transferencia', 'efectivo')),
-        referencia_pago VARCHAR(255) UNIQUE,
-        estado_pago VARCHAR(50) DEFAULT 'pendiente' CHECK (estado_pago IN ('pendiente', 'completado', 'rechazado', 'cancelado')),
+        referencia_pago VARCHAR(255),
+        estado_pago VARCHAR(50) DEFAULT 'completado' CHECK (estado_pago IN ('pendiente', 'completado', 'rechazado', 'cancelado')),
         id_mercado_pago VARCHAR(255),
         estado_mercado_pago VARCHAR(50),
-        fecha_pago TIMESTAMP,
+        fecha_pago TIMESTAMP DEFAULT NOW(),
         fecha_creacion TIMESTAMP DEFAULT NOW(),
         notas TEXT,
-        FOREIGN KEY (cuota_id) REFERENCES t_cuotas_mensuales(id) ON DELETE CASCADE,
-        FOREIGN KEY (usuario_id) REFERENCES t_usuarios(id) ON DELETE CASCADE
+        FOREIGN KEY (cuota_usuario_id) REFERENCES t_cuotas_usuario(id) ON DELETE CASCADE
       );
     `);
     console.log('✓ Tabla t_pagos_cuotas creada');
 
     // Índices para t_pagos_cuotas
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_cuota_id ON t_pagos_cuotas(cuota_id);`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_usuario_id ON t_pagos_cuotas(usuario_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_cuota_usuario_id ON t_pagos_cuotas(cuota_usuario_id);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_estado ON t_pagos_cuotas(estado_pago);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_id_mercado_pago ON t_pagos_cuotas(id_mercado_pago);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_pagos_fecha_pago ON t_pagos_cuotas(fecha_pago);`);

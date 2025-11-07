@@ -9,7 +9,9 @@ import {
   obtenerCuotaById,
   registrarPagoCuota,
   obtenerPagosCuota,
-  obtenerEstadisticas
+  obtenerEstadisticas,
+  obtenerCuotasGlobales,
+  obtenerTodosLosUsuarios
 } from '../controllers/cuotasController.js';
 
 const router = express.Router();
@@ -22,6 +24,12 @@ router.get('/', obtenerCuotas);
 
 // Obtener resumen de cuotas para notificaciones
 router.get('/resumen', obtenerResumenCuotas);
+
+// Obtener solo cuotas globales (admin) - para mantenedor
+router.get('/globales/todas', obtenerCuotasGlobales);
+
+// Obtener todos los usuarios (admin y nutricionista) - para la tabla
+router.get('/usuarios/todos', obtenerTodosLosUsuarios);
 
 // Obtener estadísticas generales (admin)
 router.get('/estadisticas/general', obtenerEstadisticas);

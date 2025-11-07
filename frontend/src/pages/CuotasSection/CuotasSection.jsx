@@ -15,15 +15,22 @@ const CuotasSection = ({ containerVariants }) => {
   const [estadisticas, setEstadisticas] = useState(null);
   const [resumen, setResumen] = useState(null);
   const [activeTab, setActiveTab] = useState('mis-cuotas'); // 'mis-cuotas' o 'mantenedor' (solo para admin)
+  const isAdmin = usuario?.tipo_perfil === 'admin';
 
   // Cargar cuotas
-  const cargarCuotas = async () => {
+  const cargarCuotas = async (tabActivo = activeTab) => {
     if (!token) return;
     try {
       setLoading(true);
       setError('');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.get(API_ENDPOINTS.CUOTAS.GET_ALL, config);
+
+      // Si es admin en tab mantenedor, obtener solo cuotas globales
+      const endpoint = isAdmin && tabActivo === 'mantenedor'
+        ? `${API_ENDPOINTS.CUOTAS.GET_ALL}/globales/todas`
+        : API_ENDPOINTS.CUOTAS.GET_ALL;
+
+      const response = await axios.get(endpoint, config);
       setCuotas(response.data);
     } catch (err) {
       console.error('Error al cargar cuotas:', err);
@@ -65,7 +72,12 @@ const CuotasSection = ({ containerVariants }) => {
     }
   }, [token, usuario?.tipo_perfil]);
 
-  const isAdmin = usuario?.tipo_perfil === 'admin';
+  // Recargar cuotas cuando cambia el tab (para mostrar globales vs personales)
+  useEffect(() => {
+    if (token && isAdmin) {
+      cargarCuotas(activeTab);
+    }
+  }, [activeTab]);
 
   return (
     <motion.div
