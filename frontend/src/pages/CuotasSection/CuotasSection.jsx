@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DollarSign, AlertCircle, CheckCircle, Clock, Loader } from 'lucide-react';
+import { DollarSign, AlertCircle, CheckCircle, Clock, Loader, Wallet, Settings, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../../config/apiConfig';
 import AdminCuotasTable from './AdminCuotasTable';
 import MyQuotasSection from './MyQuotasSection';
+import EstadoCuotasSection from './EstadoCuotasSection';
 
 const CuotasSection = ({ containerVariants }) => {
   const { isDarkMode, token, usuario } = useAuth();
@@ -212,27 +213,62 @@ const CuotasSection = ({ containerVariants }) => {
         <>
           {/* Tabs para Admin */}
           {isAdmin && (
-            <div className="flex gap-2 border-b border-[#8c5cff]/20">
-              <button
+            <div className={`flex gap-2 border-b ${
+              isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'
+            } pb-1 mb-6`}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab('mis-cuotas')}
-                className={`px-4 py-3 font-semibold text-sm border-b-2 transition-colors ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-semibold transition-all ${
                   activeTab === 'mis-cuotas'
-                    ? `border-[#8c5cff] ${isDarkMode ? 'text-white' : 'text-purple-600'}`
-                    : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`
+                    ? isDarkMode
+                      ? 'bg-[#8c5cff] text-white'
+                      : 'bg-purple-600 text-white'
+                    : isDarkMode
+                    ? 'text-gray-400 hover:text-white hover:bg-[#8c5cff]/20'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-purple-100'
                 }`}
               >
+                <Wallet size={18} />
                 Mis Cuotas
-              </button>
-              <button
-                onClick={() => setActiveTab('mantenedor')}
-                className={`px-4 py-3 font-semibold text-sm border-b-2 transition-colors ${
-                  activeTab === 'mantenedor'
-                    ? `border-[#8c5cff] ${isDarkMode ? 'text-white' : 'text-purple-600'}`
-                    : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setActiveTab('estado-usuarios')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-semibold transition-all ${
+                  activeTab === 'estado-usuarios'
+                    ? isDarkMode
+                      ? 'bg-[#8c5cff] text-white'
+                      : 'bg-purple-600 text-white'
+                    : isDarkMode
+                    ? 'text-gray-400 hover:text-white hover:bg-[#8c5cff]/20'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-purple-100'
                 }`}
               >
+                <Users size={18} />
+                Estado de Cuotas - Todos los Usuarios
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setActiveTab('mantenedor')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-semibold transition-all ${
+                  activeTab === 'mantenedor'
+                    ? isDarkMode
+                      ? 'bg-[#8c5cff] text-white'
+                      : 'bg-purple-600 text-white'
+                    : isDarkMode
+                    ? 'text-gray-400 hover:text-white hover:bg-[#8c5cff]/20'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-purple-100'
+                }`}
+              >
+                <Settings size={18} />
                 Mantenedor de Cuotas
-              </button>
+              </motion.button>
             </div>
           )}
 
@@ -240,6 +276,8 @@ const CuotasSection = ({ containerVariants }) => {
           {isAdmin ? (
             activeTab === 'mis-cuotas' ? (
               <MyQuotasSection containerVariants={containerVariants} />
+            ) : activeTab === 'estado-usuarios' ? (
+              <EstadoCuotasSection containerVariants={containerVariants} />
             ) : (
               <>
                 {/* Estadísticas Admin */}

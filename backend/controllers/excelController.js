@@ -61,10 +61,30 @@ export const uploadExcelFile = async (req, res) => {
     const categoriaId = categoriaResult.rows[0].id;
     const categoriaNombre = categoriaResult.rows[0].nombre;
 
-    // Generar hash del archivo para detectar duplicados
+    // 1. Generar hash del archivo ANTES de procesar (para detectar duplicados rápidamente)
     const fileHash = generateFileHash(req.file.buffer);
 
-    // Parsear el archivo Excel
+    // 2. Verificar si el archivo ya existe por hash (validación rápida ANTES de parsear)
+    const existingFileResult = await pool.query(
+      'SELECT eu.id, eu.nombre_archivo, sm.fecha_sesion, p.nombre as plantel, c.nombre as categoria FROM t_excel_uploads eu INNER JOIN t_sesion_mediciones sm ON eu.sesion_id = sm.id INNER JOIN t_planteles p ON sm.plantel_id = p.id INNER JOIN t_categorias c ON sm.categoria_id = c.id WHERE eu.hash_archivo = $1',
+      [fileHash]
+    );
+
+    if (existingFileResult.rows.length > 0) {
+      const existing = existingFileResult.rows[0];
+      return res.status(409).json({
+        error: 'Este archivo ya ha sido cargado anteriormente',
+        duplicado: true,
+        detalles: {
+          archivo: existing.nombre_archivo,
+          fecha_sesion: existing.fecha_sesion,
+          plantel: existing.plantel,
+          categoria: existing.categoria
+        }
+      });
+    }
+
+    // 3. Parsear el archivo Excel (solo si NO es duplicado)
     const tempDir = path.join(process.cwd(), 'temp');
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
@@ -81,19 +101,6 @@ export const uploadExcelFile = async (req, res) => {
     validateExcelStructure(parsedData);
 
     const { fecha_sesion, measurements, cantidad_registros } = parsedData;
-
-    // 2. Verificar si la sesión ya existe (detectar duplicados)
-    const existingSessionResult = await pool.query(
-      'SELECT id FROM t_sesion_mediciones WHERE plantel_id = $1 AND categoria_id = $2 AND fecha_sesion = $3 AND archivo_hash = $4',
-      [plantelId, categoriaId, fecha_sesion, fileHash]
-    );
-
-    if (existingSessionResult.rows.length > 0) {
-      return res.status(409).json({
-        error: 'Este archivo ya ha sido cargado previamente para este plantel y categoría en esta fecha',
-        sesionId: existingSessionResult.rows[0].id,
-      });
-    }
 
     // 3. Crear sesión de mediciones
     const sessionResult = await pool.query(

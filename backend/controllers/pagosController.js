@@ -6,20 +6,22 @@ import { crearPreferenciaPago, verificarEstadoPago } from '../services/mercadoPa
  */
 export const iniciarPagoCuota = async (req, res) => {
   try {
-    const { cuotaId } = req.body;
+    const { cuotaUsuarioId } = req.body;
     const usuarioId = req.usuario.id;
 
-    if (!cuotaId) {
-      return res.status(400).json({ error: 'cuotaId es requerido' });
+    if (!cuotaUsuarioId) {
+      return res.status(400).json({ error: 'cuotaUsuarioId es requerido' });
     }
 
-    // Obtener la cuota
+    // Obtener la cuota usuario y sus datos relacionados
     const cuotaResult = await pool.query(
-      `SELECT c.*, u.nombre, u.apellido, u.email
-       FROM t_cuotas_mensuales c
-       JOIN t_usuarios u ON c.usuario_id = u.id
-       WHERE c.id = $1`,
-      [cuotaId]
+      `SELECT cu.*, cm.mes, cm.ano, cm.monto, cm.fecha_vencimiento, cm.descripcion,
+              u.nombre, u.apellido, u.email
+       FROM t_cuotas_usuario cu
+       JOIN t_cuotas_mensuales cm ON cu.cuota_id = cm.id
+       JOIN t_usuarios u ON cu.usuario_id = u.id
+       WHERE cu.id = $1`,
+      [cuotaUsuarioId]
     );
 
     if (cuotaResult.rows.length === 0) {
@@ -38,12 +40,21 @@ export const iniciarPagoCuota = async (req, res) => {
       return res.status(400).json({ error: 'Esta cuota ya ha sido pagada' });
     }
 
-    // Crear preferencia de pago
-    const preferencia = await crearPreferenciaPago(cuota, {
-      nombre: cuota.nombre,
-      apellido: cuota.apellido,
-      email: cuota.email
-    });
+    // Crear preferencia de pago con el ID de cuota_usuario
+    const preferencia = await crearPreferenciaPago(
+      {
+        id: cuota.id, // ID de t_cuotas_usuario
+        mes: cuota.mes,
+        ano: cuota.ano,
+        monto: cuota.monto,
+        fecha_vencimiento: cuota.fecha_vencimiento
+      },
+      {
+        nombre: cuota.nombre,
+        apellido: cuota.apellido,
+        email: cuota.email
+      }
+    );
 
     res.json({
       message: 'Preferencia de pago creada',
@@ -83,20 +94,23 @@ export const webhookMercadoPago = async (req, res) => {
       return res.status(200).json({ message: 'Pago no aprobado' });
     }
 
-    // Extraer ID de cuota del external_reference
+    // Extraer ID de cuota_usuario del external_reference
     const externalRef = paymentStatus.external_reference;
-    const cuotaIdMatch = externalRef?.match(/cuota-(\d+)/);
+    const cuotaUsuarioIdMatch = externalRef?.match(/cuota-(\d+)/);
 
-    if (!cuotaIdMatch || !cuotaIdMatch[1]) {
+    if (!cuotaUsuarioIdMatch || !cuotaUsuarioIdMatch[1]) {
       return res.status(400).json({ error: 'No se pudo extraer ID de cuota' });
     }
 
-    const cuotaId = parseInt(cuotaIdMatch[1]);
+    const cuotaUsuarioId = parseInt(cuotaUsuarioIdMatch[1]);
 
-    // Obtener cuota y usuario
+    // Obtener cuota_usuario y datos relacionados
     const cuotaResult = await pool.query(
-      `SELECT * FROM t_cuotas_mensuales WHERE id = $1`,
-      [cuotaId]
+      `SELECT cu.*, cm.monto
+       FROM t_cuotas_usuario cu
+       JOIN t_cuotas_mensuales cm ON cu.cuota_id = cm.id
+       WHERE cu.id = $1`,
+      [cuotaUsuarioId]
     );
 
     if (cuotaResult.rows.length === 0) {
@@ -108,17 +122,17 @@ export const webhookMercadoPago = async (req, res) => {
     // Registrar el pago
     await pool.query(
       `INSERT INTO t_pagos_cuotas
-       (cuota_id, usuario_id, monto_pagado, metodo_pago, id_mercado_pago,
-        estado_mercado_pago, estado_pago, fecha_pago)
-       VALUES ($1, $2, $3, 'mercado_pago', $4, $5, 'completado', NOW())
+       (cuota_usuario_id, monto_pagado, metodo_pago, id_mercado_pago,
+        estado_pago, fecha_pago)
+       VALUES ($1, $2, 'mercado_pago', $3, 'completado', NOW())
        ON CONFLICT (id_mercado_pago) DO NOTHING`,
-      [cuotaId, cuota.usuario_id, cuota.monto, paymentId, paymentStatus.status]
+      [cuotaUsuarioId, cuota.monto, paymentId]
     );
 
-    // Actualizar estado de cuota a pagada
+    // Actualizar estado de cuota_usuario a pagada
     await pool.query(
-      `UPDATE t_cuotas_mensuales SET estado = 'pagado' WHERE id = $1`,
-      [cuotaId]
+      `UPDATE t_cuotas_usuario SET estado = 'pagado' WHERE id = $1`,
+      [cuotaUsuarioId]
     );
 
     res.json({ message: 'Pago procesado exitosamente' });
@@ -136,9 +150,9 @@ export const obtenerEstadoPago = async (req, res) => {
     const { cuotaId } = req.params;
     const usuarioId = req.usuario.id;
 
-    // Verificar que el usuario tenga acceso
+    // Verificar que el usuario tenga acceso (cuotaId aquí es cuota_usuario_id)
     const cuotaResult = await pool.query(
-      `SELECT usuario_id FROM t_cuotas_mensuales WHERE id = $1`,
+      `SELECT usuario_id FROM t_cuotas_usuario WHERE id = $1`,
       [cuotaId]
     );
 
@@ -152,7 +166,7 @@ export const obtenerEstadoPago = async (req, res) => {
 
     // Obtener pago más reciente
     const pagoResult = await pool.query(
-      `SELECT * FROM t_pagos_cuotas WHERE cuota_id = $1 ORDER BY fecha_creacion DESC LIMIT 1`,
+      `SELECT * FROM t_pagos_cuotas WHERE cuota_usuario_id = $1 ORDER BY fecha_pago DESC LIMIT 1`,
       [cuotaId]
     );
 

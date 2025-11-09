@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertCircle, Bell, X } from 'lucide-react';
+import { AlertCircle, Bell, X, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/apiConfig';
@@ -29,41 +29,56 @@ const CuotasNotification = ({ isDarkMode, setActiveTab }) => {
     }
   };
 
-  if (!resumen || (!resumen.esMoroso && resumen.totalPendientes === 0)) {
-    return null;
-  }
-
-  const tieneAlerta = resumen.esMoroso || resumen.totalPendientes > 0;
+  const tieneAlerta = resumen && (resumen.esMoroso || resumen.totalPendientes > 0);
+  const totalVencidas = resumen?.totalVencidas || 0;
 
   return (
     <div className="flex items-center gap-2">
-      {/* Badge Notificación */}
-      {tieneAlerta && (
+      {/* Badge Notificación - Siempre visible */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative cursor-pointer"
+      >
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          whileHover={{ scale: 1.1 }}
-          onClick={() => setIsOpen(!isOpen)}
-          className="relative cursor-pointer"
+          animate={tieneAlerta ? { y: [0, -3, 0] } : {}}
+          transition={{ duration: 2, repeat: Infinity }}
+          className={`relative p-2 rounded-lg ${
+            isDarkMode ? 'hover:bg-[#8c5cff]/20' : 'hover:bg-purple-100'
+          }`}
         >
-          <motion.div
-            animate={{ y: [0, -3, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className={`relative p-2 rounded-lg ${
-              isDarkMode ? 'hover:bg-[#8c5cff]/20' : 'hover:bg-purple-100'
-            }`}
-          >
-            <Bell size={20} className={resumen.esMoroso ? 'text-red-500' : 'text-yellow-500'} />
-            {tieneAlerta && (
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-red-500"
-              />
-            )}
-          </motion.div>
+          <Bell
+            size={20}
+            className={
+              resumen?.esMoroso
+                ? 'text-red-500'
+                : tieneAlerta
+                  ? 'text-yellow-500'
+                  : isDarkMode
+                    ? 'text-gray-400'
+                    : 'text-gray-500'
+            }
+          />
+          {tieneAlerta && totalVencidas > 0 && (
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold shadow-lg"
+            >
+              {totalVencidas}
+            </motion.div>
+          )}
+          {tieneAlerta && totalVencidas === 0 && (
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-yellow-500"
+            />
+          )}
         </motion.div>
-      )}
+      </motion.div>
 
       {/* Popup Notificación */}
       <AnimatePresence>
@@ -108,7 +123,30 @@ const CuotasNotification = ({ isDarkMode, setActiveTab }) => {
 
               {/* Body */}
               <div className="p-4 space-y-3">
-                {resumen.esMoroso && (
+                {/* Mensaje cuando todo está al día */}
+                {!tieneAlerta && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`p-3 rounded-lg border-l-4 border-green-500 ${
+                      isDarkMode ? 'bg-green-500/10' : 'bg-green-50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <CheckCircle size={18} className="text-green-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className={`font-semibold text-sm ${isDarkMode ? 'text-green-400' : 'text-green-700'}`}>
+                          ¡Todo al día!
+                        </p>
+                        <p className={`text-xs mt-1 ${isDarkMode ? 'text-green-300/80' : 'text-green-600/80'}`}>
+                          No tienes cuotas pendientes ni vencidas
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {resumen?.esMoroso && (
                   <motion.div
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}

@@ -11,6 +11,17 @@ export const obtenerCuotas = async (req, res) => {
     const usuarioId = req.usuario.id;
     const tipoUsuario = req.usuario.tipo_perfil;
 
+    // Actualizar automáticamente el estado de cuotas vencidas (solo pendientes)
+    await pool.query(`
+      UPDATE t_cuotas_usuario
+      SET estado = 'vencido'
+      WHERE estado = 'pendiente'
+      AND cuota_id IN (
+        SELECT id FROM t_cuotas_mensuales
+        WHERE fecha_vencimiento < NOW()::date
+      )
+    `);
+
     if (tipoUsuario === 'nutricionista') {
       // Nutricionista ve solo sus cuotas
       const result = await pool.query(`
@@ -152,10 +163,22 @@ export const obtenerResumenCuotas = async (req, res) => {
       return res.json({
         totalPendientes: 0,
         totalVencidas: 0,
+        esMoroso: false,
         cuotasMorosas: [],
         proximasAVencer: []
       });
     }
+
+    // Actualizar automáticamente el estado de cuotas vencidas
+    await pool.query(`
+      UPDATE t_cuotas_usuario
+      SET estado = 'vencido'
+      WHERE estado = 'pendiente'
+      AND cuota_id IN (
+        SELECT id FROM t_cuotas_mensuales
+        WHERE fecha_vencimiento < NOW()::date
+      )
+    `);
 
     // Cuotas pendientes
     const pendientes = await pool.query(
@@ -263,6 +286,7 @@ export const registrarPagoCuota = async (req, res) => {
   try {
     const { cuotaUsuarioId, montoPagado, metodoPago, referenciaPago, idMercadoPago, estadoMercadoPago } = req.body;
     const usuarioId = req.usuario.id;
+    const tipoUsuario = req.usuario.tipo_perfil;
 
     // Validar datos
     if (!cuotaUsuarioId || !montoPagado) {
@@ -284,9 +308,20 @@ export const registrarPagoCuota = async (req, res) => {
 
     const cuotaUsuario = cuotaUsuarioResult.rows[0];
 
-    // Validar que el pago sea del usuario correcto
-    if (cuotaUsuario.usuario_id !== usuarioId) {
-      return res.status(403).json({ error: 'No tienes permiso para pagar esta cuota' });
+    // Validar permisos:
+    // - Admin puede registrar pagos manuales para cualquier usuario
+    // - Usuario normal solo puede pagar sus propias cuotas
+    const esAdmin = tipoUsuario === 'admin';
+    const esPropietario = cuotaUsuario.usuario_id === usuarioId;
+
+    if (!esAdmin && !esPropietario) {
+      return res.status(403).json({ error: 'No tienes permiso para registrar este pago' });
+    }
+
+    // Solo admin puede registrar pagos manuales (transferencia/efectivo)
+    const esPagoManual = metodoPago === 'transferencia' || metodoPago === 'efectivo';
+    if (esPagoManual && !esAdmin) {
+      return res.status(403).json({ error: 'Solo administradores pueden registrar pagos manuales' });
     }
 
     // Validar que el monto sea correcto

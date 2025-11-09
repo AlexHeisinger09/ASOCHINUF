@@ -12,9 +12,10 @@ ASOCHINUF is a full-stack web application for a Chilean football nutrition organ
 ```bash
 cd frontend
 yarn install              # Install dependencies
-yarn start               # Start dev server (http://localhost:3000 with hot reload)
+yarn dev                 # Start dev server (http://localhost:3000 with hot reload)
+yarn start               # Alternative: Start dev server
 yarn build               # Build optimized production bundle
-yarn test                # Run tests
+yarn preview             # Preview production build locally
 ```
 
 ### Backend Development
@@ -72,9 +73,13 @@ frontend/
 │   │   ├── DashboardSection/     # Dashboard overview
 │   │   ├── ExcelSection/         # Excel upload and data management
 │   │   ├── DatosSection/         # Patient data section
-│   │   ├── CursosSection/        # Courses section
+│   │   ├── CursosSection/        # Courses section (user view)
+│   │   ├── CuotasSection/        # Fee/quota management section
+│   │   ├── PerfilSection/        # User profile section
 │   │   ├── ConfiguracionSection/ # Settings section
-│   │   └── GestionUsuariosSection/ # User management (admin only)
+│   │   ├── GestionUsuariosSection/ # User management (admin only)
+│   │   ├── GestionCursosSection/ # Course management (admin only)
+│   │   └── GestionPlantelesSection/ # Team/squad management (admin only)
 │   ├── context/
 │   │   └── AuthContext.jsx       # Auth state + theme provider
 │   ├── mock.js                   # Mock data for landing page
@@ -90,7 +95,12 @@ backend/
 │   └── excelController.js        # Excel upload and processing (~324 lines)
 ├── routes/
 │   ├── auth.js                   # Auth endpoints
-│   └── excel.js                  # Excel upload endpoints with Multer
+│   ├── excel.js                  # Excel upload endpoints with Multer
+│   ├── cursos.js                 # Course management endpoints
+│   ├── planteles.js              # Team/squad management endpoints
+│   ├── categorias.js             # Category management endpoints
+│   ├── cuotas.js                 # Fee/quota management endpoints
+│   └── pagos.js                  # Payment management endpoints
 ├── utils/
 │   └── excelParser.js            # Excel parsing and validation (~233 lines)
 ├── services/
@@ -124,6 +134,33 @@ backend/
 ├── GET    /history       → Get upload history
 └── GET    /session/:id   → Get measurement session details
 
+/cursos
+├── GET    /              → Get all courses
+├── POST   /              → Create new course (admin only)
+├── PUT    /:id           → Update course (admin only)
+└── DELETE /:id           → Delete course (admin only)
+
+/planteles
+├── GET    /              → Get all teams/squads
+├── POST   /              → Create new team (admin only)
+├── PUT    /:id           → Update team (admin only)
+└── DELETE /:id           → Delete team (admin only)
+
+/categorias
+├── GET    /              → Get all categories
+├── POST   /              → Create new category (admin only)
+├── PUT    /:id           → Update category (admin only)
+└── DELETE /:id           → Delete category (admin only)
+
+/cuotas
+├── GET    /              → Get fees/quotas (role-based access)
+├── POST   /              → Create new fee (admin/nutricionista)
+├── PUT    /:id           → Update fee (admin/nutricionista)
+└── DELETE /:id           → Delete fee (admin only)
+
+/payments
+└── POST   /              → Process payment
+
 /health
 └── GET    /              → Server health check
 ```
@@ -145,13 +182,18 @@ backend/
 
 *Anthropometric Data System:*
 - `t_planteles` - Football teams/squads (e.g., "Universidad de Chile")
-- `t_sesion_mediciones` - Measurement sessions (date, plantel, nutritionist, file hash)
+- `t_categorias` - Player categories (e.g., "Sub-17", "Primera División")
+- `t_sesion_mediciones` - Measurement sessions (date, plantel, category, nutritionist, file hash)
 - `t_informe_antropometrico` - Anthropometric measurements with 30+ data points:
   - Basic: peso, talla, talla_sentado
   - Diameters: biacromial, torax, biiliocristal, humero, femur, etc.
   - Perimeters: brazo_relajado, brazo_contraido, antebrazo, muslo, pierna, etc.
   - Skinfolds: triceps, subescapular, supraespinal, abdominal, muslo_frontal, pierna_medial
   - Calculated: IMC, suma_6_pliegues, suma_8_pliegues
+
+*Fee/Payment System:*
+- `t_cuotas` - Fee/quota records (client, amount, due date, payment status)
+- `t_pagos` - Payment transactions (linked to cuotas)
 
 **Authentication Flow:**
 1. User registers via `/api/auth/registro` with email/password
@@ -162,20 +204,21 @@ backend/
 6. User types: `admin`, `nutricionista`, `cliente` (tipo_perfil column)
 
 **Excel Upload Flow:**
-1. Nutritionist/admin uploads Excel file via `/api/excel/upload` (max 10MB, .xlsx/.xls)
-2. Multer stores file in memory buffer
-3. `excelParser.js` validates structure and extracts:
-   - Metadata: Plantel name (cell B2), session date (cell D3)
+1. Nutritionist/admin selects plantel (team) and categoria (category) from UI dropdowns
+2. User uploads Excel file via `/api/excel/upload` (max 10MB, .xlsx/.xls)
+3. Multer stores file in memory buffer
+4. `excelParser.js` validates structure and extracts:
+   - Metadata: Session date from cell D3 (plantel/category from UI selection)
    - Patient data: Name, cedula, birth date from rows (starting row 6)
    - Anthropometric measurements: 30+ columns
-4. File hash generated (SHA-256) to detect duplicate uploads
-5. Transaction creates/updates:
-   - t_planteles entry (if new team)
-   - t_sesion_mediciones entry (session metadata)
-   - t_pacientes entries (if new patients)
-   - t_informe_antropometrico entries (measurement data)
-6. Duplicate detection: same plantel + fecha_sesion + hash = rejected
-7. Longitudinal support: Same patient can have multiple measurements across sessions
+   - **Longitudinal data support:** Multiple measurement rows per patient (same patient across different dates)
+5. File hash generated (SHA-256) to detect duplicate uploads
+6. Transaction creates/updates:
+   - t_sesion_mediciones entry (session metadata with plantel_id, categoria_id)
+   - t_pacientes entries (if new patients by cedula)
+   - t_informe_antropometrico entries (ALL measurement data rows, including historical)
+7. Duplicate detection: same plantel + categoria + fecha_sesion + hash = rejected
+8. **Key difference:** Plantel and category are NOT extracted from Excel - they are selected in the UI before upload
 
 ## Configuration Files
 
@@ -193,7 +236,8 @@ Shadcn/ui configuration with New York style, JSX (not TSX), Lucide icons.
 
 ### netlify.toml
 - Build: `cd frontend && yarn install && yarn build`
-- Publish: `frontend/build` (Note: Vite outputs to `dist/` by default, this may need updating)
+- Publish: `frontend/build`
+- **IMPORTANT:** Vite outputs to `dist/` by default, but netlify.toml specifies `frontend/build`. To fix: either change publish path to `frontend/dist` or configure Vite's `outDir` to `build`
 - Node 20
 - SPA redirect: `/* → /index.html` (client-side routing)
 
@@ -237,12 +281,18 @@ SMTP_PASS=your_app_password
 ```
 
 **Dashboard Sections (tabs in Inicio.jsx):**
-- **Dashboard:** Overview with statistics
-- **Excel:** Upload anthropometric data, view upload history
-- **Datos:** Patient data management
-- **Cursos:** Course management
-- **Configuración:** User settings, theme toggle
-- **Gestión Usuarios:** User management (admin only)
+- **inicio:** Dashboard overview with statistics
+- **excel:** Upload anthropometric data, view upload history (nutricionista/admin only)
+- **datos:** Patient data management
+- **cursos:** Course browsing and enrollment (user view)
+- **cuotas:** Fee/quota management (role-based: admin creates, users view/pay)
+- **perfil:** User profile management
+- **configuracion:** User settings, theme toggle
+- **gestionplanteles:** Team/squad management (admin only)
+- **gestion:** User management (admin only)
+- **gestioncursos:** Course management (admin only)
+
+**Note:** Active tab is stored in sessionStorage (`asochinuf_activeTab`) to persist across page refreshes.
 
 ## Content Management
 
@@ -271,6 +321,14 @@ To update landing page content, edit `src/mock.js`.
 3. Import and register in `server.js` with `app.use('/api/endpoint', routeModule)`
 4. Protected routes use `verificarToken` middleware from `middleware/auth.js`
 
+### Add a New Dashboard Section
+1. Create new section component in `frontend/src/pages/[SectionName]/`
+2. Import the section in `MainContent.jsx`
+3. Add conditional render in MainContent based on activeTab value
+4. Add tab button/link in `Sidebar.jsx` (desktop) and `BottomNav.jsx` (mobile)
+5. If admin-only, add role check: `{usuario?.tipo_perfil === 'admin' && ...}`
+6. Section receives `containerVariants` and `itemVariants` for animations
+
 ### Add a New UI Component from Shadcn
 ```bash
 cd frontend
@@ -291,13 +349,14 @@ Imported components are placed in `src/components/ui/`
 1. Ensure backend and frontend are running
 2. Login as nutricionista or admin user
 3. Navigate to Dashboard → Excel tab
-4. Upload Excel file (.xlsx/.xls) with structure:
-   - Row 1: Plantel name in cell B1
-   - Row 2: Measurement date in cell B2
-   - Row 4: Column headers (Nombre, Cédula, Fecha Nacimiento, etc.)
-   - Row 5+: Patient data and measurements
-5. Backend validates structure, extracts data, creates session
-6. View upload history and session details in Excel section
+4. **Select plantel (team) and categoria (category)** from dropdowns (required)
+5. Upload Excel file (.xlsx/.xls) with structure:
+   - Cell D3: Measurement date (e.g., "Fecha: 29/10/2025")
+   - Row 5: Column headers (A5: PACIENTES, B5: Informes, etc.)
+   - Row 6+: Patient data and measurements
+   - **Important:** Each patient's first row has name in column A; subsequent rows without name in A are additional measurements for same patient (longitudinal data)
+6. Backend validates structure, extracts ALL measurement rows, creates session
+7. View upload history and session details in Excel section
 
 ### Add New Anthropometric Measurement Column
 1. Update database schema in `scripts/init-db.js` - add column to `t_informe_antropometrico`
@@ -322,8 +381,12 @@ Imported components are placed in `src/components/ui/`
 
 **Excel Parser (utils/excelParser.js):**
 - Reads Excel file using XLSX library
-- Validates structure: checks Plantel (B2), Fecha (D3), Headers (row 5)
-- Extracts metadata and patient rows
+- Validates structure: checks Fecha (D3), Headers (row 5)
+- **Does NOT extract plantel/category** - these come from UI selection
+- Extracts ALL patient measurement rows (longitudinal data):
+  - Patient name in column A marks new patient
+  - Rows without name in A are additional measurements for previous patient
+  - Each measurement row includes fecha_medicion (date of that specific measurement)
 - Maps 30+ anthropometric measurement columns
 - Generates SHA-256 file hash for duplicate detection
 - Returns structured data for database insertion
@@ -338,3 +401,15 @@ Imported components are placed in `src/components/ui/`
 - ResetPassword.jsx handles frontend form
 - Backend emailService.js sends reset link (requires SMTP config)
 - Tokens stored in `t_recovery_tokens` with expiration
+
+**Dashboard Tab System:**
+- MainContent.jsx acts as router for dashboard sections based on activeTab state
+- Each section is a separate component with AnimatePresence transitions
+- Tab state persists in sessionStorage to maintain active tab across refreshes
+- Role-based rendering: some tabs only visible to admin/nutricionista users
+
+**Image/File Handling:**
+- Course images stored in `frontend/public/foto_curso/`
+- Backend serves static files via Express (`/foto_curso` route)
+- ImageCropModal components for user profile and course image cropping
+- Sharp library used for server-side image processing (resizing, compression)

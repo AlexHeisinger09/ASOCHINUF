@@ -11,6 +11,7 @@ import plantelesRoutes from './routes/planteles.js';
 import categoriasRoutes from './routes/categorias.js';
 import cuotasRoutes from './routes/cuotas.js';
 import pagosRoutes from './routes/pagos.js';
+import inscripcionesRoutes from './routes/inscripciones.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api/planteles', plantelesRoutes);
 app.use('/api/categorias', categoriasRoutes);
 app.use('/api/cuotas', cuotasRoutes);
 app.use('/api/payments', pagosRoutes);
+app.use('/api/inscripciones', inscripcionesRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -61,6 +61,14 @@ export const API_ENDPOINTS = {
     ESTADO_PAGO: (cuotaId) => `${API_URL}/api/payments/estado/${cuotaId}`,
     WEBHOOK: `${API_URL}/api/payments/webhook`,
   },
+  // Inscripciones
+  INSCRIPCIONES: {
+    MIS_CURSOS: `${API_URL}/api/inscripciones/mis-cursos`,
+    INSCRIBIRSE: `${API_URL}/api/inscripciones`,
+    VERIFICAR: (id_curso) => `${API_URL}/api/inscripciones/verificar/${id_curso}`,
+    CANCELAR: (id_curso) => `${API_URL}/api/inscripciones/${id_curso}`,
+    TODAS: `${API_URL}/api/inscripciones/todas`,
+  },
 };
 
 export const BASE = API_URL;

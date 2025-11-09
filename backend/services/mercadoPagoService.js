@@ -20,19 +20,22 @@ const mpClient = axios.create({
  */
 export const crearPreferenciaPago = async (cuota, usuario) => {
   try {
+    // Asegurar que el monto sea válido (mínimo 50 CLP)
+    const monto = Math.max(50, parseFloat(cuota.monto));
+
     const preference = {
       items: [
         {
-          id: `cuota-${cuota.id}`,
-          title: `Cuota ${cuota.mes}/${cuota.ano} - ${usuario.nombre} ${usuario.apellido}`,
+          title: `Cuota ${cuota.mes}/${cuota.ano}`,
+          description: `Pago de cuota mensual - ${usuario.nombre} ${usuario.apellido}`,
           quantity: 1,
-          unit_price: parseFloat(cuota.monto),
+          unit_price: monto,
           currency_id: 'CLP'
         }
       ],
       payer: {
         name: usuario.nombre,
-        surname: usuario.apellido,
+        surname: usuario.apellido || '',
         email: usuario.email
       },
       back_urls: {
@@ -40,14 +43,28 @@ export const crearPreferenciaPago = async (cuota, usuario) => {
         failure: `${FRONTEND_URL}/dashboard?tab=cuotas&pago=failure&cuota=${cuota.id}`,
         pending: `${FRONTEND_URL}/dashboard?tab=cuotas&pago=pending&cuota=${cuota.id}`
       },
-      auto_return: 'approved',
       external_reference: `cuota-${cuota.id}`,
-      notification_url: `${BACKEND_URL}/api/payments/webhook`,
-      statement_descriptor: 'ASOCHINUF Cuota'
+      statement_descriptor: 'ASOCHINUF'
     };
+
+    // Solo agregar auto_return y notification_url si NO estamos en localhost
+    // Mercado Pago rechaza localhost URLs con auto_return
+    const isLocalhost = FRONTEND_URL.includes('localhost') || FRONTEND_URL.includes('127.0.0.1');
+
+    if (!isLocalhost) {
+      preference.auto_return = 'approved';
+      preference.notification_url = `${BACKEND_URL}/api/payments/webhook`;
+    } else {
+      console.warn('⚠️ Modo desarrollo (localhost): omitiendo auto_return y notification_url.');
+      console.warn('   → El usuario deberá hacer clic en "Volver al sitio" después del pago.');
+    }
+
+    console.log('📤 Enviando preferencia a Mercado Pago:', JSON.stringify(preference, null, 2));
 
     // Hacer llamada a API de Mercado Pago
     const response = await mpClient.post('/checkout/preferences', preference);
+
+    console.log('✅ Preferencia creada exitosamente:', response.data.id);
 
     return {
       id: response.data.id,
@@ -57,7 +74,10 @@ export const crearPreferenciaPago = async (cuota, usuario) => {
       montoTotal: parseFloat(cuota.monto)
     };
   } catch (error) {
-    console.error('Error al crear preferencia de pago:', error.response?.data || error.message);
+    console.error('❌ Error al crear preferencia de pago:');
+    console.error('Status:', error.response?.status);
+    console.error('Datos del error:', JSON.stringify(error.response?.data, null, 2));
+    console.error('Mensaje:', error.message);
     // En desarrollo/testing, retornar un objeto simulado
     if (!MP_ACCESS_TOKEN || MP_ACCESS_TOKEN === 'undefined') {
       console.warn('⚠️ MERCADO_PAGO_ACCESS_TOKEN no configurado. Retornando preferencia simulada para testing.');

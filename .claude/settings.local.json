@@ -64,7 +64,20 @@
       "Bash(cmd /c \"taskkill /F /PID 22680 /T\" 2)",
       "Bash(cmd /c \"taskkill /F /IM node.exe 2>nul\")",
       "Bash(cmd /c \"for /f \"\"tokens=5\"\" %a in (''netstat -ano ^| findstr :5000'') do (echo %a & taskkill /PID %a /F)\")",
-      "Bash(cmd /c \"taskkill /F /IM node.exe\" 2)"
+      "Bash(cmd /c \"taskkill /F /IM node.exe\" 2)",
+      "Bash(Start-Sleep -Seconds 3)",
+      "Bash(cmd /c \"taskkill /PID 7452 /F\")",
+      "Bash(cmd /c \"taskkill /PID 4420 /F\")",
+      "Bash(cmd /c \"taskkill /F /PID 23496\")",
+      "Bash(cmd /c \"taskkill /F /PID 23496 && taskkill /F /PID 19092\")",
+      "Bash(cmd /c \"taskkill /F /PID 15796 && taskkill /F /PID 19092\")",
+      "Bash(cmd /c \"netstat -ano | findstr :5001\")",
+      "Bash(cmd /c \"cd /d \"\"c:\\Proyectos React\\ASOCHINUF\\backend\"\" && restart.bat\")",
+      "Bash(cmd /c \"taskkill /F /PID 9664\")",
+      "Bash(cmd /c \"taskkill /PID 13032 /F\")",
+      "Bash(start-sleep:*)",
+      "Bash(move:*)",
+      "Bash(cmd /c:*)"
     ],
     "deny": [],
     "ask": []

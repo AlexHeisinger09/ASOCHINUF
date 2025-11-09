@@ -14,11 +14,15 @@ import {
   Monitor,
   RefreshCw,
   Filter,
-  X
+  X,
+  UserPlus,
+  CheckCircle,
+  Loader
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { API_ENDPOINTS, BASE as API_URL } from '../../config/apiConfig';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const CursosSection = ({ containerVariants }) => {
   const { isDarkMode, token } = useAuth();
@@ -27,6 +31,8 @@ const CursosSection = ({ containerVariants }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filtroNivel, setFiltroNivel] = useState('todos');
+  const [inscripciones, setInscripciones] = useState({});  // { id_curso: true/false }
+  const [inscribiendo, setInscribiendo] = useState({});    // { id_curso: true/false }
 
   // Obtener cursos al cargar
   useEffect(() => {
@@ -51,11 +57,60 @@ const CursosSection = ({ containerVariants }) => {
       const response = await axios.get(API_ENDPOINTS.CURSOS.GET_ALL);
       setCursos(response.data);
       setFilteredCursos(response.data);
+
+      // Verificar inscripciones si hay token
+      if (token) {
+        await verificarInscripciones(response.data);
+      }
     } catch (err) {
       console.error('Error al obtener cursos:', err);
       setError('Error al cargar los cursos. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const verificarInscripciones = async (cursosList) => {
+    try {
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const verificaciones = {};
+
+      for (const curso of cursosList) {
+        try {
+          const response = await axios.get(API_ENDPOINTS.INSCRIPCIONES.VERIFICAR(curso.id_curso), config);
+          verificaciones[curso.id_curso] = response.data.inscrito;
+        } catch (err) {
+          verificaciones[curso.id_curso] = false;
+        }
+      }
+
+      setInscripciones(verificaciones);
+    } catch (err) {
+      console.error('Error al verificar inscripciones:', err);
+    }
+  };
+
+  const handleInscribirse = async (cursoId, nombreCurso) => {
+    if (!token) {
+      toast.error('Debes iniciar sesión para inscribirte');
+      return;
+    }
+
+    try {
+      setInscribiendo(prev => ({ ...prev, [cursoId]: true }));
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      await axios.post(API_ENDPOINTS.INSCRIPCIONES.INSCRIBIRSE, {
+        id_curso: cursoId
+      }, config);
+
+      toast.success(`Te has inscrito en "${nombreCurso}" exitosamente`);
+      setInscripciones(prev => ({ ...prev, [cursoId]: true }));
+    } catch (err) {
+      console.error('Error al inscribirse:', err);
+      toast.error(err.response?.data?.error || 'Error al inscribirse en el curso');
+    } finally {
+      setInscribiendo(prev => ({ ...prev, [cursoId]: false }));
     }
   };
 
@@ -129,9 +184,6 @@ const CursosSection = ({ containerVariants }) => {
         exit="exit"
         className="min-h-screen"
       >
-        <h2 className={`text-3xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Cursos Disponibles
-        </h2>
         <div className="flex flex-col items-center justify-center py-20">
           <div className="relative">
             <div className="w-16 h-16 border-4 border-[#8c5cff]/30 rounded-full"></div>
@@ -155,9 +207,6 @@ const CursosSection = ({ containerVariants }) => {
         animate="visible"
         exit="exit"
       >
-        <h2 className={`text-3xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Cursos Disponibles
-        </h2>
         <div
           className={`${
             isDarkMode ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50 border-red-200'
@@ -191,10 +240,6 @@ const CursosSection = ({ containerVariants }) => {
         animate="visible"
         exit="exit"
       >
-        <h2 className={`text-3xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Cursos Disponibles
-        </h2>
-
         {/* Filtros */}
         <div className="flex flex-wrap gap-3 mb-6">
           {['todos', 'básico', 'intermedio', 'avanzado'].map((nivel) => (
@@ -260,11 +305,8 @@ const CursosSection = ({ containerVariants }) => {
       animate="visible"
       exit="exit"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Cursos Disponibles
-        </h2>
+      {/* Counter */}
+      <div className="flex items-center justify-end mb-6">
         <div className={`px-4 py-2 rounded-lg ${
           isDarkMode ? 'bg-[#1a1c22]/50 border border-[#8c5cff]/20' : 'bg-white border border-purple-200'
         }`}>
@@ -416,12 +458,37 @@ const CursosSection = ({ containerVariants }) => {
                         {formatearPrecio(precioFinal, curso.moneda)}
                       </p>
                     </div>
-                    <button
-                      className="px-4 py-2 bg-[#8c5cff] text-white rounded-lg hover:bg-[#7a4de6] transition-colors text-sm font-medium"
-                      onClick={() => console.log('Ver detalles de:', curso.nombre)}
-                    >
-                      Ver Detalles
-                    </button>
+
+                    {inscripciones[curso.id_curso] ? (
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-500 rounded-lg text-sm font-medium"
+                      >
+                        <CheckCircle size={16} />
+                        Inscrito
+                      </motion.div>
+                    ) : (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#8c5cff] text-white rounded-lg hover:bg-[#7a4de6] transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleInscribirse(curso.id_curso, curso.nombre)}
+                        disabled={inscribiendo[curso.id_curso]}
+                      >
+                        {inscribiendo[curso.id_curso] ? (
+                          <>
+                            <Loader size={16} className="animate-spin" />
+                            Inscribiendo...
+                          </>
+                        ) : (
+                          <>
+                            <UserPlus size={16} />
+                            Inscribirse
+                          </>
+                        )}
+                      </motion.button>
+                    )}
                   </div>
                 </div>
               </motion.div>

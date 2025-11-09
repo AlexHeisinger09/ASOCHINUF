@@ -30,7 +30,7 @@ import { useAuth } from '../../context/AuthContext';
 import { API_ENDPOINTS } from '../../config/apiConfig';
 import axios from 'axios';
 import ConfirmDialog from '../../components/ConfirmDialog';
-import ImageCropModalCursos from '../../components/ImageCropModalCursos';
+import ImageCropModalCursos from './ImageCropModalCursos';
 import { toast } from 'sonner';
 
 const GestionCursosSection = ({ containerVariants }) => {
@@ -440,16 +440,8 @@ const GestionCursosSection = ({ containerVariants }) => {
       exit="exit"
       className="space-y-6"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h2 className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            Gestión de Cursos
-          </h2>
-          <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-            Crear, editar y gestionar el catálogo de cursos
-          </p>
-        </div>
+      {/* Action Button */}
+      <div className="flex items-center justify-end flex-wrap gap-4">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

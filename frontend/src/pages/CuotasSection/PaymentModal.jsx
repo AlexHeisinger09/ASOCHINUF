@@ -39,9 +39,10 @@ const PaymentModal = ({ isOpen, onClose, cuota, onSuccess }) => {
         metodoPago: 'mercado_pago'
       }, config);
 
-      // Aquí se redirigiría a Mercado Pago
-      // Por ahora, simularemos el pago
-      window.location.href = response.data.data.init_point;
+      // Redirigir a Mercado Pago
+      // Usar sandbox_init_point para pruebas, init_point para producción
+      const checkoutUrl = response.data.data.sandbox_init_point || response.data.data.init_point;
+      window.location.href = checkoutUrl;
     } catch (err) {
       console.error('Error al iniciar pago:', err);
       setError(err.response?.data?.error || 'Error al iniciar pago');
@@ -240,38 +241,14 @@ const PaymentModal = ({ isOpen, onClose, cuota, onSuccess }) => {
                     </div>
                   </motion.button>
 
-                  {/* Separador */}
-                  <div className={`flex items-center gap-3 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                    <div className={`flex-1 h-px ${isDarkMode ? 'bg-[#8c5cff]/20' : 'bg-purple-200'}`} />
-                    <span className="text-sm">o</span>
-                    <div className={`flex-1 h-px ${isDarkMode ? 'bg-[#8c5cff]/20' : 'bg-purple-200'}`} />
+                  {/* Nota informativa */}
+                  <div className={`p-3 rounded-lg border ${
+                    isDarkMode ? 'bg-[#0f1117] border-[#8c5cff]/20' : 'bg-purple-50 border-purple-200'
+                  }`}>
+                    <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Para pagos por transferencia bancaria o efectivo, contacta al administrador.
+                    </p>
                   </div>
-
-                  {/* Transferencia Bancaria */}
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setPaymentStep('manual')}
-                    className={`w-full p-4 rounded-lg border-2 transition-all ${
-                      isDarkMode
-                        ? 'border-[#8c5cff]/30 hover:border-[#8c5cff] bg-[#8c5cff]/5'
-                        : 'border-purple-200 hover:border-purple-400 bg-purple-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-8 rounded flex items-center justify-center font-bold text-white bg-gradient-to-r from-green-600 to-green-700`}>
-                        TB
-                      </div>
-                      <div className="flex-1 text-left">
-                        <p className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                          Transferencia Bancaria
-                        </p>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Realiza una transferencia directa
-                        </p>
-                      </div>
-                    </div>
-                  </motion.button>
                 </motion.div>
               )}
 

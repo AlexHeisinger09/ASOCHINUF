@@ -17,11 +17,6 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
     ? [{ id: 'excel', label: 'Excel', icon: Upload }]
     : [];
 
-  // Gestión de Cursos solo para admins
-  const gestionCursosItem = usuario?.tipo_perfil === 'admin'
-    ? [{ id: 'gestioncursos', label: 'Gestión', icon: ClipboardList }]
-    : [];
-
   // Gestión de Planteles solo para admins
   const gestionPlantelesItem = usuario?.tipo_perfil === 'admin'
     ? [{ id: 'gestionplanteles', label: 'Planteles', icon: Trophy }]
@@ -32,7 +27,7 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
     ? [{ id: 'gestion', label: 'Usuarios', icon: Users }]
     : [];
 
-  const menuItems = [...baseMenuItems, ...excelItem, ...gestionPlantelesItem, ...gestionCursosItem, ...gestionUsuariosItem];
+  const menuItems = [...baseMenuItems, ...excelItem, ...gestionPlantelesItem, ...gestionUsuariosItem];
 
   return (
     <motion.nav

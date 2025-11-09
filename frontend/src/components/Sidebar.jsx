@@ -27,17 +27,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab, handleL
     ? [{ id: 'gestionplanteles', label: 'Gestión Planteles', icon: Trophy }]
     : [];
 
-  // Gestión Cursos solo para admins
-  const gestionCursosItem = usuario?.tipo_perfil === 'admin'
-    ? [{ id: 'gestioncursos', label: 'Gestión Cursos', icon: BookOpen }]
-    : [];
-
   // Gestión Usuarios solo para admins
   const gestionUsuariosItem = usuario?.tipo_perfil === 'admin'
     ? [{ id: 'gestion', label: 'Gestión Usuarios', icon: Users }]
     : [];
 
-  const menuItems = [...baseMenuItems, ...excelItem, ...cuotasItem, ...gestionPlantelesItem, ...gestionCursosItem, ...gestionUsuariosItem];
+  const menuItems = [...baseMenuItems, ...excelItem, ...cuotasItem, ...gestionPlantelesItem, ...gestionUsuariosItem];
 
   return (
     <motion.aside

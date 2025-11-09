@@ -1,0 +1,147 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen, GraduationCap, CheckCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import CursosSection from './CursosSection';
+import MisCursosSection from './MisCursosSection';
+import GestionCursosSection from './GestionCursosSection';
+
+const UnifiedCursosSection = ({ containerVariants }) => {
+  const { isDarkMode, usuario } = useAuth();
+  const isAdmin = usuario?.tipo_perfil === 'admin';
+  const [activeTab, setActiveTab] = useState('cursos'); // 'cursos', 'mis-cursos' o 'gestion' (solo para admin)
+
+  // Si no es admin, forzar tab de cursos o mis-cursos
+  useEffect(() => {
+    if (!isAdmin && activeTab === 'gestion') {
+      setActiveTab('cursos');
+    }
+  }, [isAdmin, activeTab]);
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={containerVariants}
+      className="space-y-6"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <BookOpen size={32} className="text-[#8c5cff]" />
+        <div>
+          <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            {isAdmin ? 'Gestión de Cursos' : 'Cursos Disponibles'}
+          </h1>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            {isAdmin
+              ? 'Explora el catálogo de cursos o gestiona el contenido disponible'
+              : 'Explora el catálogo de cursos disponibles'}
+          </p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className={`flex gap-2 border-b ${
+        isDarkMode ? 'border-[#8c5cff]/20' : 'border-purple-200'
+      } pb-1 mb-6`}>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setActiveTab('cursos')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-semibold transition-all ${
+            activeTab === 'cursos'
+              ? isDarkMode
+                ? 'bg-[#8c5cff] text-white'
+                : 'bg-purple-600 text-white'
+              : isDarkMode
+              ? 'text-gray-400 hover:text-white hover:bg-[#8c5cff]/20'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-purple-100'
+          }`}
+        >
+          <GraduationCap size={18} />
+          Cursos Disponibles
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setActiveTab('mis-cursos')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-semibold transition-all ${
+            activeTab === 'mis-cursos'
+              ? isDarkMode
+                ? 'bg-[#8c5cff] text-white'
+                : 'bg-purple-600 text-white'
+              : isDarkMode
+              ? 'text-gray-400 hover:text-white hover:bg-[#8c5cff]/20'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-purple-100'
+          }`}
+        >
+          <CheckCircle size={18} />
+          Mis Cursos
+        </motion.button>
+
+        {isAdmin && (
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab('gestion')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-semibold transition-all ${
+              activeTab === 'gestion'
+                ? isDarkMode
+                  ? 'bg-[#8c5cff] text-white'
+                  : 'bg-purple-600 text-white'
+                : isDarkMode
+                ? 'text-gray-400 hover:text-white hover:bg-[#8c5cff]/20'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-purple-100'
+            }`}
+          >
+            <BookOpen size={18} />
+            Mantenedor de Cursos
+          </motion.button>
+        )}
+      </div>
+
+      {/* Content */}
+      <AnimatePresence mode="wait">
+        {activeTab === 'cursos' && (
+          <motion.div
+            key="cursos"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <CursosSection containerVariants={containerVariants} />
+          </motion.div>
+        )}
+
+        {activeTab === 'mis-cursos' && (
+          <motion.div
+            key="mis-cursos"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <MisCursosSection containerVariants={containerVariants} />
+          </motion.div>
+        )}
+
+        {activeTab === 'gestion' && isAdmin && (
+          <motion.div
+            key="gestion"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <GestionCursosSection containerVariants={containerVariants} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
+export default UnifiedCursosSection;
